@@ -195,8 +195,17 @@ def create_stretch(stretch_jnt, scale_jnt, att_holder, grp_offset, ikx_jnt, twis
     sdk_grp = cmds.group(em=True, n="st_sdk_" + stretch_jnt)
     flip_grp = cmds.group(em=True, n="st_flip_" + stretch_jnt)
     st_ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "cntrl_stretch_limb.yaml")), "cntrl_stretch_" + scale_jnt)
-    cmds.setAttr(st_ctrl + ".overrideEnabled", 1)
-    cmds.setAttr(st_ctrl + ".overrideColor", 16)
+
+    if "_R" in stretch_jnt:
+        cmds.setAttr(st_ctrl + ".overrideEnabled", 1)
+        cmds.setAttr(st_ctrl + ".overrideColor", 31)
+    elif "_L" in stretch_jnt:
+        cmds.setAttr(st_ctrl + ".overrideEnabled", 1)
+        cmds.setAttr(st_ctrl + ".overrideColor", 18)
+    else:
+        cmds.setAttr(st_ctrl + ".overrideEnabled", 1)
+        cmds.setAttr(st_ctrl + ".overrideColor", 21)
+
     cmds.setAttr(st_ctrl + ".tx", lock=True, k=False, cb=False)
     cmds.setAttr(st_ctrl + ".tz", lock=True, k=False, cb=False)
     cmds.setAttr(st_ctrl + ".rx", lock=True, k=False, cb=False)
@@ -217,7 +226,7 @@ def create_stretch(stretch_jnt, scale_jnt, att_holder, grp_offset, ikx_jnt, twis
         cmds.xform(flip_grp, r=True, ro=(180, 0, 0))
 
 
-def create_ribbon(ribbon_name, transform_list, duplicated=None):
+def create_ribbon(ribbon_name, transform_list, duplicated=None, direction=(0, -1, 0), reverse=False):
     point_list = []
     for index, jnt in enumerate(transform_list):
         point = cmds.xform(jnt, q=True, ws=True, t=True)
@@ -230,15 +239,17 @@ def create_ribbon(ribbon_name, transform_list, duplicated=None):
         point_list.append(point)
     new_curve = cmds.curve(p=point_list)
     cmds.reverseCurve(new_curve)
-    extruded_ribbon = cmds.extrude(new_curve, et=0, l=0.2, po=0, d=(0, -1, 0), n=ribbon_name)
+    extruded_ribbon = cmds.extrude(new_curve, et=0, l=0.2, po=0, d=direction, n=ribbon_name)
     cmds.delete(new_curve)
     ribbon_shape = cmds.listRelatives(extruded_ribbon[0])
+    if reverse:
+        cmds.reverseSurface(ribbon_shape)
+
     steps = len(transform_list) - 1
     param_u_step = 1 / steps
     param_u_step_sum = 0
     ribbon_follicle_grp = cmds.group(em=True, n="follicles_" + ribbon_name)
     ribbon = cmds.listRelatives(ribbon_shape, p=True)
-# TODO: Create a way to verify if the follicle is already attached to something and skip
     for item in reversed(transform_list):
         follicle = cmds.createNode("follicle")
         if duplicated:

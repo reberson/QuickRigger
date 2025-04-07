@@ -62,14 +62,16 @@ def create_torso_rig(dict):
         grp_offset = cmds.group(n="fk_offset_" + jd[3], em=True)
         grp_sdk = cmds.group(n="fk_sdk_" + jd[3], em=True)
         grp_flip = cmds.group(n="fk_flip_" + jd[3], em=True)
-        # ctrl = cmds.circle(n="fk_" + jd[3], r=10, nr=(0, 1, 0))
         ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Scapula_R.yaml")), "fk_" + jd[3])
+        cmds.setAttr(ctrl + ".overrideEnabled", 1)
         if "_L" in joint:
             mirror_object(ctrl, "x")
             mirror_object(ctrl, "y")
             mirror_object(ctrl, "z")
-        cmds.setAttr(ctrl + ".overrideEnabled", 1)
-        cmds.setAttr(ctrl + ".overrideColor", 17)
+            cmds.setAttr(ctrl + ".overrideColor", 6)
+        else:
+            cmds.setAttr(ctrl + ".overrideColor", 13)
+
         cmds.setAttr(ctrl + ".v", lock=True, k=False, cb=False)
         cmds.select(d=True)
         jnt = cmds.joint(n="fkx_" + jd[3])
@@ -150,7 +152,7 @@ def create_torso_rig(dict):
         elif "Neck_" in joint:
             ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_Neck.yaml")), "ik_" + jd[3])
         cmds.setAttr(ctrl + ".overrideEnabled", 1)
-        cmds.setAttr(ctrl + ".overrideColor", 4)
+        cmds.setAttr(ctrl + ".overrideColor", 17)
         cmds.setAttr(ctrl + ".v", lock=True, k=False, cb=False)
         cmds.select(d=True)
         jnt = cmds.joint(n="bind_" + jd[3])
@@ -187,7 +189,7 @@ def create_torso_rig(dict):
     cmds.addAttr(switch_torso, longName="ikSwitch", attributeType="double", min=0, max=1, dv=0)
     cmds.setAttr(str(switch_torso) + ".ikSwitch", e=True, channelBox=True)
     cmds.setAttr(switch_torso + ".overrideEnabled", 1)
-    cmds.setAttr(switch_torso + ".overrideColor", 21)
+    cmds.setAttr(switch_torso + ".overrideColor", 17)
     cmds.setAttr(switch_torso + ".tx", lock=True, k=False, cb=False)
     cmds.setAttr(switch_torso + ".ty", lock=True, k=False, cb=False)
     cmds.setAttr(switch_torso + ".tz", lock=True, k=False, cb=False)

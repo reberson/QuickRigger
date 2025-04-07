@@ -3,7 +3,6 @@ import maya.OpenMaya as OpenMaya
 from System.utils import create_lattice_plane, create_ribbon, joint_list, create_ribbon_closed, create_lattice_sphere
 import math
 
-# TODO: Make eyelid group follow eye movement (with falloff)
 
 
 def create_nasolabial(dict):
@@ -11,9 +10,14 @@ def create_nasolabial(dict):
     cmds.matchTransform(grp_ctrl, "Facial")
     cmds.parent(grp_ctrl, "face_constrain_head")
 
+    # declare existing projection groups
+    grp_proj_sys = "face_projection_system"
+    grp_proj_fol = "face_projection_follicles"
+    grp_proj_rib = "face_ribbons"
+
     # Create projection lattice plane for both sides
     proj_surface = create_lattice_plane("Nasolabial", 40, 40, "proj_plane_nasolabial")
-    cmds.parent(proj_surface[0], "face_constrain_head")
+    cmds.parent(proj_surface[0], grp_proj_sys)
 
     # separate each side list
     jnts_all = cmds.listRelatives("Nasolabial")
@@ -24,27 +28,7 @@ def create_nasolabial(dict):
             if side in jnt:
                 jnt_sides.append(jnt)
 
-        # # reorganize list index
-        # upper_half = []
-        # lower_half = []
-        # for jnt in jnt_sides:
-        #     if "upper" in jnt.lower():
-        #         upper_half.append(jnt)
-        #     elif "lower" in jnt.lower():
-        #         lower_half.append(jnt)
-        # upper_half.sort(reverse=True)
-        # lower_half.sort()
-
-
         jnt_list = jnt_sides
-        # jnt_list.append("EyelidOuterCorner{0}".format(side))
-        # for jnt in upper_half:
-        #     jnt_list.append(jnt)
-        # jnt_list.append("EyelidInnerCourner{0}".format(side))
-        # for jnt in lower_half:
-        #     jnt_list.append(jnt)
-
-        # jnt_list = joint_list("Eyelids", first_half="upper", second_half="lower",middle_joint="Eyelid_InnerCourner")
         first_jnt = jnt_list[0]
         last_jnt = jnt_list[len(jnt_list) - 1]
 
@@ -57,10 +41,16 @@ def create_nasolabial(dict):
             # ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
             if "_r" in jnt.lower():
                 ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
+                cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+                cmds.setAttr(ctrl[0] + ".overrideColor", 31)
             elif "_l" in jnt.lower():
                 ctrl = cmds.circle(n="ctrl_" + jnt, cy=-1, r=0.75, nr=(0, 1, 0))
+                cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+                cmds.setAttr(ctrl[0] + ".overrideColor", 18)
             else:
                 ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
+                cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+                cmds.setAttr(ctrl[0] + ".overrideColor", 21)
 
             cmds.select(d=True)
             xjnt = cmds.joint(n="x_" + jnt)
@@ -77,33 +67,50 @@ def create_nasolabial(dict):
             if "_l" in jnt.lower():
                 cmds.xform(grp_flip, r=True, ro=(0, 180, 0))
 
-        ribbon = create_ribbon("ribbon_Nasolabial{0}".format(side), jnt_list)
+        if side == "_R":
+            ribbon = create_ribbon("ribbon_Nasolabial{0}".format(side), jnt_list, direction=(1, 0, 0), reverse=True)
+        else:
+            ribbon = create_ribbon("ribbon_Nasolabial{0}".format(side), jnt_list, direction=(-1, 0, 0))
+
         param_u_step = ribbon[3]
-        cmds.parent(ribbon[0], grp_ctrl)
-        cmds.parent(ribbon[1], grp_ctrl)
+        cmds.parent(ribbon[0], grp_proj_rib)
+        cmds.parent(ribbon[1], grp_proj_rib)
 
 
 
         # Figure out the center most ctrl for upper and lower - It's temporary hardcoded, should find the midpoint between first half, and midpoint between second half
         # TODO: NEEDS 3 controls
-        ctrl_upper_number = "2"
-        ctrl_upper_name = "ctrl_Nasolabial" + ctrl_upper_number + "{0}".format(side)
+        ctrl_upper_number = "1"
+        # ctrl_upper_name = "offset_Nasolabial" + ctrl_upper_number + "{0}".format(side)
+        ctrl_upper_name = str(jnt_list[0])
 
         ctrl_lower_number = "4"
-        ctrl_lower_name = "ctrl_Nasolabial" + ctrl_lower_number + "{0}".format(side)
+        # ctrl_lower_name = "offset_Nasolabial" + ctrl_lower_number + "{0}".format(side)
+        ctrl_lower_name = str(jnt_list[len(jnt_list)-1])
 
-
+        # Measures to get the position for mid control
+        start = cmds.xform(ctrl_upper_name, q=True, ws=True, t=True)
+        start_rot = cmds.xform(ctrl_upper_name, q=True, ws=True, ro=True)
+        # start_roo = cmds.xform(ctrl_upper_name, q=True, ws=True, roo=True)
+        end = cmds.xform(ctrl_lower_name, q=True, ws=True, t=True)
+        start_v = OpenMaya.MVector(start[0], start[1], start[2])
+        end_v = OpenMaya.MVector(end[0], end[1], end[2])
+        mid_v = (end_v + start_v)/2
 
         # Create the primary controls - Hardcoded based on ctrl above
-        rib_point_list = ["NasolabialUpper{0}".format(side), "NasolabialLower{0}".format(side)]
+        rib_point_list = ["NasolabialUpper{0}".format(side), "NasolabialLower{0}".format(side), "NasolabialMid{0}".format(side)]
         for rib_point in rib_point_list:
             grp_offset = cmds.group(em=True, n="offset_" + rib_point)
             grp_flip = cmds.group(em=True, n="flip_" + rib_point)
             grp_sdk = cmds.group(em=True, n="sdk_" + rib_point)
-            if "_L" in rib_point:
+            if "_l" in rib_point.lower():
                 ctrl = cmds.circle(n="ctrl_" + rib_point, cy=-1, r=1, nr=(0, 1, 0))
+                cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+                cmds.setAttr(ctrl[0] + ".overrideColor", 6)
             else:
                 ctrl = cmds.circle(n="ctrl_" + rib_point, cy=1, r=1, nr=(0, 1, 0))
+                cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+                cmds.setAttr(ctrl[0] + ".overrideColor", 13)
             mediator = cmds.group(em=True, n="mediator_" + rib_point)
 
             cmds.parent(ctrl[0], grp_sdk)
@@ -116,17 +123,27 @@ def create_nasolabial(dict):
 
             follicle = cmds.createNode("follicle")
 
-            if "Upper" in rib_point:
-                cmds.matchTransform(grp_offset, ctrl_upper_name, pos=True)
+            if "upper" in rib_point.lower():
+                cmds.matchTransform(grp_offset, "offset_" + ctrl_upper_name, pos=True)
                 follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_surface_NasolabialUpper{0}".format(side))
                 cmds.select(d=True)
                 rib_cjoint = cmds.joint(n="ribbon_cjoint_NasolabialUpper{0}".format(side))
 
-            elif "Lower" in rib_point:
-                cmds.matchTransform(grp_offset, ctrl_lower_name, pos=True)
+            elif "lower" in rib_point.lower():
+                cmds.matchTransform(grp_offset, "offset_" + ctrl_lower_name, pos=True)
                 follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_surface_NasolabialLower{0}".format(side))
                 cmds.select(d=True)
                 rib_cjoint = cmds.joint(n="ribbon_cjoint_NasolabialLower{0}".format(side))
+
+            elif "mid" in rib_point.lower():
+                # cmds.matchTransform(grp_offset, "offset_" + ctrl_lower_name, pos=True)
+                cmds.xform(grp_offset, ws=True, t=mid_v)
+                if "_l" in rib_point.lower():
+                    cmds.xform(grp_offset, r=True, ro=(0, 0, 180))
+                follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_surface_NasolabialMid{0}".format(side))
+                cmds.select(d=True)
+                rib_cjoint = cmds.joint(n="ribbon_cjoint_NasolabialMid{0}".format(side))
+
 
             cmds.setAttr(rib_cjoint + ".drawStyle", 2)
             cmds.parent(rib_cjoint, ctrl[0])
@@ -134,9 +151,10 @@ def create_nasolabial(dict):
             cmds.makeIdentity(rib_cjoint, a=True, r=True)
             follicle = cmds.listRelatives(follicle_transform)[0]
 
+            if "_l" in rib_point.lower():
+                cmds.xform(grp_flip, r=True, ro=(0, 180, 0))
 
-            cmds.parent(follicle_transform, "face_system")
-
+            cmds.parent(follicle_transform, grp_proj_fol)
 
 
             cmds.connectAttr(proj_surface[3][0] + ".outMesh", follicle + ".inputMesh")
@@ -154,14 +172,32 @@ def create_nasolabial(dict):
             cmds.connectAttr(close_pnt_node + ".result.parameterV", follicle + ".parameterV")
 
 
-        cmds.matchTransform("offset_NasolabialUpper{0}".format(side), "Nasolabial" + ctrl_upper_number + "{0}".format(side))
-        cmds.matchTransform("offset_NasolabialLower{0}".format(side), "Nasolabial" + ctrl_lower_number + "{0}".format(side))
-        cmds.skinCluster("ribbon_cjoint_NasolabialUpper{0}".format(side), "ribbon_cjoint_NasolabialLower{0}".format(side), ribbon[0], tsb=True)
+        cmds.matchTransform("offset_NasolabialUpper{0}".format(side), "offset_Nasolabial" + ctrl_upper_number + "{0}".format(side))
+        cmds.matchTransform("offset_NasolabialLower{0}".format(side), "offset_Nasolabial" + ctrl_lower_number + "{0}".format(side))
+        cmds.xform("offset_NasolabialMid{0}".format(side), ws=True, t=mid_v)
+        if "_r" in side.lower():
+            cmds.xform("offset_NasolabialMid{0}".format(side), r=True, t=(-2.5, 0, 0), ro=(0, -20, 0))
+        elif "_l" in side.lower():
+            cmds.xform("offset_NasolabialMid{0}".format(side), r=True, t=(2.5, 0, 0), ro=(0, 20, 0))
+            cmds.xform(grp_flip, r=True, ro=(180, 0, 0))
+        cmds.skinCluster("ribbon_cjoint_NasolabialUpper{0}".format(side), "ribbon_cjoint_NasolabialLower{0}".format(side), "ribbon_cjoint_NasolabialMid{0}".format(side), ribbon[0], tsb=True)
 
         # attach def joints to ctrl jnts
         for jnt in jnt_list:
             cmds.parent(cmds.pointConstraint("x_" + jnt, jnt), "face_constraints")
             cmds.parent(cmds.orientConstraint("x_" + jnt, jnt), "face_constraints")
+
+    # Constrain Last Nasolabial to follow the jaw (with falloff)
+    jnts_lowerNaso_ctrl = ["NasolabialLower_R", "NasolabialLower_L"]
+    for jnt in jnts_lowerNaso_ctrl:
+        grp_parent = cmds.group(em=True, n="group_" + jnt)
+        cmds.matchTransform(grp_parent, "offset_" + jnt)
+        cmds.parent(grp_parent, grp_ctrl)
+        if "_l" in jnt.lower():
+            cmds.xform(grp_parent, r=True, ro=(0, 180, 0))
+        cmds.parent("offset_" + jnt, grp_parent)
+        const_head = cmds.parentConstraint("Nasolabial", grp_parent, mo=True)
+        const_jaw = cmds.parentConstraint("Jaw_M", grp_parent, mo=True)
 
 
 def attach_nasolabial():

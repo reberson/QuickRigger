@@ -1,15 +1,20 @@
 import maya.cmds as cmds
-import maya.OpenMaya as OpenMaya
-from System.utils import create_lattice_plane, create_ribbon, joint_list, create_ribbon_closed, create_lattice_sphere
+from System.utils import create_ribbon_closed, create_lattice_sphere
 import math
 
 # TODO: Make eyelid group follow eye movement (with falloff)
+# TODO : Fix Eye corner (inner and outer) ctrl orientations
 
 
 def create_eyelid(dict):
     grp_ctrl = cmds.group(em=True, n="eyelid_control_group")
     cmds.matchTransform(grp_ctrl, "Facial")
     cmds.parent(grp_ctrl, "face_constrain_head")
+
+    # declare existing projection groups
+    grp_proj_sys = "face_projection_system"
+    grp_proj_fol = "face_projection_follicles"
+    grp_proj_rib = "face_ribbons"
 
     # separate each side list
     jnts_all = cmds.listRelatives("Eyelids")
@@ -35,7 +40,7 @@ def create_eyelid(dict):
         jnt_list.append("EyelidOuterCorner{0}".format(side))
         for jnt in upper_half:
             jnt_list.append(jnt)
-        jnt_list.append("EyelidInnerCourner{0}".format(side))
+        jnt_list.append("EyelidInnerCorner{0}".format(side))
         for jnt in lower_half:
             jnt_list.append(jnt)
 
@@ -52,10 +57,16 @@ def create_eyelid(dict):
             # ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
             if "_r" in jnt.lower():
                 ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
+                cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+                cmds.setAttr(ctrl[0] + ".overrideColor", 31)
             elif "_l" in jnt.lower():
                 ctrl = cmds.circle(n="ctrl_" + jnt, cy=-1, r=0.75, nr=(0, 1, 0))
+                cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+                cmds.setAttr(ctrl[0] + ".overrideColor", 18)
             else:
                 ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
+                cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+                cmds.setAttr(ctrl[0] + ".overrideColor", 21)
 
             cmds.select(d=True)
             xjnt = cmds.joint(n="x_" + jnt)
@@ -77,11 +88,11 @@ def create_eyelid(dict):
         else:
             ribbon = create_ribbon_closed("ribbon_eyelid{0}".format(side), jnt_list, "Eye{0}".format(side), left_side=True)
         param_u_step = ribbon[3]
-        cmds.parent(ribbon[0], grp_ctrl)
-        cmds.parent(ribbon[1], grp_ctrl)
+        cmds.parent(ribbon[0], grp_proj_rib)
+        cmds.parent(ribbon[1], grp_proj_rib)
 
         proj_sphere = create_lattice_sphere("Eye{0}".format(side), 3, "proj_sphere_eye{0}".format(side))
-        cmds.parent(proj_sphere[0], "face_constrain_head")
+        cmds.parent(proj_sphere[0], grp_proj_sys)
 
         # Figure out the center most ctrl for upper and lower
 
@@ -94,15 +105,19 @@ def create_eyelid(dict):
 
 
         # Create the primary controls
-        rib_point_list = ["eyelidUpper{0}".format(side), "eyelidLower{0}".format(side)]
+        rib_point_list = ["eyelidUpper{0}".format(side), "eyelidLower{0}".format(side), "eyelidInnerCorner{0}".format(side), "eyelidOuterCorner{0}".format(side)]
         for rib_point in rib_point_list:
             grp_offset = cmds.group(em=True, n="offset_" + rib_point)
             grp_flip = cmds.group(em=True, n="flip_" + rib_point)
             grp_sdk = cmds.group(em=True, n="sdk_" + rib_point)
             if "_L" in rib_point:
                 ctrl = cmds.circle(n="ctrl_" + rib_point, cy=-1, r=1, nr=(0, 1, 0))
+                cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+                cmds.setAttr(ctrl[0] + ".overrideColor", 6)
             else:
                 ctrl = cmds.circle(n="ctrl_" + rib_point, cy=1, r=1, nr=(0, 1, 0))
+                cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+                cmds.setAttr(ctrl[0] + ".overrideColor", 13)
             mediator = cmds.group(em=True, n="mediator_" + rib_point)
 
             cmds.parent(ctrl[0], grp_sdk)
@@ -127,14 +142,29 @@ def create_eyelid(dict):
                 cmds.select(d=True)
                 rib_cjoint = cmds.joint(n="ribbon_cjoint_eyelidLower{0}".format(side))
 
+            elif "innercorner" in rib_point.lower():
+                cmds.matchTransform(grp_offset, "ctrl_EyelidInnerCorner{0}".format(side), pos=True)
+                follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_sphere_eyelidInnerCorner{0}".format(side))
+                cmds.select(d=True)
+                rib_cjoint = cmds.joint(n="ribbon_cjoint_eyelidInnerCorner{0}".format(side))
+
+            elif "outercorner" in rib_point.lower():
+                cmds.matchTransform(grp_offset, "ctrl_EyelidOuterCorner{0}".format(side), pos=True)
+                follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_sphere_eyelidOuterCorner{0}".format(side))
+                cmds.select(d=True)
+                rib_cjoint = cmds.joint(n="ribbon_cjoint_eyelidOuterCorner{0}".format(side))
+
+
             cmds.setAttr(rib_cjoint + ".drawStyle", 2)
             cmds.parent(rib_cjoint, ctrl[0])
             cmds.xform(rib_cjoint, t=(0, 0, 0), ro=(0, 0, 0))
             cmds.makeIdentity(rib_cjoint, a=True, r=True)
             follicle = cmds.listRelatives(follicle_transform)[0]
 
+            if "_l" in rib_point.lower():
+                cmds.xform(grp_flip, r=True, ro=(0, 180, 0))
 
-            cmds.parent(follicle_transform, "face_system")
+            cmds.parent(follicle_transform, grp_proj_fol)
 
             cmds.connectAttr(proj_sphere[3][0] + ".outMesh", follicle + ".inputMesh")
             cmds.connectAttr(proj_sphere[3][0] + ".worldMatrix", follicle + ".inputWorldMatrix")
@@ -153,7 +183,9 @@ def create_eyelid(dict):
 
         cmds.matchTransform("offset_eyelidUpper{0}".format(side), "EyelidUpper" + ctrl_upper_number + "{0}".format(side))
         cmds.matchTransform("offset_eyelidLower{0}".format(side), "EyelidLower" + ctrl_lower_number + "{0}".format(side))
-        cmds.skinCluster("ribbon_cjoint_eyelidUpper{0}".format(side), "ribbon_cjoint_eyelidLower{0}".format(side), ribbon[0], tsb=True)
+        cmds.matchTransform("offset_eyelidInnerCorner{0}".format(side), "EyelidInnerCorner" + "{0}".format(side))
+        cmds.matchTransform("offset_eyelidOuterCorner{0}".format(side), "EyelidOuterCorner" + "{0}".format(side))
+        cmds.skinCluster("ribbon_cjoint_eyelidUpper{0}".format(side), "ribbon_cjoint_eyelidLower{0}".format(side),"ribbon_cjoint_eyelidOuterCorner{0}".format(side), "ribbon_cjoint_eyelidInnerCorner{0}".format(side), ribbon[0], tsb=True)
 
         # attach def joints to ctrl jnts
         for jnt in jnt_list:

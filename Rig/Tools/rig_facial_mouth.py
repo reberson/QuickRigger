@@ -1,6 +1,5 @@
 import maya.cmds as cmds
-import maya.OpenMaya as OpenMaya
-from System.utils import create_lattice_plane, create_ribbon, joint_list
+from System.utils import create_lattice_plane, create_ribbon
 
 
 def create_mouth(dict):
@@ -8,13 +7,18 @@ def create_mouth(dict):
     cmds.matchTransform(grp_ctrl, "Facial")
     cmds.parent(grp_ctrl, "face_constrain_head")
 
+    # declare existing projection groups
+    grp_proj_sys = "face_projection_system"
+    grp_proj_fol = "face_projection_follicles"
+    grp_proj_rib = "face_ribbons"
+
     proj_surface = create_lattice_plane("Mouth", 40, 40, "proj_plane_mouth")
-    cmds.parent(proj_surface[0], "face_constrain_head")
+    cmds.parent(proj_surface[0], grp_proj_sys)
 
     jnt_list = cmds.listRelatives("Mouth")
-
     jnts_upper = []
     jnts_lower = []
+
     # create base controls
     for jnt in jnt_list:
         jd = dict[jnt]
@@ -22,12 +26,18 @@ def create_mouth(dict):
         grp_flip = cmds.group(em=True, n="flip_" + jnt)
         grp_sdk = cmds.group(em=True, n="sdk_" + jnt)
         # ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
-        if "_R" in jnt:
+        if "_r" in jnt.lower():
             ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
-        elif "_L" in jnt:
+            cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+            cmds.setAttr(ctrl[0] + ".overrideColor", 31)
+        elif "_l" in jnt.lower():
             ctrl = cmds.circle(n="ctrl_" + jnt, cy=-1, r=0.75, nr=(0, 1, 0))
+            cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+            cmds.setAttr(ctrl[0] + ".overrideColor", 18)
         else:
             ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
+            cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+            cmds.setAttr(ctrl[0] + ".overrideColor", 21)
 
         cmds.select(d=True)
         xjnt = cmds.joint(n="x_" + jnt)
@@ -113,13 +123,13 @@ def create_mouth(dict):
     # ribbons setup section
     ribbon_upper = create_ribbon("ribbon_mouth_upper", jnts_upper_sorted)
     param_u_step_upper = ribbon_upper[3]
-    cmds.parent(ribbon_upper[0], grp_ctrl)
-    cmds.parent(ribbon_upper[1], grp_ctrl)
+    cmds.parent(ribbon_upper[0], grp_proj_rib)
+    cmds.parent(ribbon_upper[1], grp_proj_rib)
 
     ribbon_lower = create_ribbon("ribbon_mouth_lower", jnts_lower_sorted, duplicated="corner")
     param_u_step_lower = ribbon_lower[3]
-    cmds.parent(ribbon_lower[0], grp_ctrl)
-    cmds.parent(ribbon_lower[1], grp_ctrl)
+    cmds.parent(ribbon_lower[0], grp_proj_rib)
+    cmds.parent(ribbon_lower[1], grp_proj_rib)
 
 
     # Create the primary controls
@@ -128,10 +138,18 @@ def create_mouth(dict):
         grp_offset = cmds.group(em=True, n="offset_" + rib_point)
         grp_flip = cmds.group(em=True, n="flip_" + rib_point)
         grp_sdk = cmds.group(em=True, n="sdk_" + rib_point)
-        if "_L" in rib_point:
+        if "_l" in rib_point.lower():
             ctrl = cmds.circle(n="ctrl_" + rib_point, cy=-1, r=1, nr=(0, 1, 0))
+            cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+            cmds.setAttr(ctrl[0] + ".overrideColor", 6)
+        elif "_r" in rib_point.lower():
+            ctrl = cmds.circle(n="ctrl_" + rib_point, cy=1, r=1, nr=(0, 1, 0))
+            cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+            cmds.setAttr(ctrl[0] + ".overrideColor", 13)
         else:
             ctrl = cmds.circle(n="ctrl_" + rib_point, cy=1, r=1, nr=(0, 1, 0))
+            cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+            cmds.setAttr(ctrl[0] + ".overrideColor", 17)
         mediator = cmds.group(em=True, n="mediator_" + rib_point)
 
         cmds.parent(ctrl[0], grp_sdk)
@@ -174,7 +192,7 @@ def create_mouth(dict):
 
         # follicle = cmds.createNode("follicle", n="brow_follicle")
         # follicle_transform = cmds.listRelatives(follicle, p=True)
-        cmds.parent(follicle_transform, "face_system")
+        cmds.parent(follicle_transform, grp_proj_fol)
 
         cmds.connectAttr(proj_surface[3][0] + ".outMesh", follicle + ".inputMesh")
         cmds.connectAttr(proj_surface[3][0] + ".worldMatrix", follicle + ".inputWorldMatrix")
@@ -207,33 +225,48 @@ def create_mouth(dict):
         cmds.parent(cmds.orientConstraint("x_" + jnt, jnt), "face_constraints")
 
 
+    # Constrain mouth corners to follow the jaw (with falloff)
+    jnts_corner_ctrl = ["mouthCorner_R", "mouthCorner_L"]
+    for jnt in jnts_corner_ctrl:
+        grp_parent = cmds.group(em=True, n="group_" + jnt)
+        cmds.matchTransform(grp_parent, "offset_" + jnt)
+        cmds.parent(grp_parent, grp_ctrl)
+        if "_l" in jnt.lower():
+            cmds.xform(grp_parent, r=True, ro=(0, 180, 0))
+        cmds.parent("offset_" + jnt, grp_parent)
+        const_head = cmds.parentConstraint("Mouth", grp_parent, mo=True)
+        const_jaw = cmds.parentConstraint("Jaw_M", grp_parent, mo=True)
+
+    # Constrain mouth LowerLip to follow the jaw
+    jnts_lower_ctrl = ["mouthLower_M"]
+    for jnt in jnts_lower_ctrl:
+        grp_parent = cmds.group(em=True, n="group_" + jnt)
+        cmds.matchTransform(grp_parent, "offset_" + jnt)
+        cmds.parent(grp_parent, grp_ctrl)
+        cmds.parent("offset_" + jnt, grp_parent)
+        const_jaw = cmds.parentConstraint("Jaw_M", grp_parent, mo=True)
+
+
+
 def attach_mouth():
-    # make sure brow ctrls are all zeroed out
-    # ctrl_list = ['Brow_4_R', 'Brow_3_R', 'Brow_2_R', 'Brow_1_R', 'Brow_M', 'Brow_1_L', 'Brow_2_L', 'Brow_3_L',
-    #              'Brow_4_L', "brow_R", "brow_M", "brow_L"]
-    ctrl_list = joint_list("Brows", "Brow_M", first_half="_r", second_half="_l")
-    # ctrl_list = joint_list("Brows", "Brow_M")
-    ctrl_list.append("brow_R")
-    ctrl_list.append("brow_M")
-    ctrl_list.append("brow_L")
+    # make sure ctrls are all zeroed out
+    ctrl_list = cmds.listRelatives("Mouth")
+    ctrl_list.append("mouthCorner_R")
+    ctrl_list.append("mouthUpper_M")
+    ctrl_list.append("mouthLower_M")
+    ctrl_list.append("mouthCorner_L")
     for ctrl in ctrl_list:
         cmds.xform("ctrl_" + ctrl, t=(0, 0, 0), ro=(0, 0, 0))
-
-    const_grp = cmds.group(em=True, n="brow_ribbon_constraint")
+    const_grp = cmds.group(em=True, n="mouth_ribbon_constraint")
     cmds.parent(const_grp, "face_system")
 
-    rib_jnts = ["brow_R", "brow_M", "brow_L"]
+    rib_jnts = ["mouthCorner_R", "mouthUpper_M", "mouthLower_M", "mouthCorner_L"]
     for jnt in rib_jnts:
         cmds.parent("ribbon_cjoint_" + jnt, "follicle_plane_" + jnt)
-        # cmds.xform(jnt, t=(0, 0, 0), ro=(90, 0, 90))
         cmds.xform("ribbon_cjoint_" + jnt, t=(0, 0, 0))
-        # cmds.makeIdentity("ribbon_cjoint_" + jnt, a=True, r=True)
     cmds.select(d=True)
 
-    # jnt_list = ['Brow_4_R', 'Brow_3_R', 'Brow_2_R', 'Brow_1_R', 'Brow_M', 'Brow_1_L', 'Brow_2_L', 'Brow_3_L',
-    #             'Brow_4_L']
-    # jnt_list = joint_list("Brows", "Brow_M")
-    jnt_list = joint_list("Brows", "Brow_M", first_half="_r", second_half="_l")
+    jnt_list = cmds.listRelatives("Mouth")
 
     for jnt in jnt_list:
         const_pnt = cmds.pointConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
@@ -244,24 +277,21 @@ def attach_mouth():
 
 
 def detach_mouth():
-    # ctrl_list = ['Brow_4_R', 'Brow_3_R', 'Brow_2_R', 'Brow_1_R', 'Brow_M', 'Brow_1_L', 'Brow_2_L', 'Brow_3_L',
-    #              'Brow_4_L', "brow_R", "brow_M", "brow_L"]
-    ctrl_list = joint_list("Brows", "Brow_M", first_half="_r", second_half="_l")
-    # ctrl_list = joint_list("Brows", "Brow_M")
-    ctrl_list.append("brow_R")
-    ctrl_list.append("brow_M")
-    ctrl_list.append("brow_L")
+    ctrl_list = cmds.listRelatives("Mouth")
+    ctrl_list.append("mouthCorner_R")
+    ctrl_list.append("mouthUpper_M")
+    ctrl_list.append("mouthLower_M")
+    ctrl_list.append("mouthCorner_L")
     for ctrl in ctrl_list:
         cmds.xform("ctrl_" + ctrl, t=(0, 0, 0), ro=(0, 0, 0))
-    # make sure brow ctrls are all zeroed out
-    cmds.delete("brow_ribbon_constraint")
+    # make sure  ctrls are all zeroed out
+    cmds.delete("mouth_ribbon_constraint")
     cmds.select(d=True)
 
-    rib_jnts = ["brow_R", "brow_M", "brow_L"]
+    rib_jnts = ["mouthCorner_R", "mouthUpper_M", "mouthLower_M", "mouthCorner_L"]
     for jnt in rib_jnts:
         cmds.parent("ribbon_cjoint_" + jnt, "ctrl_" + jnt)
         cmds.xform("ribbon_cjoint_" + jnt, t=(0, 0, 0))
-        # cmds.makeIdentity("ribbon_cjoint_" + jnt, a=True, r=True)
     cmds.select(d=True)
 
 

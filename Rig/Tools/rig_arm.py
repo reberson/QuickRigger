@@ -25,13 +25,17 @@ def create_arm_rig(dict):
         elif "Wrist_" in joint:
             ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Wrist_R.yaml")), "fk_" + jd[3])
 
-        if "_L" in joint:
+        if "_l" in joint.lower():
             mirror_object(ctrl, "x")
             mirror_object(ctrl, "y")
             mirror_object(ctrl, "z")
+            cmds.setAttr(ctrl + ".overrideEnabled", 1)
+            cmds.setAttr(ctrl + ".overrideColor", 6)
+        else:
+            cmds.setAttr(ctrl + ".overrideEnabled", 1)
+            cmds.setAttr(ctrl + ".overrideColor", 13)
 
-        cmds.setAttr(ctrl + ".overrideEnabled", 1)
-        cmds.setAttr(ctrl + ".overrideColor", 18)
+
         cmds.setAttr(ctrl + ".v", lock=True, k=False, cb=False)
         cmds.select(d=True)
         jnt = cmds.joint(n="fkx_" + jd[3])
@@ -105,9 +109,12 @@ def create_arm_rig(dict):
         ctrl_arm = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_Arm_R.yaml")), "ik_Arm{0}".format(side))
         if "_L" in side:
             mirror_object(ctrl_arm, "x")
+            cmds.setAttr(ctrl_arm + ".overrideEnabled", 1)
+            cmds.setAttr(ctrl_arm + ".overrideColor", 6)
+        else:
+            cmds.setAttr(ctrl_arm + ".overrideEnabled", 1)
+            cmds.setAttr(ctrl_arm + ".overrideColor", 13)
 
-        cmds.setAttr(ctrl_arm + ".overrideEnabled", 1)
-        cmds.setAttr(ctrl_arm + ".overrideColor", 13)
         cmds.setAttr(ctrl_arm + ".v", lock=True, k=False, cb=False)
         grp_offset_arm = cmds.group(n="ik_offset_Arm{0}".format(side), em=True)
         grp_offset_shoulder = cmds.group(n="ik_offset_Shoulder{0}".format(side), em=True)
@@ -125,8 +132,12 @@ def create_arm_rig(dict):
         cmds.setAttr(ikh[0] + ".visibility", 0)
         # Create PV
         pv_arm = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_pv.yaml")), "pv_Arm{0}".format(side))
-        cmds.setAttr(pv_arm + ".overrideEnabled", 1)
-        cmds.setAttr(pv_arm + ".overrideColor", 13)
+        if "_r" in side.lower():
+            cmds.setAttr(pv_arm + ".overrideEnabled", 1)
+            cmds.setAttr(pv_arm + ".overrideColor", 13)
+        else:
+            cmds.setAttr(pv_arm + ".overrideEnabled", 1)
+            cmds.setAttr(pv_arm + ".overrideColor", 6)
         cmds.setAttr(pv_arm + ".v", lock=True, k=False, cb=False)
         grp_pv_arm = cmds.group(n="pv_offset_Arm{0}".format(side), em=True)
         cmds.parent(pv_arm, grp_pv_arm)
@@ -139,7 +150,11 @@ def create_arm_rig(dict):
         # Create ik/fk switch
         switch_arm = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ikfk.yaml")), "ikfk_arm{0}".format(side))
         cmds.setAttr(switch_arm + ".overrideEnabled", 1)
-        cmds.setAttr(switch_arm + ".overrideColor", 21)
+        if "_R" in side:
+            cmds.setAttr(switch_arm + ".overrideColor", 13)
+        else:
+            cmds.setAttr(switch_arm + ".overrideColor", 6)
+
         cmds.setAttr(switch_arm + ".tx", lock=True, k=False, cb=False)
         cmds.setAttr(switch_arm + ".ty", lock=True, k=False, cb=False)
         cmds.setAttr(switch_arm + ".tz", lock=True, k=False, cb=False)

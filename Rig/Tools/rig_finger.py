@@ -27,7 +27,10 @@ def create_finger_rig(dict):
             else:
                 ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Finger_R.yaml")), "fk_" + jd[3])
             cmds.setAttr(ctrl + ".overrideEnabled", 1)
-            cmds.setAttr(ctrl + ".overrideColor", 18)
+            if "_R" in side:
+                cmds.setAttr(ctrl + ".overrideColor", 13)
+            else:
+                cmds.setAttr(ctrl + ".overrideColor", 6)
             cmds.setAttr(ctrl + ".v", lock=True, k=False, cb=False)
             cmds.select(d=True)
             jnt = cmds.joint(n="fkx_" + jd[3])

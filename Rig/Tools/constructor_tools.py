@@ -121,12 +121,23 @@ def create_rig_structure_face():
     cmds.parent(grp_const, grp_sys)
     cmds.parent(grp_sys, grp_rig)
 
-    #Checks if there is an existing body rig
+    # Checks if there is an existing body rig
     if cmds.objExists("Head_M"):
         cmds.pointConstraint("Head_M", grp_follow_head)
         cmds.orientConstraint("Head_M", grp_follow_head)
     else:
         cmds.parent("Facial", def_grp)
+
+    # Create Projection system groups
+    grp_proj_sys = cmds.group(em=True, n="face_projection_system")
+    grp_proj_fol = cmds.group(em=True, n="face_projection_follicles")
+    grp_proj_rib = cmds.group(em=True, n="face_ribbons")
+    cmds.parent(grp_proj_rib, grp_proj_sys)
+    cmds.parent(grp_proj_fol, grp_sys)
+    cmds.matchTransform(grp_proj_sys, grp_follow_head)
+    cmds.parent(grp_proj_sys, grp_follow_head)
+
+
 
 
 def create_deform_rig_face():

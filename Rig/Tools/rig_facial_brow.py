@@ -16,6 +16,11 @@ def create_brow(dict):
     first_jnt = jnt_list[0]
     last_jnt = jnt_list[len(jnt_list) - 1]
 
+    # declare existing projection groups
+    grp_proj_sys = "face_projection_system"
+    grp_proj_fol = "face_projection_follicles"
+    grp_proj_rib = "face_ribbons"
+
     # create base controls
     for jnt in jnt_list:
         jd = dict[jnt]
@@ -23,12 +28,18 @@ def create_brow(dict):
         grp_flip = cmds.group(em=True, n="flip_" + jnt)
         grp_sdk = cmds.group(em=True, n="sdk_" + jnt)
         # ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
-        if "_R" in jnt:
+        if "_r" in jnt.lower():
             ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
-        elif "_L" in jnt:
+            cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+            cmds.setAttr(ctrl[0] + ".overrideColor", 31)
+        elif "_l" in jnt.lower():
             ctrl = cmds.circle(n="ctrl_" + jnt, cy=-1, r=0.75, nr=(0, 1, 0))
+            cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+            cmds.setAttr(ctrl[0] + ".overrideColor", 18)
         else:
             ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
+            cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+            cmds.setAttr(ctrl[0] + ".overrideColor", 21)
 
         cmds.select(d=True)
         xjnt = cmds.joint(n="x_" + jnt)
@@ -48,21 +59,29 @@ def create_brow(dict):
     # ribbon = create_ribbon_flat("Brow_4_L", "Brow_4_R", "Brow_M", "ribbon_brow", jnt_list)
     ribbon = create_ribbon("ribbon_brow", jnt_list)
     param_u_step = ribbon[3]
-    cmds.parent(ribbon[0], grp_ctrl)
-    cmds.parent(ribbon[1], grp_ctrl)
+    cmds.parent(ribbon[0], grp_proj_rib)
+    cmds.parent(ribbon[1], grp_proj_rib)
 
     proj_plane = create_lattice_plane("Brows", 40, 40, "proj_plane_forehead")
-    cmds.parent(proj_plane[0], "face_constrain_head")
+    cmds.parent(proj_plane[0], grp_proj_sys)
     # Create the primary controls
     rib_point_list = ["brow_R", "brow_M", "brow_L"]
     for rib_point in rib_point_list:
         grp_offset = cmds.group(em=True, n="offset_" + rib_point)
         grp_flip = cmds.group(em=True, n="flip_" + rib_point)
         grp_sdk = cmds.group(em=True, n="sdk_" + rib_point)
-        if "_L" in rib_point:
+        if "_l" in rib_point.lower():
             ctrl = cmds.circle(n="ctrl_" + rib_point, cy=-1, r=1, nr=(0, 1, 0))
+            cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+            cmds.setAttr(ctrl[0] + ".overrideColor", 6)
+        elif "_r" in rib_point.lower():
+            ctrl = cmds.circle(n="ctrl_" + rib_point, cy=1, r=1, nr=(0, 1, 0))
+            cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+            cmds.setAttr(ctrl[0] + ".overrideColor", 13)
         else:
             ctrl = cmds.circle(n="ctrl_" + rib_point, cy=1, r=1, nr=(0, 1, 0))
+            cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
+            cmds.setAttr(ctrl[0] + ".overrideColor", 17)
         mediator = cmds.group(em=True, n="mediator_" + rib_point)
 
         cmds.parent(ctrl[0], grp_sdk)
@@ -100,7 +119,7 @@ def create_brow(dict):
 
         # follicle = cmds.createNode("follicle", n="brow_follicle")
         # follicle_transform = cmds.listRelatives(follicle, p=True)
-        cmds.parent(follicle_transform, "face_system")
+        cmds.parent(follicle_transform, grp_proj_fol)
 
         cmds.connectAttr(proj_plane[3][0] + ".outMesh", follicle + ".inputMesh")
         cmds.connectAttr(proj_plane[3][0] + ".worldMatrix", follicle + ".inputWorldMatrix")

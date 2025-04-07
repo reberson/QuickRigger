@@ -4,7 +4,7 @@ import Rig
 from Rig.Tools import layout_tools
 from Rig.Tools import constructor_tools
 from Rig.Tools import rig_root, rig_torso, rig_arm, rig_leg, rig_finger, rig_sdk_finger, rig_neck
-from Rig.Tools import rig_facial_brow, rig_facial_eyelid, rig_facial_nasolabial, rig_facial_mouth
+from Rig.Tools import rig_facial_brow, rig_facial_eyelid, rig_facial_nasolabial, rig_facial_mouth, rig_facial_cheek, rig_facial_nose, rig_facial_jaw, rig_facial_tongue
 from System.file_handle import file_dialog_yaml as fd
 from System.file_handle import export_curve, import_curve
 import System.utils
@@ -125,6 +125,18 @@ def menu():
     cmds.menuItem(p='facesteps', l='mouth rig', stp='python',
                   c=lambda *args: rig_facial_mouth.create_mouth(layout_tools.joint_dictionary_creator()),
                   ann='Creates the rig controls for the mouth')
+    cmds.menuItem(p='facesteps', l='nose rig', stp='python',
+                  c=lambda *args: rig_facial_nose.create_nose(layout_tools.joint_dictionary_creator()),
+                  ann='Creates the rig controls for the nose')
+    cmds.menuItem(p='facesteps', l='cheek rig', stp='python',
+                  c=lambda *args: rig_facial_cheek.create_cheek(layout_tools.joint_dictionary_creator()),
+                  ann='Creates the rig controls for the cheeks')
+    cmds.menuItem(p='facesteps', l='jaw rig', stp='python',
+                  c=lambda *args: rig_facial_jaw.create_jaw(layout_tools.joint_dictionary_creator()),
+                  ann='Creates the rig controls for the jaw')
+    cmds.menuItem(p='facesteps', l='tongue rig', stp='python',
+                  c=lambda *args: rig_facial_tongue.create_tongue(layout_tools.joint_dictionary_creator()),
+                  ann='Creates the rig controls for the tongue')
 
 
     # Rig face - Tools
@@ -170,6 +182,10 @@ def build_rig_face():
     rig_facial_eyelid.create_eyelid(layout_tools.joint_dictionary_creator())
     rig_facial_nasolabial.create_nasolabial(layout_tools.joint_dictionary_creator())
     rig_facial_mouth.create_mouth(layout_tools.joint_dictionary_creator())
+    rig_facial_nose.create_nose(layout_tools.joint_dictionary_creator())
+    rig_facial_cheek.create_cheek(layout_tools.joint_dictionary_creator())
+    rig_facial_jaw.create_jaw(layout_tools.joint_dictionary_creator())
+    rig_facial_tongue.create_tongue(layout_tools.joint_dictionary_creator())
 
 
 def attach_face():

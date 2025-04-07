@@ -19,7 +19,10 @@ def create_finger_sdk():
         grp_holder = cmds.group(em=True, n="offset_holder_sdk_fingers{0}".format(side))
         ctrl_holder = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "holder_sdk_fingers.yaml")), "holder_sdk_fingers{0}".format(side))
         cmds.setAttr(ctrl_holder + ".overrideEnabled", 1)
-        cmds.setAttr(ctrl_holder + ".overrideColor", 14)
+        if "_R" in side:
+            cmds.setAttr(ctrl_holder + ".overrideColor", 13)
+        else:
+            cmds.setAttr(ctrl_holder + ".overrideColor", 6)
         cmds.setAttr(ctrl_holder + ".tx", lock=True, k=False, cb=False)
         cmds.setAttr(ctrl_holder + ".ty", lock=True, k=False, cb=False)
         cmds.setAttr(ctrl_holder + ".tz", lock=True, k=False, cb=False)
@@ -33,7 +36,10 @@ def create_finger_sdk():
         grp_ctrl = cmds.group(em=True, n="offset_cntrl_sdk_fingers{0}".format(side))
         ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "cntrl_sdk_fingers.yaml")), "cntrl_sdk_fingers{0}".format(side))
         cmds.setAttr(ctrl + ".overrideEnabled", 1)
-        cmds.setAttr(ctrl + ".overrideColor", 14)
+        if "_R" in side:
+            cmds.setAttr(ctrl + ".overrideColor", 13)
+        else:
+            cmds.setAttr(ctrl + ".overrideColor", 6)
         cmds.setAttr(ctrl + ".ty", lock=True, k=False, cb=False)
         cmds.setAttr(ctrl + ".rx", lock=True, k=False, cb=False)
         cmds.setAttr(ctrl + ".ry", lock=True, k=False, cb=False)
@@ -47,7 +53,10 @@ def create_finger_sdk():
         grp_extra_metacarpal = cmds.group(em=True, n="extra_metacarpal{0}".format(side))
         ctrl_metacarpal = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "cntrl_metacarpal_R.yaml")), "cntrl_metacarpal{0}".format(side))
         cmds.setAttr(ctrl_metacarpal + ".overrideEnabled", 1)
-        cmds.setAttr(ctrl_metacarpal + ".overrideColor", 14)
+        if "_R" in side:
+            cmds.setAttr(ctrl_metacarpal + ".overrideColor", 13)
+        else:
+            cmds.setAttr(ctrl_metacarpal + ".overrideColor", 6)
         cmds.setAttr(ctrl_metacarpal + ".sx", lock=True, k=False, cb=False)
         cmds.setAttr(ctrl_metacarpal + ".sy", lock=True, k=False, cb=False)
         cmds.setAttr(ctrl_metacarpal + ".sz", lock=True, k=False, cb=False)
