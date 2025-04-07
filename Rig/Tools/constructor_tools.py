@@ -1,5 +1,6 @@
 import maya.cmds as cmds
 from Rig.Tools.reference_tools import joint_dictionary_creator
+import System.file_handle
 
 
 def mirror_joint(first_joint):
@@ -48,6 +49,8 @@ def create_rig_structure():
     motion_grp = cmds.group(em=True, n="motion_system")
     main_grp = cmds.group(em=True, n="main_system")
     main_ctrl = cmds.circle(n="Main", r=50, nr=(0, 1, 0))
+    cmds.setAttr(main_ctrl[0] + ".overrideEnabled", 1)
+    cmds.setAttr(main_ctrl[0] + ".overrideColor", 7)
     root_grp = cmds.group(em=True, n="root_system")
     glob_grp = cmds.group(em=True, n="global_system")
     glob_main_grp = cmds.group(em=True, n="global_constraint_main")

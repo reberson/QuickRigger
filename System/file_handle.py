@@ -3,6 +3,7 @@ import yaml
 import os
 from pathlib import Path
 import io
+from definitions import CONTROLS_DIR
 
 
 def file_dialog_yaml(title, mode, saved_data=None):
@@ -22,6 +23,13 @@ def file_dialog_yaml(title, mode, saved_data=None):
         return loaded_data
 
 
+def file_read_yaml(file_path):
+    output = Path(file_path)
+    with open(output, "r") as stream:
+        loaded_data = yaml.load(stream, Loader=yaml.FullLoader)
+    return loaded_data
+
+
 def import_ctrl(file_path, ctrl_name):
     cmds.file(file_path, i=True)
 
@@ -36,15 +44,21 @@ def export_curve():
     curve_obj = cmds.ls(sl=True, v=True, tr=True)
     ctrl_curve = cmds.listRelatives(curve_obj, ad=True, shapes=True)
     curve_dict = {}
+    # ctrl_curve = cmds.rename(cmds.listRelatives(curve_obj, ad=True, shapes=True), cmds.ls(ctrl_curve, uuid=True)[0].replace("-", "_"))
     for shape in ctrl_curve:
-        nodes = cmds.listConnections(shape)
+        # nodes = cmds.listConnections(shape)
         cv_mode = "circle"
-        if nodes is not None:
-            for node in nodes:
-                if "makeNurbCircle" in node:
-                    cv_mode = "circle"
-                else:
-                    cv_mode = "curve"
+        # crv_uuid = cmds.ls(shape, uuid=True)
+        # shape_renamed = cmds.rename(shape, crv_uuid[0].replace("-", "_"))
+        shape_form = cmds.getAttr(shape + ".form")
+        if shape_form == 2:
+            cv_mode = "circle"
+        # if nodes is not None:
+        #     for node in nodes:
+        #         if "makeNurbCircle" in node:
+        #             cv_mode = "circle"
+        #         else:
+        #             cv_mode = "curve"
         else:
             cv_mode = "curve"
         cv_points = {}
@@ -63,8 +77,8 @@ def export_curve():
     file_dialog_yaml("Save curve into yaml", mode="w", saved_data=curve_dict)
 
 
-def import_curve():
-    curve_dict = file_dialog_yaml("Load curve", mode="r")
+def import_curve(curve_dict):
+    # curve_dict = file_dialog_yaml("Load curve", mode="r")
     created_curves = []
     for key in curve_dict:
         cv_list = []
@@ -106,3 +120,4 @@ def import_curve():
     for empty_curve in created_curves_new:
         cmds.delete(empty_curve)
     cmds.select(d=True)
+    return ctrl_grp

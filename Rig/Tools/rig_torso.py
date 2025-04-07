@@ -1,11 +1,11 @@
 import maya.cmds as cmds
 from Rig.Tools.reference_tools import joint_dictionary_creator
-from System.utils import connect_point_constraint, connect_orient_constraint
+from System.utils import connect_point_constraint, connect_orient_constraint, mirror_object
 from definitions import CONTROLS_DIR
-from System.file_handle import import_ctrl
+from System.file_handle import file_read_yaml, import_curve
 
 # TODO: Refactor to Class objects
-# TODO: toggle visibility for ik fk
+
 
 def create_torso_rig(dict):
     # List all necessary joints
@@ -18,13 +18,23 @@ def create_torso_rig(dict):
         grp_offset = cmds.group(n="fk_offset_" + jd[3], em=True)
         grp_sdk = cmds.group(n="fk_sdk_" + jd[3], em=True)
         grp_flip = cmds.group(n="fk_flip_" + jd[3], em=True)
-        ctrl = cmds.circle(n="fk_" + jd[3], r=10, nr=(0, 1, 0))
+        if "Spine1_" in joint:
+            # ctrl = cmds.circle(n="fk_" + jd[3], r=10, nr=(0, 1, 0))
+            ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Spine1.yaml")), "fk_" + jd[3])
+        elif "Spine2_" in joint:
+            # ctrl = cmds.circle(n="fk_" + jd[3], r=10, nr=(0, 1, 0))
+            ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Spine2.yaml")), "fk_" + jd[3])
+        elif "Chest_" in joint:
+            # ctrl = cmds.circle(n="fk_" + jd[3], r=10, nr=(0, 1, 0))
+            ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Chest.yaml")), "fk_" + jd[3])
+        cmds.setAttr(ctrl + ".overrideEnabled", 1)
+        cmds.setAttr(ctrl + ".overrideColor", 17)
         cmds.select(d=True)
         jnt = cmds.joint(n="fkx_" + jd[3])
         cmds.setAttr(jnt + ".drawStyle", 2)
         cmds.select(d=True)
-        cmds.parent(jnt, ctrl[0])
-        cmds.parent(ctrl[0], grp_flip)
+        cmds.parent(jnt, ctrl)
+        cmds.parent(ctrl, grp_flip)
         cmds.parent(grp_flip, grp_sdk)
         cmds.parent(grp_sdk, grp_offset)
         cmds.xform(grp_offset, ws=True, t=jd[0], ro=jd[1], roo=jd[2])
@@ -55,13 +65,20 @@ def create_torso_rig(dict):
         grp_offset = cmds.group(n="fk_offset_" + jd[3], em=True)
         grp_sdk = cmds.group(n="fk_sdk_" + jd[3], em=True)
         grp_flip = cmds.group(n="fk_flip_" + jd[3], em=True)
-        ctrl = cmds.circle(n="fk_" + jd[3], r=10, nr=(0, 1, 0))
+        # ctrl = cmds.circle(n="fk_" + jd[3], r=10, nr=(0, 1, 0))
+        ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Scapula_R.yaml")), "fk_" + jd[3])
+        if "_L" in joint:
+            mirror_object(ctrl, "x")
+            mirror_object(ctrl, "y")
+            mirror_object(ctrl, "z")
+        cmds.setAttr(ctrl + ".overrideEnabled", 1)
+        cmds.setAttr(ctrl + ".overrideColor", 17)
         cmds.select(d=True)
         jnt = cmds.joint(n="fkx_" + jd[3])
         cmds.setAttr(jnt + ".drawStyle", 2)
         cmds.select(d=True)
-        cmds.parent(jnt, ctrl[0])
-        cmds.parent(ctrl[0], grp_flip)
+        cmds.parent(jnt, ctrl)
+        cmds.parent(ctrl, grp_flip)
         cmds.parent(grp_flip, grp_sdk)
         cmds.parent(grp_sdk, grp_offset)
         cmds.xform(grp_offset, ws=True, t=jd[0], ro=jd[1], roo=jd[2])
@@ -119,7 +136,7 @@ def create_torso_rig(dict):
     ikh_curve = ikh_spine[2]
     ikh_curve = cmds.rename(ikh_curve, "ikh_spine_curve")
     cmds.parent(ikh_curve, ik_const_main)
-    # connect invers matrix from follow main group to offset parent materix curve
+    # connect inverse matrix from follow main group to offset parent materix curve
     cmds.connectAttr(ik_const_main + ".worldInverseMatrix", ikh_curve + ".offsetParentMatrix")
 
     # Create ik controls
@@ -128,14 +145,20 @@ def create_torso_rig(dict):
         jd = dict[joint]
         grp_offset = cmds.group(n="ik_offset_" + jd[3], em=True)
         grp_sdk = cmds.group(n="ik_sdk_" + jd[3], em=True)
-
-        ctrl = cmds.circle(n="ik_" + jd[3], r=15, nr=(0, 1, 0))
+        if "Spine1_" in joint:
+            ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_Spine1.yaml")), "ik_" + jd[3])
+        elif "Chest_" in joint:
+            ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_Chest.yaml")), "ik_" + jd[3])
+        elif "Neck_" in joint:
+            ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_Neck.yaml")), "ik_" + jd[3])
+        cmds.setAttr(ctrl + ".overrideEnabled", 1)
+        cmds.setAttr(ctrl + ".overrideColor", 17)
         cmds.select(d=True)
         jnt = cmds.joint(n="bind_" + jd[3])
         cmds.setAttr(jnt + ".drawStyle", 2)
         cmds.select(d=True)
-        cmds.parent(jnt, ctrl[0])
-        cmds.parent(ctrl[0], grp_sdk)
+        cmds.parent(jnt, ctrl)
+        cmds.parent(ctrl, grp_sdk)
         cmds.parent(grp_sdk, grp_offset)
         cmds.xform(grp_offset, ws=True, t=jd[0], ro=jd[1], roo=jd[2])
         cmds.parent(grp_offset, ik_spine_ctrls)
@@ -157,23 +180,26 @@ def create_torso_rig(dict):
     cmds.connectAttr(spine_pma_node + ".output1D", "ikh_Spine.twist")
 
     # Create ik/fk switch
-    switch_torso = cmds.circle(n="ikfk_torso", nr=(0, 1, 0), c=(0, 0, 0), r=2)
+    # switch_torso = cmds.circle(n="ikfk_torso", nr=(0, 1, 0), c=(0, 0, 0), r=2)
+    switch_torso = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ikfk.yaml")), "ikfk_torso")
     cmds.addAttr(switch_torso, longName="ikSwitch", attributeType="double", min=0, max=1, dv=0)
-    cmds.setAttr(str(switch_torso[0]) + ".ikSwitch", e=True, channelBox=True)
-    switch_torso_attr = switch_torso[0] + ".ikSwitch"
+    cmds.setAttr(str(switch_torso) + ".ikSwitch", e=True, channelBox=True)
+    cmds.setAttr(switch_torso + ".overrideEnabled", 1)
+    cmds.setAttr(switch_torso + ".overrideColor", 21)
+    switch_torso_attr = switch_torso + ".ikSwitch"
     # Create unhide attribute
     cmds.addAttr(switch_torso, longName="unhide", attributeType="double", min=0, max=1, dv=0)
-    cmds.setAttr(str(switch_torso[0]) + ".unhide", e=True, channelBox=True)
-    unhide_attr = switch_torso[0] + ".unhide"
+    cmds.setAttr(str(switch_torso) + ".unhide", e=True, channelBox=True)
+    unhide_attr = switch_torso + ".unhide"
 
     grp_switch_torso = cmds.group(n="offset_ikfk_torso", em=True)
     grp_switch_follow_main = cmds.group(n="follow_ikfk_torso", em=True)
-    cmds.parent(switch_torso[0], grp_switch_torso)
+    cmds.parent(switch_torso, grp_switch_torso)
     cmds.parent(grp_switch_torso, grp_switch_follow_main)
     cmds.parent(grp_switch_follow_main, "fkik_system")
     cmds.orientConstraint("xRoot", grp_switch_follow_main)
     cmds.pointConstraint("xRoot", grp_switch_follow_main)
-    cmds.xform(grp_switch_torso, t=(30, 0, 0), r=True)
+    cmds.xform(grp_switch_torso, t=(30, 5, 0), r=True)
 
     # Set visibility state for ik fk ctrls
     nd_ikfk_vis_cond = cmds.createNode('condition', ss=True, n="ikfk_torso_vis_cond")

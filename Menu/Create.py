@@ -88,7 +88,7 @@ def Menu():
                   ann='Save curve object into YAML')
 
     cmds.menuItem(p='tools', l='Import curve', stp='python',
-                  c=lambda *args: import_curve(),
+                  c=lambda *args: import_curve(fd("Load curve", mode="r")),
                   ann='Load curve object into YAML')
 
 
