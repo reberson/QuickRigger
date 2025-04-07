@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 from System.utils import create_ribbon_closed, create_lattice_sphere
 import math
-
+from Rig.Tools.layout_tools import lattice_load
 
 
 
@@ -94,6 +94,14 @@ def create_eyelid(dict):
         proj_sphere = create_lattice_sphere("Eye{0}".format(side), 3, "proj_sphere_eye{0}".format(side))
         cmds.parent(proj_sphere[0], grp_proj_sys)
 
+        cmds.select(d=True)
+        cmds.select(proj_sphere[2][1])
+        if side == "_R":
+            lattice_load("template_lattice_eye_r.yaml")
+        else:
+            lattice_load("template_lattice_eye_l.yaml")
+        cmds.select(d=True)
+
         # Figure out the center most ctrl for upper and lower
 
         ctrl_upper_number = str(math.ceil((len(upper_half)/2)))
@@ -101,8 +109,6 @@ def create_eyelid(dict):
 
         ctrl_lower_number = str(math.ceil((len(upper_half)/2)))
         ctrl_lower_name = "ctrl_EyelidLower" + ctrl_lower_number + "{0}".format(side)
-
-
 
         # Create the primary controls
         rib_point_list = ["eyelidUpper{0}".format(side), "eyelidLower{0}".format(side), "eyelidInnerCorner{0}".format(side), "eyelidOuterCorner{0}".format(side)]

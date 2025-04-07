@@ -51,33 +51,33 @@ def calculatePVPosition(jnts, distance):
     return ([finalV.x, finalV.y, finalV.z])
 
 
-def connect_bc(def_jnt, fk_jnt, ik_jnt, attribute_name, switch_name):
-    # Create blend color nodes and attach to the target attribute
-    constraints = []
-    bcNodeT = cmds.shadingNode("blendColors", asUtility=True, n='bcNodeT_switch_' + switch_name)
-    cmds.connectAttr(attribute_name, bcNodeT + '.blender')
-    bcNodeR = cmds.shadingNode("blendColors", asUtility=True, n='bcNodeR_switch_' + switch_name)
-    cmds.connectAttr(attribute_name, bcNodeR + '.blender')
-    bcNodeS = cmds.shadingNode("blendColors", asUtility=True, n='bcNodeS_switch_' + switch_name)
-    cmds.connectAttr(attribute_name, bcNodeS + '.blender')
-    constraints.append([bcNodeT, bcNodeR, bcNodeS])
-
-    # Input FK jnt
-    cmds.connectAttr(fk_jnt + '.translate', bcNodeT + '.color1')
-    cmds.connectAttr(fk_jnt + '.rotate', bcNodeR + '.color1')
-    cmds.connectAttr(fk_jnt + '.scale', bcNodeS + '.color1')
-
-    # Input IK jnt
-    cmds.connectAttr(ik_jnt + '.translate', bcNodeT + '.color2')
-    cmds.connectAttr(ik_jnt + '.rotate', bcNodeR + '.color2')
-    cmds.connectAttr(ik_jnt + '.scale', bcNodeS + '.color2')
-
-    # Output Deform jnt
-    cmds.connectAttr(bcNodeT + '.output', def_jnt + '.translate')
-    cmds.connectAttr(bcNodeR + '.output', def_jnt + '.rotate')
-    cmds.connectAttr(bcNodeS + '.output', def_jnt + '.scale')
-
-    return constraints
+# def connect_bc(def_jnt, fk_jnt, ik_jnt, attribute_name, switch_name):
+#     # Create blend color nodes and attach to the target attribute
+#     constraints = []
+#     bcNodeT = cmds.shadingNode("blendColors", asUtility=True, n='bcNodeT_switch_' + switch_name)
+#     cmds.connectAttr(attribute_name, bcNodeT + '.blender')
+#     bcNodeR = cmds.shadingNode("blendColors", asUtility=True, n='bcNodeR_switch_' + switch_name)
+#     cmds.connectAttr(attribute_name, bcNodeR + '.blender')
+#     bcNodeS = cmds.shadingNode("blendColors", asUtility=True, n='bcNodeS_switch_' + switch_name)
+#     cmds.connectAttr(attribute_name, bcNodeS + '.blender')
+#     constraints.append([bcNodeT, bcNodeR, bcNodeS])
+#
+#     # Input FK jnt
+#     cmds.connectAttr(fk_jnt + '.translate', bcNodeT + '.color1')
+#     cmds.connectAttr(fk_jnt + '.rotate', bcNodeR + '.color1')
+#     cmds.connectAttr(fk_jnt + '.scale', bcNodeS + '.color1')
+#
+#     # Input IK jnt
+#     cmds.connectAttr(ik_jnt + '.translate', bcNodeT + '.color2')
+#     cmds.connectAttr(ik_jnt + '.rotate', bcNodeR + '.color2')
+#     cmds.connectAttr(ik_jnt + '.scale', bcNodeS + '.color2')
+#
+#     # Output Deform jnt
+#     cmds.connectAttr(bcNodeT + '.output', def_jnt + '.translate')
+#     cmds.connectAttr(bcNodeR + '.output', def_jnt + '.rotate')
+#     cmds.connectAttr(bcNodeS + '.output', def_jnt + '.scale')
+#
+#     return constraints
 
 
 def connect_point_constraint(def_jnt, fk_jnt, ik_jnt, attribute):
@@ -330,13 +330,12 @@ def create_ribbon_closed(ribbon_name, transform_list, center_jnt, left_side=Fals
         cmds.parent(follicle_transform, ribbon_follicle_grp)
         cmds.select(d=True)
 
-
     return ribbon, ribbon_follicle_grp, ribbon_shape, param_u_step
 
 
 def create_lattice_plane(origin_transform, height, width, name):
     grp = cmds.group(em=True, n="group_" + name)
-    proj_plane = cmds.polyPlane(n=name, ax=(0, 0, 1), h=height, w=width)
+    proj_plane = cmds.polyPlane(n=name, ax=(0, 0, 1), h=height, w=width, sh=80, sw=80)
     proj_plane_shape = cmds.listRelatives(proj_plane[0])
     # cmds.delete(proj_plane, constructionHistory=True)
     proj_plane_lattice = cmds.lattice(proj_plane[0], dv=(5, 5, 2), oc=True, n=name + "_")

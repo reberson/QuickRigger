@@ -48,11 +48,16 @@ def create_jaw(dict):
 
     #parent ctrls to jaw ctrl
     cmds.parent("offset_Chin_M", "x_Jaw_M")
+    cmds.parent("offset_Jaw_End_M", "x_Jaw_M")
 
     # attach def joints to ctrl jnts
     for jnt in jnt_list:
         cmds.parent(cmds.pointConstraint("x_" + jnt, jnt), "face_constraints")
         cmds.parent(cmds.orientConstraint("x_" + jnt, jnt), "face_constraints")
+
+    # make jaw locator follow jaw_end
+    cmds.pointConstraint("x_Jaw_End_M", "loc_jaw")
+    cmds.orientConstraint("x_Jaw_End_M", "loc_jaw")
 
 
 

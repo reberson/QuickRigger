@@ -1,10 +1,8 @@
 import maya.cmds as cmds
 import yaml
-import os
-from pathlib import Path
-import io
 from definitions import ROOT_DIR
 from System.file_handle import file_dialog_yaml
+import pymel.core as pm
 
 
 
@@ -132,3 +130,40 @@ def joint_dictionary_creator_source(parent):
         joint_dictionary[jnt_name] = pos, rot, rot_order, jnt_name, jnt_parent
     cmds.select(d=True)
     return joint_dictionary
+
+# TODO: Check lattice divisions and make sure the selected lattice matches the number of the loaded lattice
+def lattice_save():
+    """save selected lattice to yaml file"""
+    dict = {}
+    lattice = pm.selected()[0]
+    lat_obj = cmds.ls(sl=True)[0]
+    lattice_pos = cmds.xform(lat_obj, q=True, t=True, ws=True)
+    lattice_rot = cmds.xform(lat_obj, q=True, ro=True, ws=True)
+    for index, point in enumerate(lattice.pt):
+        list = []
+        list.append(pm.pointPosition(point)[0])
+        list.append(pm.pointPosition(point)[1])
+        list.append(pm.pointPosition(point)[2])
+        item = str(point)[len(str(point)) - 11:len(str(point))]
+        dict[item] = list
+    combined_data = {"lattice_dict": dict, "lattice_pos": lattice_pos, "lattice_rot": lattice_rot}
+    file_dialog_yaml("Save Lattice", mode="w", saved_data=combined_data)
+
+
+def lattice_load(file=None):
+    """load lattice data from yaml and apply to current lattice"""
+    if file is None:
+        source_file = file_dialog_yaml("Load Lattice", mode="r")
+    else:
+        output = ROOT_DIR + '/Data/Template/' + file
+        with open(output, "r") as stream:
+            source_file = yaml.load(stream, Loader=yaml.FullLoader)
+    lattice = pm.selected()[0]
+    lat_obj = cmds.ls(sl=True)[0]
+    cmds.xform(lat_obj, t=source_file["lattice_pos"], ws=True)
+    cmds.xform(lat_obj, ro=source_file["lattice_rot"], ws=True)
+    dict = source_file["lattice_dict"]
+    for key in dict:
+        cmds.select(str(lattice) + "." + key, r=True)
+        cmds.move(dict[key][0], dict[key][1], dict[key][2], ws=True)
+

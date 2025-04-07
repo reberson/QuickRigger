@@ -1,6 +1,7 @@
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 from System.utils import create_lattice_plane, create_ribbon, joint_list, create_ribbon_closed, create_lattice_sphere
+from Rig.Tools.layout_tools import lattice_load
 import math
 
 
@@ -18,6 +19,12 @@ def create_nasolabial(dict):
     # Create projection lattice plane for both sides
     proj_surface = create_lattice_plane("Nasolabial", 40, 40, "proj_plane_nasolabial")
     cmds.parent(proj_surface[0], grp_proj_sys)
+    cmds.select(d=True)
+    cmds.select(proj_surface[2][1])
+    lattice_load("template_lattice_nasolabial.yaml")
+    cmds.select(d=True)
+    cmds.skinCluster("Facial", "Jaw_End_M", proj_surface[3], tsb=True)
+    cmds.select(d=True)
 
     # separate each side list
     jnts_all = cmds.listRelatives("Nasolabial")
@@ -68,7 +75,7 @@ def create_nasolabial(dict):
                 cmds.xform(grp_flip, r=True, ro=(0, 180, 0))
 
         if side == "_R":
-            ribbon = create_ribbon("ribbon_Nasolabial{0}".format(side), jnt_list, direction=(1, 0, 0), reverse=True)
+            ribbon = create_ribbon("ribbon_Nasolabial{0}".format(side), jnt_list, direction=(1, 0, 0), reverse=False)
         else:
             ribbon = create_ribbon("ribbon_Nasolabial{0}".format(side), jnt_list, direction=(-1, 0, 0))
 
@@ -196,10 +203,10 @@ def create_nasolabial(dict):
         if "_l" in jnt.lower():
             cmds.xform(grp_parent, r=True, ro=(0, 180, 0))
         cmds.parent("offset_" + jnt, grp_parent)
-        cmds.pointConstraint("Nasolabial", grp_parent, mo=True)
-        cmds.pointConstraint("Jaw_M", grp_parent, mo=True)
-        cmds.orientConstraint("Nasolabial", grp_parent, mo=True)
-        cmds.orientConstraint("Jaw_M", grp_parent, mo=True)
+        cmds.pointConstraint("Nasolabial", grp_parent, mo=True, w=0.25)
+        cmds.pointConstraint("Jaw_End_M", grp_parent, mo=True, w=0.75)
+        cmds.orientConstraint("Nasolabial", grp_parent, mo=True, w=0.25)
+        cmds.orientConstraint("Jaw_M", grp_parent, mo=True, w=0.75)
 
 
 def attach_nasolabial():

@@ -106,7 +106,12 @@ def create_rig_structure_face():
 
     grp_sys = cmds.group(em=True, n="face_system")
     grp_origin = cmds.group(em=True, n="face_origin")
+    cmds.setAttr(grp_origin + ".visibility", 0)
     grp_follow_head = cmds.group(em=True, n="face_constrain_head")
+    grp_follow_jaw = cmds.group(em=True, n="face_constrain_jaw")
+    loc_jaw = cmds.spaceLocator(n="loc_jaw")
+    cmds.setAttr(loc_jaw[0] + ".visibility", 0)
+
 
     if cmds.objExists("deformation_joints"):
         def_grp = "deformation_joints"
@@ -117,6 +122,8 @@ def create_rig_structure_face():
     grp_const = cmds.group(em=True, n="face_constraints")
     cmds.parent(grp_origin, grp_sys)
     cmds.parent(grp_follow_head, grp_sys)
+    cmds.parent(grp_follow_jaw, grp_follow_head)
+    cmds.parent(loc_jaw[0], grp_follow_jaw)
     cmds.parent(grp_mediators, grp_sys)
     cmds.parent(grp_const, grp_sys)
     cmds.parent(grp_sys, grp_rig)
@@ -130,6 +137,7 @@ def create_rig_structure_face():
         cmds.scaleConstraint("fkx_Head_M", grp_follow_head)
     # Create Projection system groups
     grp_proj_sys = cmds.group(em=True, n="face_projection_system")
+    cmds.setAttr(grp_proj_sys + ".visibility", 0)
     grp_proj_fol = cmds.group(em=True, n="face_projection_follicles")
     grp_proj_rib = cmds.group(em=True, n="face_ribbons")
     cmds.parent(grp_proj_rib, grp_origin)

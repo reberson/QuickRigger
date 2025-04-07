@@ -171,6 +171,14 @@ def menu():
                   c=lambda *args: constructor_tools.set_scale_compensate(0),
                   ann='Disables scale compensate for all joints')
 
+    cmds.menuItem(p='tools', l='Save Lattice', stp='python',
+                  c=lambda *args: layout_tools.lattice_save(),
+                  ann='Saves selected Lattice into yaml')
+    cmds.menuItem(p='tools', l='Load Lattice', stp='python',
+                  c=lambda *args: layout_tools.lattice_load(),
+                  ann='Saves selected Lattice into yaml')
+
+
 
 def build_rig():
     constructor_tools.create_rig_structure()

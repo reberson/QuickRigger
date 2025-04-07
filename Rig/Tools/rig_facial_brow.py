@@ -1,6 +1,7 @@
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 from System.utils import create_lattice_plane, create_ribbon, joint_list
+from Rig.Tools.layout_tools import lattice_load
 
 
 # TODO: create a toggle for follicle visibility
@@ -64,6 +65,11 @@ def create_brow(dict):
 
     proj_plane = create_lattice_plane("Brows", 40, 40, "proj_plane_forehead")
     cmds.parent(proj_plane[0], grp_proj_sys)
+    cmds.select(d=True)
+    cmds.select(proj_plane[2][1])
+    lattice_load("template_lattice_forehead.yaml")
+    cmds.select(d=True)
+
     # Create the primary controls
     rib_point_list = ["brow_R", "brow_M", "brow_L"]
     for rib_point in rib_point_list:

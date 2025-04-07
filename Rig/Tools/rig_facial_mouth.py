@@ -1,6 +1,6 @@
 import maya.cmds as cmds
 from System.utils import create_lattice_plane, create_ribbon
-
+from Rig.Tools.layout_tools import lattice_load
 
 def create_mouth(dict):
     grp_ctrl = cmds.group(em=True, n="mouth_control_group")
@@ -14,6 +14,13 @@ def create_mouth(dict):
 
     proj_surface = create_lattice_plane("Mouth", 40, 40, "proj_plane_mouth")
     cmds.parent(proj_surface[0], grp_proj_sys)
+    cmds.select(d=True)
+    cmds.select(proj_surface[2][1])
+    lattice_load("template_lattice_mouth.yaml")
+    cmds.select(d=True)
+    cmds.skinCluster("Facial", "Jaw_End_M", proj_surface[3], tsb=True)
+    cmds.select(d=True)
+
 
     jnt_list = cmds.listRelatives("Mouth")
     jnts_upper = []
@@ -131,7 +138,6 @@ def create_mouth(dict):
     cmds.parent(ribbon_lower[0], grp_proj_rib)
     cmds.parent(ribbon_lower[1], grp_proj_rib)
 
-
     # Create the primary controls
     rib_point_list = ["mouthCorner_R", "mouthUpper_M", "mouthCorner_L", "mouthLower_M"]
     for rib_point in rib_point_list:
@@ -224,7 +230,6 @@ def create_mouth(dict):
         cmds.parent(cmds.pointConstraint("x_" + jnt, jnt), "face_constraints")
         cmds.parent(cmds.orientConstraint("x_" + jnt, jnt), "face_constraints")
 
-
     # Constrain mouth corners to follow the jaw (with falloff)
     jnts_corner_ctrl = ["mouthCorner_R", "mouthCorner_L"]
     for jnt in jnts_corner_ctrl:
@@ -234,10 +239,10 @@ def create_mouth(dict):
         if "_l" in jnt.lower():
             cmds.xform(grp_parent, r=True, ro=(0, 180, 0))
         cmds.parent("offset_" + jnt, grp_parent)
-        cmds.pointConstraint("Mouth", grp_parent, mo=True)
-        cmds.pointConstraint("Jaw_M", grp_parent, mo=True)
-        cmds.orientConstraint("Mouth", grp_parent, mo=True)
-        cmds.orientConstraint("Jaw_M", grp_parent, mo=True)
+        cmds.pointConstraint("Mouth", grp_parent, mo=True, w=0.7)
+        cmds.pointConstraint("Jaw_End_M", grp_parent, mo=True, w=0.3)
+        cmds.orientConstraint("Mouth", grp_parent, mo=True, w=0.7)
+        cmds.orientConstraint("Jaw_M", grp_parent, mo=True, w=0.3)
 
     # Constrain mouth LowerLip to follow the jaw
     jnts_lower_ctrl = ["mouthLower_M"]
@@ -246,9 +251,22 @@ def create_mouth(dict):
         cmds.matchTransform(grp_parent, "offset_" + jnt)
         cmds.parent(grp_parent, grp_ctrl)
         cmds.parent("offset_" + jnt, grp_parent)
-        cmds.pointConstraint("Jaw_M", grp_parent, mo=True)
-        cmds.orientConstraint("Jaw_M", grp_parent, mo=True)
+        cmds.pointConstraint("Mouth", grp_parent, mo=True, w=0.25)
+        cmds.pointConstraint("Jaw_End_M", grp_parent, mo=True, w=0.75)
+        cmds.orientConstraint("Mouth", grp_parent, mo=True, w=0.25)
+        cmds.orientConstraint("Jaw_M", grp_parent, mo=True, w=0.75)
 
+    # Constrain mouth UpperLip to follow the jaw
+    jnts_upper_ctrl = ["mouthUpper_M"]
+    for jnt in jnts_upper_ctrl:
+        grp_parent = cmds.group(em=True, n="group_" + jnt)
+        cmds.matchTransform(grp_parent, "offset_" + jnt)
+        cmds.parent(grp_parent, grp_ctrl)
+        cmds.parent("offset_" + jnt, grp_parent)
+        cmds.pointConstraint("Mouth", grp_parent, mo=True, w=0.9)
+        cmds.pointConstraint("Jaw_End_M", grp_parent, mo=True, w=0.1)
+        cmds.orientConstraint("Mouth", grp_parent, mo=True, w=0.9)
+        cmds.orientConstraint("Jaw_M", grp_parent, mo=True, w=0.1)
 
 
 def attach_mouth():
