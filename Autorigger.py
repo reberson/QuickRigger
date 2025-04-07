@@ -1,6 +1,6 @@
 from maya.api import OpenMaya
-from scripts.autorigger.ui.Autorigger_menu import menu
-
+# from scripts.autorigger.ui.Autorigger_menu import menu
+from scripts.autorigger.ui import Toolshelf
 maya_useNewAPI = True
 
 
@@ -15,7 +15,7 @@ class Autorigger():
     @classmethod
     def initialize(cls):
         """Call the rig menu."""
-        menu()
+        Toolshelf.show()
 
     @classmethod
     def creator(cls):

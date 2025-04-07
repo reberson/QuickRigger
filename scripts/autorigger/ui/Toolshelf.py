@@ -240,7 +240,7 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         body_module_list.append(body_module_item_11)
         body_module_item_12 = self.checklist_item(scrollable_layout_body, "Fingers rig", functools.partial(self.run_rig_module, rig.rig_finger.create_finger_rig, joint_dict=True,))
         body_module_list.append(body_module_item_12)
-        body_module_item_13 = self.checklist_item(scrollable_layout_body, "Fingers sdk", rig.rig_sdk_finger.create_finger_sdk)
+        body_module_item_13 = self.checklist_item(scrollable_layout_body, "Fingers extended controls", rig.rig_sdk_finger.create_finger_sdk, checkstate=False)
         body_module_list.append(body_module_item_13)
 
         # Button to run all checked
@@ -279,49 +279,49 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         scrollable_layout.addWidget(scroll_face)
         face_module_list = []
         # adding each module
-        face_module_item_01 = self.checklist_item(scrollable_layout_face, "Face structure", rig.constructor_tools.create_rig_structure_face)
+        face_module_item_01 = self.checklist_item(scrollable_layout_face, "Face structure", rig.constructor_tools.create_rig_structure_face, checkstate=False)
         face_module_list.append(face_module_item_01)
-        face_module_item_02 = self.checklist_item(scrollable_layout_face, "Face deform structure", rig.constructor_tools.create_deform_rig_face)
+        face_module_item_02 = self.checklist_item(scrollable_layout_face, "Face deform structure", rig.constructor_tools.create_deform_rig_face, checkstate=False)
         face_module_list.append(face_module_item_02)
-        face_module_item_03 = self.checklist_item(scrollable_layout_face, "Brow rig", functools.partial(self.run_rig_module, rig.rig_facial_brow.create_brow, joint_dict=True))
+        face_module_item_03 = self.checklist_item(scrollable_layout_face, "Brow rig", functools.partial(self.run_rig_module, rig.rig_facial_brow.create_brow, joint_dict=True), checkstate=False)
         face_module_list.append(face_module_item_03)
         face_module_item_04 = self.checklist_item(scrollable_layout_face, "Eyelid rig",
-                            functools.partial(self.run_rig_module, rig.rig_facial_eyelid.create_eyelid, joint_dict=True))
+                            functools.partial(self.run_rig_module, rig.rig_facial_eyelid.create_eyelid, joint_dict=True), checkstate=False)
         face_module_list.append(face_module_item_04)
         face_module_item_05 = self.checklist_item(scrollable_layout_face, "Nasolabial rig",
                             functools.partial(self.run_rig_module, rig.rig_facial_nasolabial.create_nasolabial,
-                                              joint_dict=True))
+                                              joint_dict=True), checkstate=False)
         face_module_list.append(face_module_item_05)
         face_module_item_06 = self.checklist_item(scrollable_layout_face, "Mouth rig",
                             functools.partial(self.run_rig_module, rig.rig_facial_mouth.create_mouth,
-                                              joint_dict=True))
+                                              joint_dict=True), checkstate=False)
         face_module_list.append(face_module_item_06)
         face_module_item_07 = self.checklist_item(scrollable_layout_face, "Nose rig",
                             functools.partial(self.run_rig_module, rig.rig_facial_nose.create_nose,
-                                              joint_dict=True))
+                                              joint_dict=True), checkstate=False)
         face_module_list.append(face_module_item_07)
         face_module_item_08 = self.checklist_item(scrollable_layout_face, "Cheek rig",
                             functools.partial(self.run_rig_module, rig.rig_facial_cheek.create_cheek,
-                                              joint_dict=True))
+                                              joint_dict=True), checkstate=False)
         face_module_list.append(face_module_item_08)
         face_module_item_09 = self.checklist_item(scrollable_layout_face, "Jaw rig",
                             functools.partial(self.run_rig_module, rig.rig_facial_jaw.create_jaw,
-                                              joint_dict=True))
+                                              joint_dict=True), checkstate=False)
         face_module_list.append(face_module_item_09)
         face_module_item_10 = self.checklist_item(scrollable_layout_face, "Tongue rig",
                             functools.partial(self.run_rig_module, rig.rig_facial_tongue.create_tongue,
-                                              joint_dict=True))
+                                              joint_dict=True), checkstate=False)
         face_module_list.append(face_module_item_10)
         face_module_item_11 = self.checklist_item(scrollable_layout_face, "Eye rig",
                             functools.partial(self.run_rig_module, rig.rig_facial_eye.create_eye,
-                                              joint_dict=True))
+                                              joint_dict=True), checkstate=False)
         face_module_list.append(face_module_item_11)
 
-        face_module_item_12 = self.checklist_item(scrollable_layout_face, "Attach face ribbons", self.attach_face_ribbons)
+        face_module_item_12 = self.checklist_item(scrollable_layout_face, "Attach face ribbons", self.attach_face_ribbons, checkstate=False)
         face_module_list.append(face_module_item_12)
-        face_module_item_13 = self.checklist_item(scrollable_layout_face, "Create face lattices", self.create_face_lattice)
+        face_module_item_13 = self.checklist_item(scrollable_layout_face, "Create face lattices", self.create_face_lattice, checkstate=False)
         face_module_list.append(face_module_item_13)
-        face_module_item_14 = self.checklist_item(scrollable_layout_face, "Attach face lattices", self.attach_face_lattice)
+        face_module_item_14 = self.checklist_item(scrollable_layout_face, "Attach face lattices", self.attach_face_lattice, checkstate=False)
         face_module_list.append(face_module_item_14)
 
         # Button to run all checked
@@ -354,7 +354,7 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         # adding each module
         item_misc_01 = self.checklist_item(scrollable_layout_misc, "Build all chains", rig.rig_generic_chain.create_chain_all)
         misc_module_list.append(item_misc_01)
-        item_misc_02 = self.checklist_item(scrollable_layout_misc, "Enable scale compensate", self.scale_compensate_enable)
+        item_misc_02 = self.checklist_item(scrollable_layout_misc, "Enable scale compensate", self.scale_compensate_enable, checkstate=False)
         misc_module_list.append(item_misc_02)
         item_misc_03 = self.checklist_item(scrollable_layout_misc, "Disable scale compensate", self.scale_compensate_disable)
         misc_module_list.append(item_misc_03)
@@ -370,7 +370,7 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
 
         # Connect action of the Build complete button
         button_build_rig.clicked.connect(
-            functools.partial(self.build_complete_rig, body_module_list, face_module_list, misc_module_list, load_mesh, load_placement, load_skin_weigths, load_ribbons_skins, load_lattices_shapes, load_lattices_skins))
+            functools.partial(self.build_complete_rig, list_body=body_module_list, list_face=face_module_list, list_misc=misc_module_list, exe_me=load_mesh, exe_pl=load_placement, exe_sw=load_skin_weigths, exe_swrib=load_ribbons_skins, exe_shlat=load_lattices_shapes, exe_swlat=load_lattices_skins))
 
     def create_tools_tab(self, tabs):
         tab_layout = QtWidgets.QVBoxLayout()
@@ -544,14 +544,15 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
 
     def build_complete_rig(self, list_body, list_face, list_misc, exe_me=None, exe_pl=None, exe_sw=None, exe_swrib=None, exe_shlat=None, exe_swlat=None, buildribbon=False, buildLattice=False):
         # Load Mesh
-        if exe_me[2] is None:
+        if exe_me[2].text() == "":
             print("Skipping Mesh load")
         else:
             self.import_file_maya_action(exe_me[2])
 
         # Load Placement
-        if exe_pl[2] is None:
-            print("Skipping Placement load")
+        if exe_pl[2].text() == "":
+            print("Error: Placement field is empty. Aborting build.")
+            return
         else:
             self.import_file_yaml_action(exe_pl[2])
 
@@ -562,15 +563,9 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         # Run Misc Modules
         self.run_module_list(list_misc)
 
-        # Load Skin Weights
-        # TODO: Make sure the skin weights is applied even if the current mesh does not have yet a cluster
-        if exe_sw[2] is None:
-            print("Skipping Skin Weights load")
-        else:
-            skin_handler.load_skin_yaml_with_file(exe_sw[2].text)
 
         # Load Ribbons Skin Weights
-        if exe_swrib[2] is None: # TODO: Need to also check if the ribbons were checked on build in the first place
+        if exe_swrib[2].text() == "" or buildribbon is False:
             print("Skipping Face Ribbons Skin Weights load")
         else:
             # first dettach everything
@@ -578,7 +573,7 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
             # ribbons load skin code here
 
         # Load Face Lattice Shapes
-        if exe_shlat[2] is None:  # TODO: Need to also check if the Lattice were checked on build in the first place
+        if exe_shlat[2].text() == "" or buildLattice is False:
             print("Skipping Face Lattice Shapes load")
         else:
             # first dettach everything
@@ -586,7 +581,7 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
             # Face Lattice Shape load code here
 
         # Load Face Lattice Skin Weights
-        if exe_swlat[2] is None:  # TODO: Need to also check if the Lattice were checked on build in the first place
+        if exe_swlat[2].text() == "" or buildLattice is False:
             print("Skipping Face Lattice Skin Weights Load")
         else:
             # first dettach everything
@@ -600,6 +595,17 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
 
         if buildLattice:
             self.attach_face_lattice()
+
+        # Step to bind all geos using the joints from deformation_joints group
+        geo_objects = rig.rig_mesh_setup.list_mesh_objects("geometry")
+        def_joints = rig.rig_mesh_setup.list_deformation_joints("deformation_joints")
+        rig.rig_mesh_setup.bind_mesh_to_joints(geo_objects, def_joints)
+
+        # Load Skin Weights - Moved to bottom
+        if exe_sw[2].text() == "":
+            print("Skipping Skin Weights load")
+        else:
+            skin_handler.load_skin_yaml_with_file(exe_sw[2].text)
 
     def run_module_list(self, list_modules):
         for module in list_modules:
