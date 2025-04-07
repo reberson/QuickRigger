@@ -14,6 +14,12 @@ def create_mouth(dict):
 
     proj_surface = create_lattice_plane("Mouth", 40, 40, "proj_plane_mouth")
     cmds.parent(proj_surface[0], grp_proj_sys)
+
+    # Make lattice not inherit transforms so the plane won't have double transformation
+    cmds.setAttr(proj_surface[2][0] + "Lattice" + ".inheritsTransform", 0)
+    # Place lattice back to the original position
+    cmds.matchTransform(proj_surface[2][0] + "Lattice", "Facial")
+
     cmds.select(d=True)
     cmds.select(proj_surface[2][1])
     lattice_load("template_lattice_mouth.yaml")
@@ -34,15 +40,15 @@ def create_mouth(dict):
         grp_sdk = cmds.group(em=True, n="sdk_" + jnt)
         # ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
         if "_r" in jnt.lower():
-            ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
+            ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.25, nr=(0, 1, 0))
             cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
             cmds.setAttr(ctrl[0] + ".overrideColor", 31)
         elif "_l" in jnt.lower():
-            ctrl = cmds.circle(n="ctrl_" + jnt, cy=-1, r=0.75, nr=(0, 1, 0))
+            ctrl = cmds.circle(n="ctrl_" + jnt, cy=-1, r=0.25, nr=(0, 1, 0))
             cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
             cmds.setAttr(ctrl[0] + ".overrideColor", 18)
         else:
-            ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
+            ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.25, nr=(0, 1, 0))
             cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
             cmds.setAttr(ctrl[0] + ".overrideColor", 21)
 
@@ -290,10 +296,13 @@ def attach_mouth():
     jnt_list = cmds.listRelatives("Mouth")
 
     for jnt in jnt_list:
-        const_pnt = cmds.pointConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
-        const_ori = cmds.orientConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
-        cmds.parent(const_pnt, const_grp)
-        cmds.parent(const_ori, const_grp)
+        # const_pnt = cmds.pointConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
+        # const_ori = cmds.orientConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
+        const_par = cmds.parentConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
+        cmds.setAttr(const_par[0] + ".interpType", 2)
+        # cmds.parent(const_pnt, const_grp)
+        # cmds.parent(const_ori, const_grp)
+        cmds.parent(const_par, const_grp)
     cmds.select(d=True)
 
 

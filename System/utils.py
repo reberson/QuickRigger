@@ -108,6 +108,24 @@ def connect_orient_constraint(def_jnt, fk_jnt, ik_jnt, attribute):
     return orient_constraint
 
 
+def connect_parent_constraint(tgt, first_source, second_source, attribute):
+    # creates orient constraint between 2 sources to 1 target (ik/fk to def)
+    parent_constraint = cmds.parentConstraint(second_source, first_source, tgt, mo=True)
+
+    # connect custom attribute to first source weight
+    cmds.connectAttr(attribute, parent_constraint[0] + "." + second_source + "W0")
+
+    # create reverse node for ik source
+    reverse_node = cmds.createNode('reverse', n="reverse_" + first_source)
+    cmds.connectAttr(attribute, reverse_node + ".input.inputX")
+    cmds.connectAttr(reverse_node + ".output.outputX", parent_constraint[0] + "." + first_source + "W1")
+    return parent_constraint
+
+
+
+
+
+
 # Todo: Find a way to make sure the Left twist joints are on the oposite orientation. Might not brake as is, but it's good to set
 def create_twist_joint(parent_jnt, child_jnt, name):
     start = cmds.xform(parent_jnt, q=True, ws=True, t=True)
@@ -239,7 +257,7 @@ def create_ribbon(ribbon_name, transform_list, duplicated=None, direction=(0, -1
         point_list.append(point)
     new_curve = cmds.curve(p=point_list)
     cmds.reverseCurve(new_curve)
-    extruded_ribbon = cmds.extrude(new_curve, et=0, l=0.2, po=0, d=direction, n=ribbon_name)
+    extruded_ribbon = cmds.extrude(new_curve, et=0, l=0.5, po=0, d=direction, n=ribbon_name)
     cmds.delete(new_curve)
     ribbon_shape = cmds.listRelatives(extruded_ribbon[0])
     if reverse:
@@ -252,6 +270,7 @@ def create_ribbon(ribbon_name, transform_list, duplicated=None, direction=(0, -1
     ribbon = cmds.listRelatives(ribbon_shape, p=True)
     for item in reversed(transform_list):
         follicle = cmds.createNode("follicle")
+        index = transform_list.index(item)
         if duplicated:
             if duplicated in item.lower():
                 follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_" + item + "_copy")
@@ -265,11 +284,16 @@ def create_ribbon(ribbon_name, transform_list, duplicated=None, direction=(0, -1
         cmds.connectAttr(ribbon_shape[0] + ".worldMatrix", follicle + ".inputWorldMatrix")
         cmds.connectAttr(follicle + ".outRotate", follicle_transform + ".rotate")
         cmds.connectAttr(follicle + ".outTranslate", follicle_transform + ".translate")
-        cmds.setAttr(follicle + ".parameterV", 0)
+        cmds.setAttr(follicle + ".parameterV", 0.5)
         cmds.setAttr(follicle + ".parameterU", param_u_step_sum)
         param_u_step_sum += param_u_step
         cmds.parent(follicle_transform, ribbon_follicle_grp)
         cmds.select(d=True)
+        # check if it's the first or the last in the ribbon, so we can offset the follicle a little to improve stability
+        if index == 0:
+            cmds.setAttr(follicle + ".parameterU", 0.95)
+        elif index == len(transform_list) - 1:
+            cmds.setAttr(follicle + ".parameterU", 0.05)
 
     return ribbon, ribbon_follicle_grp, ribbon_shape, param_u_step
 
@@ -291,7 +315,7 @@ def create_ribbon_closed(ribbon_name, transform_list, center_jnt, left_side=Fals
     cmds.closeCurve(new_curve, rpo=True, bki=True, p=0, ps=0)
     curve_dupli = cmds.duplicate(new_curve)
     cmds.xform(curve_dupli, cp=True)
-    cmds.xform(curve_dupli, s=(0.9, 0.9, 1))
+    cmds.xform(curve_dupli, s=(0.85, 0.85, 1))
     cmds.select(d=True)
     extruded_ribbon = cmds.loft(curve_dupli, new_curve, n=ribbon_name)
 
@@ -335,7 +359,7 @@ def create_ribbon_closed(ribbon_name, transform_list, center_jnt, left_side=Fals
 
 def create_lattice_plane(origin_transform, height, width, name):
     grp = cmds.group(em=True, n="group_" + name)
-    proj_plane = cmds.polyPlane(n=name, ax=(0, 0, 1), h=height, w=width, sh=80, sw=80)
+    proj_plane = cmds.polyPlane(n=name, ax=(0, 0, 1), h=height, w=width, sh=10, sw=10)
     proj_plane_shape = cmds.listRelatives(proj_plane[0])
     # cmds.delete(proj_plane, constructionHistory=True)
     proj_plane_lattice = cmds.lattice(proj_plane[0], dv=(5, 5, 2), oc=True, n=name + "_")
@@ -348,7 +372,7 @@ def create_lattice_plane(origin_transform, height, width, name):
 
 def create_lattice_sphere(origin_transform, radius, name):
     grp = cmds.group(em=True, n="group_" + name)
-    proj_sphere = cmds.polySphere(n=name, ax=(1, 0, 0), r=radius, sa=32, sh=32)
+    proj_sphere = cmds.polySphere(n=name, ax=(1, 0, 0), r=radius, sa=16, sh=16)
 
     proj_sphere_shape = cmds.listRelatives(proj_sphere[0])
     # cmds.delete(proj_sphere, constructionHistory=True)

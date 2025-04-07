@@ -1,5 +1,6 @@
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
+from System.utils import connect_parent_constraint
 
 
 def create_eye(dict):
@@ -68,6 +69,7 @@ def create_eye(dict):
         cmds.parent(cmds.orientConstraint("fkx_" + jnt, jnt), "face_constraints")
 
     # Create AIM Main Eye control
+    aim_follow_grp = cmds.group(em=True, n="group_follow_EyeAim")
     aim_grp = cmds.group(em=True, n="offset_EyeAim")
     aim_flip = cmds.group(em=True, n="flip_EyeAim")
     aim_sdk = cmds.group(em=True, n="sdk_EyeAim")
@@ -77,9 +79,11 @@ def create_eye(dict):
     cmds.parent(aim_ctrl[0], aim_flip)
     cmds.parent(aim_flip, aim_sdk)
     cmds.parent(aim_sdk, aim_grp)
-    cmds.parent(aim_grp, grp_ctrl)
+    # cmds.parent(aim_grp, grp_ctrl)
+    cmds.parent(aim_grp, aim_follow_grp)
+    cmds.parent(aim_follow_grp, grp_ctrl)
     # reorient to face Y forward and z Up (just to keep standard)
-    cmds.xform(aim_grp, r=True, ro=(90, 0, 180))
+    cmds.xform(aim_follow_grp, r=True, ro=(90, 0, 180))
 
     # Define the correct spot for the Aim origin
     # first check if there's more than one eye
@@ -96,8 +100,7 @@ def create_eye(dict):
         origin = cmds.xform(jnt_list[0], q=True, ws=True, t=True)
         origin_v = OpenMaya.MVector(origin[0], origin[1], origin[2])
 
-    cmds.xform(aim_grp, ws=True, t=origin_v)
-
+    cmds.xform(aim_follow_grp, ws=True, t=origin_v)
 
     # create AIM individual controls
     for jnt in jnt_list:
@@ -135,9 +138,17 @@ def create_eye(dict):
                 cmds.xform(grp_flip, r=True, ro=(0, 180, 0))
 
     # after each eye ctrl is created and parented to the main Aim, offset the whole aim forward
-    cmds.xform(aim_grp, r=True, t=(0, 0, 30))
+    cmds.xform(aim_follow_grp, r=True, t=(0, 0, 30))
 
     # create AIM constraint for each eye
     for jnt in jnt_list:
         if "_end" not in jnt.lower():
-            cmds.aimConstraint("aimx_" + jnt, "fk_sdk_" + jnt, aim=(0, 1, 0), mo=True, wut="object", wuo="loc_" + jnt)
+            cmds.aimConstraint("aimx_" + jnt, "fk_sdk_" + jnt, aim=(0, 1, 0), u=(0, 0, 1), mo=True, wut="object", wuo="loc_" + jnt)
+
+    # create parent constraint for aim group to swap between following head to main
+    # Create global attribute on aim ctrl
+    cmds.addAttr("ctrl_EyeAim", longName="global", attributeType="double", min=0, max=1, dv=0)
+    cmds.setAttr("ctrl_EyeAim.global", e=True, channelBox=True)
+    cmds.setAttr("ctrl_EyeAim.global", 1)
+    # constrain to both face and origin
+    connect_parent_constraint(aim_follow_grp, "face_constrain_head", "face_origin", "ctrl_EyeAim.global")

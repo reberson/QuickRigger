@@ -15,19 +15,19 @@ def create_jaw(dict):
         grp_sdk = cmds.group(em=True, n="sdk_" + jnt)
 
         if "_r" in jnt.lower():
-            ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
+            ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.25, nr=(0, 1, 0))
             cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
             cmds.setAttr(ctrl[0] + ".overrideColor", 13)
         elif "_l" in jnt.lower():
-            ctrl = cmds.circle(n="ctrl_" + jnt, cy=-1, r=0.75, nr=(0, 1, 0))
+            ctrl = cmds.circle(n="ctrl_" + jnt, cy=-1, r=0.25, nr=(0, 1, 0))
             cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
             cmds.setAttr(ctrl[0] + ".overrideColor", 6)
         elif "jaw_m" in jnt.lower():
-            ctrl = cmds.circle(n="ctrl_" + jnt, cy=15, r=0.75, nr=(0, 1, 0))
+            ctrl = cmds.circle(n="ctrl_" + jnt, cy=15, r=0.25, nr=(0, 1, 0))
             cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
             cmds.setAttr(ctrl[0] + ".overrideColor", 17)
         else:
-            ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
+            ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.25, nr=(0, 1, 0))
             cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
             cmds.setAttr(ctrl[0] + ".overrideColor", 17)
         cmds.select(d=True)

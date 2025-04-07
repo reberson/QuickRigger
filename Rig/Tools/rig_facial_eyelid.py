@@ -56,15 +56,15 @@ def create_eyelid(dict):
             grp_sdk = cmds.group(em=True, n="sdk_" + jnt)
             # ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
             if "_r" in jnt.lower():
-                ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
+                ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.25, nr=(0, 1, 0))
                 cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
                 cmds.setAttr(ctrl[0] + ".overrideColor", 31)
             elif "_l" in jnt.lower():
-                ctrl = cmds.circle(n="ctrl_" + jnt, cy=-1, r=0.75, nr=(0, 1, 0))
+                ctrl = cmds.circle(n="ctrl_" + jnt, cy=-1, r=0.25, nr=(0, 1, 0))
                 cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
                 cmds.setAttr(ctrl[0] + ".overrideColor", 18)
             else:
-                ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
+                ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.25, nr=(0, 1, 0))
                 cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
                 cmds.setAttr(ctrl[0] + ".overrideColor", 21)
 
@@ -234,10 +234,13 @@ def attach_eyelids():
     jnt_list = cmds.listRelatives("Eyelids")
 
     for jnt in jnt_list:
-        const_pnt = cmds.pointConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
-        const_ori = cmds.orientConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
-        cmds.parent(const_pnt, const_grp)
-        cmds.parent(const_ori, const_grp)
+        # const_pnt = cmds.pointConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
+        # const_ori = cmds.orientConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
+        const_par = cmds.parentConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
+        cmds.setAttr(const_par[0] + ".interpType", 2)
+        # cmds.parent(const_pnt, const_grp)
+        # cmds.parent(const_ori, const_grp)
+        cmds.parent(const_par, const_grp)
     cmds.select(d=True)
 
 

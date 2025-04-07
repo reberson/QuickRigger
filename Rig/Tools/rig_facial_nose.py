@@ -14,15 +14,15 @@ def create_nose(dict):
         grp_flip = cmds.group(em=True, n="flip_" + jnt)
         grp_sdk = cmds.group(em=True, n="sdk_" + jnt)
         if "_r" in jnt.lower():
-            ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
+            ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.25, nr=(0, 1, 0))
             cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
             cmds.setAttr(ctrl[0] + ".overrideColor", 31)
         elif "_l" in jnt.lower():
-            ctrl = cmds.circle(n="ctrl_" + jnt, cy=-1, r=0.75, nr=(0, 1, 0))
+            ctrl = cmds.circle(n="ctrl_" + jnt, cy=-1, r=0.25, nr=(0, 1, 0))
             cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
             cmds.setAttr(ctrl[0] + ".overrideColor", 18)
         else:
-            ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
+            ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.25, nr=(0, 1, 0))
             cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
             cmds.setAttr(ctrl[0] + ".overrideColor", 21)
 

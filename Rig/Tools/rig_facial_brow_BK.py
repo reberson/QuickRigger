@@ -30,15 +30,15 @@ def create_brow(dict):
         grp_sdk = cmds.group(em=True, n="sdk_" + jnt)
         # ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
         if "_r" in jnt.lower():
-            ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.25, nr=(0, 1, 0))
+            ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
             cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
             cmds.setAttr(ctrl[0] + ".overrideColor", 31)
         elif "_l" in jnt.lower():
-            ctrl = cmds.circle(n="ctrl_" + jnt, cy=-1, r=0.25, nr=(0, 1, 0))
+            ctrl = cmds.circle(n="ctrl_" + jnt, cy=-1, r=0.75, nr=(0, 1, 0))
             cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
             cmds.setAttr(ctrl[0] + ".overrideColor", 18)
         else:
-            ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.25, nr=(0, 1, 0))
+            ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
             cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
             cmds.setAttr(ctrl[0] + ".overrideColor", 21)
 
@@ -71,9 +71,7 @@ def create_brow(dict):
     cmds.select(d=True)
 
     # Create the primary controls
-    # TODO: find middle point of each brow half to place the new brow control.
-    # rib_point_list = ["brow_outer_R", "brow_M", "brow_outer_L"]
-    rib_point_list = ["brow_outer_R", "brow_mid_R", "brow_inner_R", "brow_M", "brow_outer_L", "brow_mid_L", "brow_inner_L"]
+    rib_point_list = ["brow_R", "brow_M", "brow_L"]
     for rib_point in rib_point_list:
         grp_offset = cmds.group(em=True, n="offset_" + rib_point)
         grp_flip = cmds.group(em=True, n="flip_" + rib_point)
@@ -99,45 +97,24 @@ def create_brow(dict):
         cmds.xform(grp_offset, ro=(90, 0, 90))
         cmds.parent(mediator, "face_mediators")
         cmds.pointConstraint(ctrl, mediator)
+        # cmds.orientConstraint(ctrl, rib_cjoint)
         follicle = cmds.createNode("follicle")
-        if rib_point == "brow_outer_R":
+        if rib_point == "brow_R":
             # cmds.matchTransform(grp_offset, "follicle_Brow_4_R", pos=True)
             cmds.matchTransform(grp_offset, "follicle_" + jnt_list[0], pos=True)
-            follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_plane_brow_outer_R")
+            follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_plane_brow_R")
             cmds.select(d=True)
-            rib_cjoint = cmds.joint(n="ribbon_cjoint_brow_outer_R")
-        elif rib_point == "brow_inner_R":
-            cmds.matchTransform(grp_offset, "follicle_Brow1_R", pos=True)
-            follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_plane_brow_inner_R")
-            cmds.select(d=True)
-            rib_cjoint = cmds.joint(n="ribbon_cjoint_brow_inner_R")
+            rib_cjoint = cmds.joint(n="ribbon_cjoint_brow_R")
         elif rib_point == "brow_M":
             cmds.matchTransform(grp_offset, "follicle_Brow_M", pos=True)
             follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_plane_brow_M")
             cmds.select(d=True)
             rib_cjoint = cmds.joint(n="ribbon_cjoint_brow_M")
-        elif rib_point == "brow_outer_L":
+        elif rib_point == "brow_L":
             cmds.matchTransform(grp_offset, "follicle_" + last_jnt, pos=True)
-            follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_plane_brow_outer_L")
+            follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_plane_brow_L")
             cmds.select(d=True)
-            rib_cjoint = cmds.joint(n="ribbon_cjoint_brow_outer_L")
-            cmds.xform(grp_flip, r=True, ro=(0, 180, 0))
-        elif rib_point == "brow_inner_L":
-            cmds.matchTransform(grp_offset, "follicle_Brow1_L", pos=True)
-            follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_plane_brow_inner_L")
-            cmds.select(d=True)
-            rib_cjoint = cmds.joint(n="ribbon_cjoint_brow_inner_L")
-            cmds.xform(grp_flip, r=True, ro=(0, 180, 0))
-        elif rib_point == "brow_mid_R":
-            cmds.matchTransform(grp_offset, "follicle_Brow2_R", pos=True) # - temporary
-            follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_plane_brow_mid_R")
-            cmds.select(d=True)
-            rib_cjoint = cmds.joint(n="ribbon_cjoint_brow_mid_R")
-        elif rib_point == "brow_mid_L":
-            cmds.matchTransform(grp_offset, "follicle_Brow2_L", pos=True) # - temporary
-            follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_plane_brow_mid_L")
-            cmds.select(d=True)
-            rib_cjoint = cmds.joint(n="ribbon_cjoint_brow_mid_L")
+            rib_cjoint = cmds.joint(n="ribbon_cjoint_brow_L")
             cmds.xform(grp_flip, r=True, ro=(0, 180, 0))
 
         cmds.setAttr(rib_cjoint + ".drawStyle", 2)
@@ -145,6 +122,9 @@ def create_brow(dict):
         cmds.xform(rib_cjoint, t=(0, 0, 0), ro=(0, 0, 0))
         cmds.makeIdentity(rib_cjoint, a=True, r=True)
         follicle = cmds.listRelatives(follicle_transform)[0]
+
+        # follicle = cmds.createNode("follicle", n="brow_follicle")
+        # follicle_transform = cmds.listRelatives(follicle, p=True)
         cmds.parent(follicle_transform, grp_proj_fol)
 
         cmds.connectAttr(proj_plane[3][0] + ".outMesh", follicle + ".inputMesh")
@@ -161,16 +141,15 @@ def create_brow(dict):
         cmds.connectAttr(close_pnt_node + ".result.parameterU", follicle + ".parameterU")
         cmds.connectAttr(close_pnt_node + ".result.parameterV", follicle + ".parameterV")
 
+        # cmds.parent(rib_cjoint, follicle_transform)
+        # cmds.xform(rib_cjoint, t=(0, 0, 0), ro=(90, 0, 90))
+        # cmds.makeIdentity(rib_cjoint, a=True, r=True)
 
-
-    cmds.matchTransform("offset_brow_outer_R", jnt_list[0])
-    cmds.matchTransform("offset_brow_inner_R", "Brow1_R")
-    cmds.matchTransform("offset_brow_mid_R", "Brow2_R")  # - Temporary
-    cmds.matchTransform("offset_brow_mid_L", "Brow2_L")  # - Temporary
-    cmds.matchTransform("offset_brow_inner_L", "Brow1_L")
+    cmds.matchTransform("offset_brow_R", jnt_list[0])
     cmds.matchTransform("offset_brow_M", "Brow_M")
-    cmds.matchTransform("offset_brow_outer_L", last_jnt)
-    cmds.skinCluster("ribbon_cjoint_brow_outer_R", "ribbon_cjoint_brow_M", "ribbon_cjoint_brow_outer_L", "ribbon_cjoint_brow_inner_R", "ribbon_cjoint_brow_inner_L", "ribbon_cjoint_brow_mid_R", "ribbon_cjoint_brow_mid_L", ribbon[0], tsb=True)
+    cmds.matchTransform("offset_brow_L", last_jnt)
+    # cmds.skinCluster("ribbon_cjoint_brow_R", "ribbon_cjoint_brow_M", "ribbon_cjoint_brow_L", ribbon[0], tsb=True)
+    cmds.skinCluster("ribbon_cjoint_brow_R", "ribbon_cjoint_brow_M", "ribbon_cjoint_brow_L", ribbon[0], tsb=True)
 
     # attach def joints to ctrl jnts
     for jnt in jnt_list:
@@ -184,18 +163,16 @@ def attach_brow():
     #              'Brow_4_L', "brow_R", "brow_M", "brow_L"]
     ctrl_list = joint_list("Brows", "Brow_M", first_half="_r", second_half="_l")
     # ctrl_list = joint_list("Brows", "Brow_M")
-    ctrl_list.append("brow_outer_R")
+    ctrl_list.append("brow_R")
     ctrl_list.append("brow_M")
-    ctrl_list.append("brow_outer_L")
-    ctrl_list.append("brow_inner_R")
-    ctrl_list.append("brow_inner_L")
+    ctrl_list.append("brow_L")
     for ctrl in ctrl_list:
         cmds.xform("ctrl_" + ctrl, t=(0, 0, 0), ro=(0, 0, 0))
 
     const_grp = cmds.group(em=True, n="brow_ribbon_constraint")
     cmds.parent(const_grp, "face_system")
 
-    rib_jnts = ["brow_outer_R", "brow_M", "brow_outer_L", "brow_inner_R", "brow_inner_L"]
+    rib_jnts = ["brow_R", "brow_M", "brow_L"]
     for jnt in rib_jnts:
         cmds.parent("ribbon_cjoint_" + jnt, "follicle_plane_" + jnt)
         # cmds.xform(jnt, t=(0, 0, 0), ro=(90, 0, 90))
@@ -209,13 +186,10 @@ def attach_brow():
     jnt_list = joint_list("Brows", "Brow_M", first_half="_r", second_half="_l")
 
     for jnt in jnt_list:
-        # const_pnt = cmds.pointConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
-        # const_ori = cmds.orientConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
-        const_par = cmds.parentConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
-        cmds.setAttr(const_par[0] + ".interpType", 2)
-        # cmds.parent(const_pnt, const_grp)
-        # cmds.parent(const_ori, const_grp)
-        cmds.parent(const_par, const_grp)
+        const_pnt = cmds.pointConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
+        const_ori = cmds.orientConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
+        cmds.parent(const_pnt, const_grp)
+        cmds.parent(const_ori, const_grp)
     cmds.select(d=True)
 
 
@@ -224,18 +198,16 @@ def detach_brow():
     #              'Brow_4_L', "brow_R", "brow_M", "brow_L"]
     ctrl_list = joint_list("Brows", "Brow_M", first_half="_r", second_half="_l")
     # ctrl_list = joint_list("Brows", "Brow_M")
-    ctrl_list.append("brow_outer_R")
+    ctrl_list.append("brow_R")
     ctrl_list.append("brow_M")
-    ctrl_list.append("brow_outer_L")
-    ctrl_list.append("brow_inner_R")
-    ctrl_list.append("brow_inner_L")
+    ctrl_list.append("brow_L")
     for ctrl in ctrl_list:
         cmds.xform("ctrl_" + ctrl, t=(0, 0, 0), ro=(0, 0, 0))
     # make sure brow ctrls are all zeroed out
     cmds.delete("brow_ribbon_constraint")
     cmds.select(d=True)
 
-    rib_jnts = ["brow_outer_R", "brow_M", "brow_outer_L", "brow_inner_R", "brow_inner_L"]
+    rib_jnts = ["brow_R", "brow_M", "brow_L"]
     for jnt in rib_jnts:
         cmds.parent("ribbon_cjoint_" + jnt, "ctrl_" + jnt)
         cmds.xform("ribbon_cjoint_" + jnt, t=(0, 0, 0))
