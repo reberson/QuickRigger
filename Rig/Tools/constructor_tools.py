@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 from Rig.Tools.reference_tools import joint_dictionary_creator
 import System.file_handle
-
+from System.utils import create_twist_joint
 
 def mirror_joint(first_joint):
     """Mirrors the joint and gives proper naming"""
@@ -37,11 +37,26 @@ def create_deform_rig():
         elif "eye_r" == str(key).lower() or "eye_l" == str(key).lower():
             mirror_joint(str(key))
 
+    # Freeze Transforms
     all_jnts = cmds.ls(type="joint")
     for joint in all_jnts:
         cmds.makeIdentity(joint, a=True, r=True)
 
-# TODO: Create a twist joint function by grabbing the half lenght of the joint to the next one and place it in midway
+    # Create Twist joints
+    sides = ["_R", "_L"]
+    for side in sides:
+        twist_shoulder = create_twist_joint("Shoulder{0}".format(side), "Elbow{0}".format(side), "Shoulder_Twist{0}".format(side))
+        cmds.parent(twist_shoulder[1], "constraints")
+        twist_elbow = create_twist_joint("Elbow{0}".format(side), "Wrist{0}".format(side), "Elbow_Twist{0}".format(side))
+        cmds.parent(twist_elbow[1], "constraints")
+        twist_hip = create_twist_joint("Hip{0}".format(side), "Knee{0}".format(side), "Hip_Twist{0}".format(side))
+        cmds.parent(twist_hip[1], "constraints")
+        twist_knee = create_twist_joint("Knee{0}".format(side), "Ankle{0}".format(side), "Knee_Twist{0}".format(side))
+        cmds.parent(twist_knee[1], "constraints")
+    twist_neck = create_twist_joint("Neck_M", "Head_M", "Neck_Twist")
+    cmds.parent(twist_neck[1], "constraints")
+
+
 
 
 def create_rig_structure():

@@ -1,8 +1,10 @@
 import maya.cmds as cmds
 from Rig.Tools.reference_tools import joint_dictionary_creator
-from System.utils import connect_point_constraint, connect_orient_constraint
 from definitions import CONTROLS_DIR
 from System.file_handle import import_ctrl
+from System.utils import connect_point_constraint, connect_orient_constraint, mirror_object
+from definitions import CONTROLS_DIR
+from System.file_handle import file_read_yaml, import_curve
 
 # TODO: Refactor to Class objects
 # TODO: Add support for twist joint
@@ -17,13 +19,20 @@ def create_neck_rig(dict):
         grp_offset = cmds.group(n="fk_offset_" + jd[3], em=True)
         grp_sdk = cmds.group(n="fk_sdk_" + jd[3], em=True)
         grp_flip = cmds.group(n="fk_flip_" + jd[3], em=True)
-        ctrl = cmds.circle(n="fk_" + jd[3], r=10, nr=(0, 1, 0))
+        # ctrl = cmds.circle(n="fk_" + jd[3], r=10, nr=(0, 1, 0))
+        if "Neck" in joint:
+            ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Neck.yaml")), "fk_" + jd[3])
+        else:
+            ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Head.yaml")), "fk_" + jd[3])
+
+        cmds.setAttr(ctrl + ".overrideEnabled", 1)
+        cmds.setAttr(ctrl + ".overrideColor", 17)
         cmds.select(d=True)
         jnt = cmds.joint(n="fkx_" + jd[3])
         cmds.setAttr(jnt + ".drawStyle", 2)
         cmds.select(d=True)
-        cmds.parent(jnt, ctrl[0])
-        cmds.parent(ctrl[0], grp_flip)
+        cmds.parent(jnt, ctrl)
+        cmds.parent(ctrl, grp_flip)
         cmds.parent(grp_flip, grp_sdk)
         cmds.parent(grp_sdk, grp_offset)
         cmds.xform(grp_offset, ws=True, t=jd[0], ro=jd[1], roo=jd[2])

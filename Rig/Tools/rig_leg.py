@@ -1,12 +1,14 @@
 import maya.cmds as cmds
 from Rig.Tools.reference_tools import joint_dictionary_creator
 from System.utils import calculatePVPosition as calc_pv
-from System.utils import connect_point_constraint, connect_orient_constraint
-from definitions import CONTROLS_DIR
 from System.file_handle import import_ctrl
+from System.utils import connect_point_constraint, connect_orient_constraint, mirror_object
+from definitions import CONTROLS_DIR
+from System.file_handle import file_read_yaml, import_curve
 
 # TODO: Refactor to Class objects
 # TODO: Hide all atributes that are not directly controllable
+# TODO: Move the roll and heel joints to a reserved space instead of deleting, so that it can be reverted back if the user wants
 
 def create_leg_rig(dict):
     # List all necessary joints
@@ -22,13 +24,31 @@ def create_leg_rig(dict):
         grp_offset = cmds.group(n="fk_offset_" + jd[3], em=True)
         grp_sdk = cmds.group(n="fk_sdk_" + jd[3], em=True)
         grp_flip = cmds.group(n="fk_flip_" + jd[3], em=True)
-        ctrl = cmds.circle(n="fk_" + jd[3], r=10, nr=(0, 1, 0))
+        # ctrl = cmds.circle(n="fk_" + jd[3], r=10, nr=(0, 1, 0))
+
+        if "Hip_" in joint:
+            ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Hip_R.yaml")), "fk_" + jd[3])
+        elif "Knee" in joint:
+            ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Knee_R.yaml")), "fk_" + jd[3])
+        elif "Ankle" in joint:
+            ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Ankle_R.yaml")), "fk_" + jd[3])
+        else:
+            ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Toes_R.yaml")), "fk_" + jd[3])
+
+        if "_L" in joint:
+            mirror_object(ctrl, "x")
+            mirror_object(ctrl, "y")
+            mirror_object(ctrl, "z")
+
+        cmds.setAttr(ctrl + ".overrideEnabled", 1)
+        cmds.setAttr(ctrl + ".overrideColor", 18)
+
         cmds.select(d=True)
         jnt = cmds.joint(n="fkx_" + jd[3])
         cmds.setAttr(jnt + ".drawStyle", 2)
         cmds.select(d=True)
-        cmds.parent(jnt, ctrl[0])
-        cmds.parent(ctrl[0], grp_flip)
+        cmds.parent(jnt, ctrl)
+        cmds.parent(ctrl, grp_flip)
         cmds.parent(grp_flip, grp_sdk)
         cmds.parent(grp_sdk, grp_offset)
         cmds.xform(grp_offset, ws=True, t=jd[0], ro=jd[1], roo=jd[2])
@@ -40,8 +60,10 @@ def create_leg_rig(dict):
             cmds.parent("fk_offset_" + jd[3], "fkx_" + jd[4])
 
     # Remove curve shape component from toes end
-    cmds.delete("fk_Toes_End_RShape")
-    cmds.delete("fk_Toes_End_LShape")
+    # cmds.delete("fk_Toes_End_RShape")
+    # cmds.delete("fk_Toes_End_LShape")
+    cmds.delete(cmds.listRelatives(cmds.ls("fk_Toes_End_R"), s=True))
+    cmds.delete(cmds.listRelatives(cmds.ls("fk_Toes_End_L"), s=True))
 
     cmds.select(d=True)
     # Create FK swing constraint groop
@@ -81,7 +103,13 @@ def create_leg_rig(dict):
         cmds.makeIdentity(jnt_ankle, a=True, r=True)
         cmds.makeIdentity(jnt_toes, a=True, r=True)
         cmds.makeIdentity(jnt_toesend, a=True, r=True)
-        ctrl_leg = import_ctrl(CONTROLS_DIR + 'square.ma', "ik_Leg{0}".format(side))
+        # ctrl_leg = import_ctrl(CONTROLS_DIR + 'square.ma', "ik_Leg{0}".format(side))
+        ctrl_leg = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_Leg_R.yaml")), "ik_Leg{0}".format(side))
+        if "_L" in side:
+            mirror_object(ctrl_leg, "x")
+        cmds.setAttr(ctrl_leg + ".overrideEnabled", 1)
+        cmds.setAttr(ctrl_leg + ".overrideColor", 4)
+
         grp_offset_leg = cmds.group(n="ik_offset_Leg{0}".format(side), em=True)
         grp_offset_hip = cmds.group(n="ik_offset_Hip{0}".format(side), em=True)
         cmds.matchTransform(grp_offset_hip, "Hip{0}".format(side))
@@ -105,42 +133,58 @@ def create_leg_rig(dict):
 
         grp_heel = cmds.group(n="ik_offset_Heel{0}".format(side), em=True)
         sdk_heel = cmds.group(n="ik_sdk_Heel{0}".format(side), em=True)
-        ctrl_heel = cmds.circle(n="ik_Heel{0}".format(side), r=5, nr=(1, 0, 0))
-        cmds.parent(ctrl_heel[0], sdk_heel)
+        # ctrl_heel = cmds.circle(n="ik_Heel{0}".format(side), r=5, nr=(1, 0, 0))
+        ctrl_heel = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_Heel_R.yaml")), "ik_Heel{0}".format(side))
+        cmds.setAttr(ctrl_heel + ".overrideEnabled", 1)
+        cmds.setAttr(ctrl_heel + ".overrideColor", 4)
+
+
+        cmds.parent(ctrl_heel, sdk_heel)
         cmds.parent(sdk_heel, grp_heel)
         cmds.matchTransform(grp_heel, "Heel{0}".format(side))
 
         grp_toe = cmds.group(n="ik_offset_Toe{0}".format(side), em=True)
         sdk_toe = cmds.group(n="ik_sdk_Toe{0}".format(side), em=True)
-        ctrl_toe = cmds.circle(n="ik_Toe{0}".format(side), r=5, nr=(1, 0, 0))
-        cmds.parent(ctrl_toe[0], sdk_toe)
+        # ctrl_toe = cmds.circle(n="ik_Toe{0}".format(side), r=5, nr=(1, 0, 0))
+        ctrl_toe = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_Toe_R.yaml")), "ik_Toe{0}".format(side))
+        cmds.setAttr(ctrl_toe + ".overrideEnabled", 1)
+        cmds.setAttr(ctrl_toe + ".overrideColor", 4)
+
+        cmds.parent(ctrl_toe, sdk_toe)
         cmds.parent(sdk_toe, grp_toe)
         cmds.matchTransform(grp_toe, "Toes_End{0}".format(side))
 
         grp_ball = cmds.group(n="ik_offset_FootBall{0}".format(side), em=True)
         sdk_ball = cmds.group(n="ik_sdk_FootBall{0}".format(side), em=True)
-        ctrl_ball = cmds.circle(n="ik_FootBall{0}".format(side), r=5, nr=(1, 0, 0))
-        cmds.parent(ctrl_ball[0], sdk_ball)
+        # ctrl_ball = cmds.circle(n="ik_FootBall{0}".format(side), r=5, nr=(1, 0, 0))
+        ctrl_ball = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_FootBall_R.yaml")), "ik_FootBall{0}".format(side))
+        cmds.setAttr(ctrl_ball + ".overrideEnabled", 1)
+        cmds.setAttr(ctrl_ball + ".overrideColor", 4)
+        cmds.parent(ctrl_ball, sdk_ball)
         cmds.parent(sdk_ball, grp_ball)
         cmds.matchTransform(grp_ball, "Toes{0}".format(side))
         ikh_ball = cmds.ikHandle(sol="ikSCsolver", sj="ikx_Ankle{0}".format(side), ee="ikx_Toes{0}".format(side), n="ikh_FootBall{0}".format(side), p=1, w=1)
         cmds.setAttr(ikh_ball[0] + ".visibility", 0)
-        cmds.parent(ikh_ball[0], ctrl_ball[0])
+        cmds.parent(ikh_ball[0], ctrl_ball)
 
         grp_flap = cmds.group(n="ik_offset_FootFlap{0}".format(side), em=True)
         sdk_flap = cmds.group(n="ik_sdk_FootFlap{0}".format(side), em=True)
-        ctrl_flap = cmds.circle(n="ik_FootFlap{0}".format(side), r=5, nr=(0, 1, 0))
-        cmds.parent(ctrl_flap[0], sdk_flap)
+        # ctrl_flap = cmds.circle(n="ik_FootFlap{0}".format(side), r=5, nr=(0, 1, 0))
+        ctrl_flap = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_FootFlap_R.yaml")), "ik_FootFlap{0}".format(side))
+        cmds.setAttr(ctrl_flap + ".overrideEnabled", 1)
+        cmds.setAttr(ctrl_flap + ".overrideColor", 4)
+
+        cmds.parent(ctrl_flap, sdk_flap)
         cmds.parent(sdk_flap, grp_flap)
         cmds.matchTransform(grp_flap, "Toes{0}".format(side))
         ikh_flap = cmds.ikHandle(sol="ikSCsolver", sj="ikx_Toes{0}".format(side), ee="ikx_Toes_End{0}".format(side), n="ikh_FootFlap{0}".format(side), p=0, w=1)
         cmds.setAttr(ikh_flap[0] + ".visibility", 0)
-        cmds.parent(ikh_flap[0], ctrl_flap[0])
+        cmds.parent(ikh_flap[0], ctrl_flap)
 
         # Reparent Foot controls
-        cmds.parent(grp_flap, ctrl_toe[0])
-        cmds.parent(grp_ball, ctrl_toe[0])
-        cmds.parent(grp_toe, ctrl_heel[0])
+        cmds.parent(grp_flap, ctrl_toe)
+        cmds.parent(grp_ball, ctrl_toe)
+        cmds.parent(grp_toe, ctrl_heel)
         cmds.parent(grp_heel, sdk_roll_in)
         cmds.parent(grp_roll_in, sdk_roll_out)
         cmds.parent(grp_roll_out, ctrl_leg)
@@ -167,12 +211,19 @@ def create_leg_rig(dict):
         # Visual controls for foot sdks
         grp_footdrivers = cmds.group(n="ik_offset_FootDrivers{0}".format(side), em=True)
         grp_frontroll = cmds.group(n="ik_offset_sdk_FootRoll{0}".format(side), em=True)
-        ctrl_frontroll = cmds.circle(n="ik_sdk_FootRoll{0}".format(side), r=2, nr=(1, 0, 0))
-        grp_sideroll = cmds.group(n="ik_offset_sdk_FootSideRoll{0}".format(side), em=True)
-        ctrl_sideroll = cmds.circle(n="ik_sdk_FootSideRoll{0}".format(side), r=2, nr=(1, 0, 0))
+        # ctrl_frontroll = cmds.circle(n="ik_sdk_FootRoll{0}".format(side), r=2, nr=(1, 0, 0))
+        ctrl_frontroll = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_sdk_FootRoll_R.yaml")), "ik_sdk_FootRoll{0}".format(side))
+        cmds.setAttr(ctrl_frontroll + ".overrideEnabled", 1)
+        cmds.setAttr(ctrl_frontroll + ".overrideColor", 4)
 
-        cmds.parent(ctrl_sideroll[0], grp_sideroll)
-        cmds.parent(ctrl_frontroll[0], grp_frontroll)
+        grp_sideroll = cmds.group(n="ik_offset_sdk_FootSideRoll{0}".format(side), em=True)
+        # ctrl_sideroll = cmds.circle(n="ik_sdk_FootSideRoll{0}".format(side), r=2, nr=(1, 0, 0))
+        ctrl_sideroll = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_sdk_FootSideRoll_R.yaml")), "ik_sdk_FootSideRoll{0}".format(side))
+        cmds.setAttr(ctrl_sideroll + ".overrideEnabled", 1)
+        cmds.setAttr(ctrl_sideroll + ".overrideColor", 4)
+
+        cmds.parent(ctrl_sideroll, grp_sideroll)
+        cmds.parent(ctrl_frontroll, grp_frontroll)
         cmds.parent(grp_frontroll, grp_footdrivers)
         cmds.parent(grp_sideroll, grp_footdrivers)
         cmds.parent(grp_footdrivers, "drivers_system")
@@ -201,19 +252,27 @@ def create_leg_rig(dict):
 
         # Create IK handle
         ikh = cmds.ikHandle(sol="ikRPsolver", sj="ikx_Hip{0}".format(side), ee="ikx_Ankle{0}".format(side), n="ikh_Leg{0}".format(side), p=2, w=1)
-        cmds.parent(ikh[0], ctrl_ball[0])
+        cmds.parent(ikh[0], ctrl_ball)
         cmds.setAttr(ikh[0] + ".visibility", 0)
         # Create PV
-        pv_leg = cmds.circle(n="pv_Leg{0}".format(side), r=5, nr=(0, 0, 1))
+        # pv_leg = cmds.circle(n="pv_Leg{0}".format(side), r=5, nr=(0, 0, 1))
+        pv_leg = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_pv.yaml")), "pv_Leg{0}".format(side))
+        mirror_object(pv_leg, "z")
+        cmds.setAttr(pv_leg + ".overrideEnabled", 1)
+        cmds.setAttr(pv_leg + ".overrideColor", 4)
+
         grp_pv_leg = cmds.group(n="pv_offset_Leg{0}".format(side), em=True)
-        cmds.parent(pv_leg[0], grp_pv_leg)
+        cmds.parent(pv_leg, grp_pv_leg)
         pv_pos = calc_pv(["Hip{0}".format(side), "Knee{0}".format(side), "Ankle{0}".format(side)], 20)
         cmds.xform(grp_pv_leg, t=pv_pos, ws=True)
         cmds.parent(grp_pv_leg, "ik_constraint_main")
         # assign constraint pole vector
         cmds.poleVectorConstraint(pv_leg, ikh[0])
         # Create ik/fk switch
-        switch_leg = cmds.circle(n="ikfk_leg{0}".format(side), nr=(0, 1, 0), c=(0, 0, 0), r=2)
+        # switch_leg = cmds.circle(n="ikfk_leg{0}".format(side), nr=(0, 1, 0), c=(0, 0, 0), r=2)
+        switch_leg = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ikfk.yaml")), "ikfk_leg{0}".format(side))
+        cmds.setAttr(switch_leg + ".overrideEnabled", 1)
+        cmds.setAttr(switch_leg + ".overrideColor", 21)
         grp_switch_leg = cmds.group(n="offset_switch_leg{0}".format(side), em=True)
         cmds.matchTransform(grp_switch_leg, "Hip{0}".format(side), pos=True)
         if side == "_R":
@@ -222,15 +281,15 @@ def create_leg_rig(dict):
             cmds.xform(grp_switch_leg, t=(20, 0, 0), r=True)
         cmds.matchTransform(switch_leg, grp_switch_leg)
         cmds.addAttr(switch_leg, longName="ikSwitch", attributeType="double", min=0, max=1, dv=0)
-        cmds.setAttr(str(switch_leg[0]) + ".ikSwitch", e=True, channelBox=True)
-        cmds.setAttr(str(switch_leg[0]) + ".ikSwitch", 1)
-        switch_leg_attr = switch_leg[0] + ".ikSwitch"
-        cmds.parent(switch_leg[0], grp_switch_leg)
+        cmds.setAttr(str(switch_leg) + ".ikSwitch", e=True, channelBox=True)
+        cmds.setAttr(str(switch_leg) + ".ikSwitch", 1)
+        switch_leg_attr = switch_leg + ".ikSwitch"
+        cmds.parent(switch_leg, grp_switch_leg)
         cmds.parent(grp_switch_leg, "follow_ikfk_root")
         # Create unhide attribute
         cmds.addAttr(switch_leg, longName="unhide", attributeType="double", min=0, max=1, dv=0)
-        cmds.setAttr(str(switch_leg[0]) + ".unhide", e=True, channelBox=True)
-        unhide_attr = switch_leg[0] + ".unhide"
+        cmds.setAttr(str(switch_leg) + ".unhide", e=True, channelBox=True)
+        unhide_attr = switch_leg + ".unhide"
 
         # Set visibility state for ik fk ctrls
         nd_ikfk_vis_cond = cmds.createNode('condition', ss=True, n="ikfk_leg_vis_cond{0}".format(side))

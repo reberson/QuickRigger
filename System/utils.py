@@ -1,7 +1,6 @@
 import maya.OpenMaya as OpenMaya
 import maya.cmds as cmds
 
-
 def mirror_object(object_tr, axis):
     if axis.lower() == "x":
         cmds.xform(object_tr, r=True, s=(-1, 1, 1))
@@ -15,7 +14,6 @@ def mirror_object(object_tr, axis):
 
 
 def calculatePVPosition(jnts, distance):
-    from maya import cmds, OpenMaya
     start = cmds.xform(jnts[0], q=True, ws=True, t=True)
     mid = cmds.xform(jnts[1], q=True, ws=True, t=True)
     end = cmds.xform(jnts[2], q=True, ws=True, t=True)
@@ -89,3 +87,33 @@ def connect_orient_constraint(def_jnt, fk_jnt, ik_jnt, attribute):
     cmds.connectAttr(attribute, reverse_node + ".input.inputX")
     cmds.connectAttr(reverse_node + ".output.outputX", orient_constraint[0] + "." + fk_jnt + "W1")
     return orient_constraint
+
+# Todo: Find a way to make sure the Left twist joints are on the oposite orientation. Might not brake as is, but it's good to set
+def create_twist_joint(parent_jnt, child_jnt, name):
+    start = cmds.xform(parent_jnt, q=True, ws=True, t=True)
+    start_rot = cmds.xform(parent_jnt, q=True, ws=True, ro=True)
+    start_roo = cmds.xform(parent_jnt, q=True, ws=True, roo=True)
+    end = cmds.xform(child_jnt, q=True, ws=True, t=True)
+    start_v = OpenMaya.MVector(start[0], start[1], start[2])
+    end_v = OpenMaya.MVector(end[0], end[1], end[2])
+    length_v = (end_v - start_v).length()
+
+    cmds.select(d=True)
+    twist_jnt = cmds.joint(n=name)
+    cmds.select(d=True)
+    cmds.parent(twist_jnt, parent_jnt)
+    cmds.xform(twist_jnt, t=(0, 0, 0), ro=(0, 0, 0))
+
+    cmds.delete(cmds.aimConstraint(child_jnt, twist_jnt, aim=(0, 1, 0)))
+    cmds.makeIdentity(twist_jnt, a=True, r=True, jo=False)
+
+    cmds.xform(twist_jnt, t=(0, length_v / 2, 0), os=True)
+    cmds.xform(twist_jnt, roo=start_roo)
+    cmds.makeIdentity(twist_jnt, a=True, r=True, jo=False)
+
+    twist_cont = cmds.parentConstraint(parent_jnt, child_jnt, twist_jnt, w=0.5, sr=["x", "z"], st=["x", "y", "z"])
+    cmds.setAttr(twist_cont[0] + ".interpType", 0)
+    cmds.setAttr(twist_cont[0] + "." + parent_jnt + "W0", 0.6)
+    cmds.setAttr(twist_cont[0] + "." + child_jnt + "W1", 0.4)
+    return twist_jnt, twist_cont[0]
+

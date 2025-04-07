@@ -1,6 +1,8 @@
 import maya.cmds as cmds
 from Rig.Tools.reference_tools import joint_dictionary_creator
-from System.utils import connect_point_constraint, connect_orient_constraint
+from System.utils import connect_point_constraint, connect_orient_constraint, mirror_object
+from definitions import CONTROLS_DIR
+from System.file_handle import file_read_yaml, import_curve
 
 # TODO: Refactor to Class objects
 
@@ -23,13 +25,19 @@ def create_finger_rig(dict):
         grp_sdk = cmds.group(n="fk_sdk_" + jd[3], em=True)
         grp_sdk_sec = cmds.group(n="fk_sdk_secondary_" + jd[3], em=True)
         grp_flip = cmds.group(n="fk_flip_" + jd[3], em=True)
-        ctrl = cmds.circle(n="fk_" + jd[3], r=2, nr=(0, 1, 0))
+        # ctrl = cmds.circle(n="fk_" + jd[3], r=2, nr=(0, 1, 0))
+        if "Meta" in joint:
+            ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_FingerMeta_R.yaml")), "fk_" + jd[3])
+        else:
+            ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Finger_R.yaml")), "fk_" + jd[3])
+        cmds.setAttr(ctrl + ".overrideEnabled", 1)
+        cmds.setAttr(ctrl + ".overrideColor", 18)
         cmds.select(d=True)
         jnt = cmds.joint(n="fkx_" + jd[3])
         cmds.setAttr(jnt + ".drawStyle", 2)
         cmds.select(d=True)
-        cmds.parent(jnt, ctrl[0])
-        cmds.parent(ctrl[0], grp_flip)
+        cmds.parent(jnt, ctrl)
+        cmds.parent(ctrl, grp_flip)
         cmds.parent(grp_flip, grp_sdk_sec)
         cmds.parent(grp_sdk_sec, grp_sdk)
         cmds.parent(grp_sdk, grp_offset)

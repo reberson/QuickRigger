@@ -1,4 +1,7 @@
 import maya.cmds as cmds
+from System.utils import connect_point_constraint, connect_orient_constraint, mirror_object
+from definitions import CONTROLS_DIR
+from System.file_handle import file_read_yaml, import_curve
 
 # TODO: Refactor to Class objects
 # TODO: Limit translation for the sdk control, also lock other stuff that wont be used
@@ -15,22 +18,34 @@ def create_finger_sdk():
         grp_constraint = cmds.group(em=True, n="parentconstraint_sdk_fingers{0}".format(side))
         grp_flip = cmds.group(em=True, n="flip_sdk_fingers{0}".format(side))
         grp_holder = cmds.group(em=True, n="offset_holder_sdk_fingers{0}".format(side))
-        ctrl_holder = cmds.circle(n="holder_sdk_fingers{0}".format(side), r=10, nr=(0, 1, 0))
+        # ctrl_holder = cmds.circle(n="holder_sdk_fingers{0}".format(side), r=10, nr=(0, 1, 0))
+        ctrl_holder = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "holder_sdk_fingers.yaml")), "holder_sdk_fingers{0}".format(side))
+        cmds.setAttr(ctrl_holder + ".overrideEnabled", 1)
+        cmds.setAttr(ctrl_holder + ".overrideColor", 14)
+
         grp_ctrl = cmds.group(em=True, n="offset_cntrl_sdk_fingers{0}".format(side))
-        ctrl = cmds.circle(n="cntrl_sdk_fingers{0}".format(side), r=2, nr=(0, 1, 0))  # Define the object that will hold the switch attribute.
+        # ctrl = cmds.circle(n="cntrl_sdk_fingers{0}".format(side), r=2, nr=(0, 1, 0))  # Define the object that will hold the switch attribute.
+        ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "cntrl_sdk_fingers.yaml")), "cntrl_sdk_fingers{0}".format(side))
+        cmds.setAttr(ctrl + ".overrideEnabled", 1)
+        cmds.setAttr(ctrl + ".overrideColor", 14)
 
         # create metacarpal ctrl
         grp_offset_metacarpal = cmds.group(em=True, n="offset_metacarpal{0}".format(side))
         grp_extra_metacarpal = cmds.group(em=True, n="extra_metacarpal{0}".format(side))
-        ctrl_metacarpal = cmds.circle(n="cntrl_metacarpal{0}".format(side), r=4, nr=(0, 0, 1))
+        # ctrl_metacarpal = cmds.circle(n="cntrl_metacarpal{0}".format(side), r=4, nr=(0, 0, 1))
+        ctrl_metacarpal = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "cntrl_metacarpal_R.yaml")), "cntrl_metacarpal{0}".format(side))
+        # if "_L" in side:
+        #     mirror_object(ctrl_metacarpal, "x")
+        cmds.setAttr(ctrl_metacarpal + ".overrideEnabled", 1)
+        cmds.setAttr(ctrl_metacarpal + ".overrideColor", 14)
 
-        cmds.parent(ctrl[0], grp_ctrl)
-        cmds.parent(grp_ctrl, ctrl_holder[0])
-        cmds.parent(ctrl_holder[0], grp_holder)
+        cmds.parent(ctrl, grp_ctrl)
+        cmds.parent(grp_ctrl, ctrl_holder)
+        cmds.parent(ctrl_holder, grp_holder)
         cmds.parent(grp_holder, grp_flip)
         cmds.parent(grp_flip, grp_constraint)
         cmds.parent(grp_extra_metacarpal, grp_offset_metacarpal)
-        cmds.parent(ctrl_metacarpal[0], grp_extra_metacarpal)
+        cmds.parent(ctrl_metacarpal, grp_extra_metacarpal)
         cmds.parent(grp_offset_metacarpal, grp_constraint)
 
         cmds.matchTransform(grp_constraint, "Wrist{0}".format(side))
@@ -162,28 +177,28 @@ def create_finger_sdk():
         # create constraints for metacarpal controls
         constraint_orient_metacarpal_pinky = cmds.orientConstraint(grp_extra_metacarpal, ctrl_metacarpal, "fk_sdk_PinkyMeta{0}".format(side), mo=True, n="orient_metacarpal_pinky{0}".format(side))
         cmds.setAttr(constraint_orient_metacarpal_pinky[0] + "." + grp_extra_metacarpal + "W0", 0)
-        cmds.setAttr(constraint_orient_metacarpal_pinky[0] + "." + ctrl_metacarpal[0] + "W1", 1)
+        cmds.setAttr(constraint_orient_metacarpal_pinky[0] + "." + ctrl_metacarpal + "W1", 1)
 
         constraint_orient_metacarpal_ring = cmds.orientConstraint(grp_extra_metacarpal, ctrl_metacarpal, "fk_sdk_RingMeta{0}".format(side), mo=True, n="orient_metacarpal_ring{0}".format(side))
         cmds.setAttr(constraint_orient_metacarpal_ring[0] + "." + grp_extra_metacarpal + "W0", 0.5)
-        cmds.setAttr(constraint_orient_metacarpal_ring[0] + "." + ctrl_metacarpal[0] + "W1", 0.5)
+        cmds.setAttr(constraint_orient_metacarpal_ring[0] + "." + ctrl_metacarpal + "W1", 0.5)
 
         constraint_orient_metacarpal_middle = cmds.orientConstraint(grp_extra_metacarpal, ctrl_metacarpal, "fk_sdk_MiddleMeta{0}".format(side), mo=True, n="orient_metacarpal_middle{0}".format(side))
         cmds.setAttr(constraint_orient_metacarpal_middle[0] + "." + grp_extra_metacarpal + "W0", 0.75)
-        cmds.setAttr(constraint_orient_metacarpal_middle[0] + "." + ctrl_metacarpal[0] + "W1", 0.25)
+        cmds.setAttr(constraint_orient_metacarpal_middle[0] + "." + ctrl_metacarpal + "W1", 0.25)
 
         # point constraints for metacarpal controls with falloff
         constraint_point_metacarpal_pinky = cmds.pointConstraint(grp_extra_metacarpal, ctrl_metacarpal, "fk_sdk_PinkyMeta{0}".format(side), mo=True, n="point_metacarpal_pinky{0}".format(side))
         cmds.setAttr(constraint_point_metacarpal_pinky[0] + "." + grp_extra_metacarpal + "W0", 0)
-        cmds.setAttr(constraint_point_metacarpal_pinky[0] + "." + ctrl_metacarpal[0] + "W1", 1)
+        cmds.setAttr(constraint_point_metacarpal_pinky[0] + "." + ctrl_metacarpal + "W1", 1)
 
         constraint_point_metacarpal_ring = cmds.pointConstraint(grp_extra_metacarpal, ctrl_metacarpal, "fk_sdk_RingMeta{0}".format(side), mo=True, n="point_metacarpal_ring{0}".format(side))
         cmds.setAttr(constraint_point_metacarpal_ring[0] + "." + grp_extra_metacarpal + "W0", 0.5)
-        cmds.setAttr(constraint_point_metacarpal_ring[0] + "." + ctrl_metacarpal[0] + "W1", 0.5)
+        cmds.setAttr(constraint_point_metacarpal_ring[0] + "." + ctrl_metacarpal + "W1", 0.5)
 
         constraint_point_metacarpal_middle = cmds.pointConstraint(grp_extra_metacarpal, ctrl_metacarpal, "fk_sdk_MiddleMeta{0}".format(side), mo=True, n="point_metacarpal_middle{0}".format(side))
         cmds.setAttr(constraint_point_metacarpal_middle[0] + "." + grp_extra_metacarpal + "W0", 0.75)
-        cmds.setAttr(constraint_point_metacarpal_middle[0] + "." + ctrl_metacarpal[0] + "W1", 0.25)
+        cmds.setAttr(constraint_point_metacarpal_middle[0] + "." + ctrl_metacarpal + "W1", 0.25)
 
 
 

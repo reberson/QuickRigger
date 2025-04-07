@@ -152,7 +152,7 @@ def create_torso_rig(dict):
         elif "Neck_" in joint:
             ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_Neck.yaml")), "ik_" + jd[3])
         cmds.setAttr(ctrl + ".overrideEnabled", 1)
-        cmds.setAttr(ctrl + ".overrideColor", 17)
+        cmds.setAttr(ctrl + ".overrideColor", 15)
         cmds.select(d=True)
         jnt = cmds.joint(n="bind_" + jd[3])
         cmds.setAttr(jnt + ".drawStyle", 2)
