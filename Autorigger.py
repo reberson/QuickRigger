@@ -1,5 +1,5 @@
 from maya.api import OpenMaya
-from Menu.Create import Menu
+from Menu.Create import menu
 
 maya_useNewAPI = True
 
@@ -15,7 +15,7 @@ class Autorigger():
     @classmethod
     def initialize(cls):
         """Call the rig menu."""
-        Menu()
+        menu()
 
     @classmethod
     def creator(cls):

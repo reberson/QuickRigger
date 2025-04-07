@@ -52,13 +52,13 @@ def create_finger_sdk():
 
         if side == "_L":
             cmds.xform(grp_flip, r=True, ro=(180, 0, 180))
-            cmds.xform(grp_holder, r=True, t=(0, -25, 0))
+            cmds.xform(grp_holder, r=True, t=(5, -10, 0), ro=(0, 0, -90))
             cmds.xform(grp_offset_metacarpal, r=True, t=(-5, -5, 0))
             cmds.xform(grp_offset_metacarpal, r=True, ro=(0, 180, 180))
             cmds.xform(grp_offset_metacarpal, r=True, s=(-1, 1, 1))
 
         else:
-            cmds.xform(grp_holder, r=True, t=(0, 25, 0))
+            cmds.xform(grp_holder, r=True, t=(5, 10, 0), ro=(0, 0, 90))
             cmds.xform(grp_offset_metacarpal, r=True, t=(5, 5, 0))
 
         cmds.parent(grp_constraint, "drivers_system")
@@ -200,5 +200,6 @@ def create_finger_sdk():
         cmds.setAttr(constraint_point_metacarpal_middle[0] + "." + grp_extra_metacarpal + "W0", 0.75)
         cmds.setAttr(constraint_point_metacarpal_middle[0] + "." + ctrl_metacarpal + "W1", 0.25)
 
-
-
+        # Scale constraint
+        blend_node = (cmds.listConnections("ikfk_arm{0}".format(side) + ".ikSwitch", t="blendColors"))[0]
+        cmds.connectAttr(blend_node + ".output", grp_constraint + ".scale")

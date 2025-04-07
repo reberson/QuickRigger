@@ -102,6 +102,8 @@ class IkFKWindow:
                                     self.return_lists(NAMESPACE)[0] + "IKX" + jnt,
                                     scl=False,
                                     rot=True, pos=False)
+                cmds.xform(self.return_lists(NAMESPACE)[0] + "FK" + jnt, t=(0, 0, 0))
+                cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "FK" + jnt)
             cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIK{0}.FKIKBlend".format(limb), 0)
             cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "FKIK{0}.FKIKBlend".format(limb))
         else:
@@ -121,6 +123,7 @@ class IkFKWindow:
                                             self.return_lists(NAMESPACE)[0] + "IKX" + jnt,
                                             scl=False,
                                             rot=True, pos=False)
+                        cmds.xform(self.return_lists(NAMESPACE)[0] + "FK" + jnt, t=(0, 0, 0))
                         cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "FK" + jnt)
 
     def create_window(self):
@@ -225,6 +228,3 @@ class IkFKWindow:
         cmds.setParent('..')
 
         cmds.showWindow(window_ikfk)
-
-
-window = IkFKWindow()

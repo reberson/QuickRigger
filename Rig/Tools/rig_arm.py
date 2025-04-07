@@ -1,10 +1,10 @@
 import maya.cmds as cmds
-from Rig.Tools.reference_tools import joint_dictionary_creator
+from Rig.Tools.layout_tools import joint_dictionary_creator
 from System.utils import calculatePVPosition as calc_pv
 from System.utils import connect_point_constraint, connect_orient_constraint, mirror_object
 from definitions import CONTROLS_DIR
 from System.file_handle import file_read_yaml, import_curve
-
+from System.utils import create_stretch
 # TODO: Refactor to Class objects
 
 def create_arm_rig(dict):
@@ -108,7 +108,7 @@ def create_arm_rig(dict):
             mirror_object(ctrl_arm, "x")
 
         cmds.setAttr(ctrl_arm + ".overrideEnabled", 1)
-        cmds.setAttr(ctrl_arm + ".overrideColor", 4)
+        cmds.setAttr(ctrl_arm + ".overrideColor", 13)
         grp_offset_arm = cmds.group(n="ik_offset_Arm{0}".format(side), em=True)
         grp_offset_shoulder = cmds.group(n="ik_offset_Shoulder{0}".format(side), em=True)
         cmds.matchTransform(grp_offset_shoulder, "Shoulder{0}".format(side))
@@ -127,7 +127,7 @@ def create_arm_rig(dict):
         # pv_arm = cmds.circle(n="pv_Arm{0}".format(side), r=5, nr=(0, 0, 1))
         pv_arm = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_pv.yaml")), "pv_Arm{0}".format(side))
         cmds.setAttr(pv_arm + ".overrideEnabled", 1)
-        cmds.setAttr(pv_arm + ".overrideColor", 4)
+        cmds.setAttr(pv_arm + ".overrideColor", 13)
         grp_pv_arm = cmds.group(n="pv_offset_Arm{0}".format(side), em=True)
         cmds.parent(pv_arm, grp_pv_arm)
         pv_pos = calc_pv(["Shoulder{0}".format(side), "Elbow{0}".format(side), "Wrist{0}".format(side)], 20)
@@ -184,6 +184,30 @@ def create_arm_rig(dict):
             cmds.parent(orient_constraint, "constraints")
         cmds.orientConstraint(ctrl_arm, "ikx_Wrist{0}".format(side), mo=True)
 
+        # Create Stretch
+        create_stretch("Elbow{0}".format(side), "Shoulder{0}".format(side), "ikfk_arm{0}".format(side), "fk_offset_Elbow{0}".format(side), "ikx_Elbow{0}".format(side), "Shoulder_Twist{0}".format(side))
+        create_stretch("Wrist{0}".format(side), "Elbow{0}".format(side), "ikfk_arm{0}".format(side), "fk_offset_Wrist{0}".format(side), "ikx_Wrist{0}".format(side), "Elbow_Twist{0}".format(side))
+
+        # Create blend node to control hand scaling
+        blend_node = cmds.shadingNode("blendColors", n="hand_scale_bc{0}".format(side), au=True)
+        cmds.connectAttr("ik_Arm{0}".format(side) + ".scale", blend_node + ".color1")
+        cmds.connectAttr("fk_Wrist{0}".format(side) + ".scale", blend_node + ".color2")
+        cmds.connectAttr(switch_arm_attr, blend_node + ".blender")
+        # Create hand scale attribute
+        cmds.addAttr(switch_arm, longName='handScale', attributeType='double3')
+        cmds.addAttr(switch_arm, longName='handScalex', attributeType='double', parent='handScale', dv=1)
+        cmds.addAttr(switch_arm, longName='handScaley', attributeType='double', parent='handScale', dv=1)
+        cmds.addAttr(switch_arm, longName='handScalez', attributeType='double', parent='handScale', dv=1)
+
+        # control the hand scale attribute by the fk hand or ik hand controls
+        cmds.connectAttr(blend_node + ".outputR", switch_arm + '.handScalex')
+        cmds.connectAttr(blend_node + ".outputG", switch_arm + '.handScaley')
+        cmds.connectAttr(blend_node + ".outputB", switch_arm + '.handScalez')
+
+        # output to wrist joint
+        cmds.connectAttr(switch_arm + '.handScalex', "Wrist{0}".format(side) + ".sx")
+        cmds.connectAttr(switch_arm + '.handScaley', "Wrist{0}".format(side) + ".sy")
+        cmds.connectAttr(switch_arm + '.handScalez', "Wrist{0}".format(side) + ".sz")
 
 
 

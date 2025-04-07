@@ -7,7 +7,7 @@ from definitions import ROOT_DIR
 from System.file_handle import file_dialog_yaml
 
 
-def joint_reference_save():
+def joint_layout_save():
     """Stores all joint data from current scene"""
     # create empty joint dictionary to store joints data
     joint_data = joint_dictionary_creator()
@@ -59,7 +59,7 @@ def load_template_file():
     return loaded_data
 
 
-def joint_reference_create(source_file):
+def joint_layout_create(source_file):
     """Creates a "joints_reference" joint hierarchy from loaded data"""
     # Deletes any pre-existing joints
     if cmds.ls(typ="joint"):
@@ -68,11 +68,11 @@ def joint_reference_create(source_file):
         jnt_grp = cmds.group(em=True, n="joint_reference")
         cmds.select(d=True)
         # Create each joint based on data dicitonary and assign its values to the deform dictionary
-        reference_dict = source_file["joints"]
-        for ref_joint in reference_dict:
-            new_joint = cmds.joint(name=reference_dict[ref_joint][3])
-            cmds.xform(new_joint, ws=True, t=reference_dict[ref_joint][0], ro=reference_dict[ref_joint][1],
-                       roo=reference_dict[ref_joint][2])
+        layout_dict = source_file["joints"]
+        for ref_joint in layout_dict:
+            new_joint = cmds.joint(name=layout_dict[ref_joint][3])
+            cmds.xform(new_joint, ws=True, t=layout_dict[ref_joint][0], ro=layout_dict[ref_joint][1],
+                       roo=layout_dict[ref_joint][2])
             cmds.select(d=True)
         # Reparent the newly created joints based on the hierarchy data from file.
         hirearchy_tree = source_file["hierarchy"]

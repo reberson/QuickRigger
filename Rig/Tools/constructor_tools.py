@@ -1,7 +1,8 @@
 import maya.cmds as cmds
-from Rig.Tools.reference_tools import joint_dictionary_creator
+from Rig.Tools.layout_tools import joint_dictionary_creator
 import System.file_handle
 from System.utils import create_twist_joint
+
 
 def mirror_joint(first_joint):
     """Mirrors the joint and gives proper naming"""
@@ -57,8 +58,6 @@ def create_deform_rig():
     cmds.parent(twist_neck[1], "constraints")
 
 
-
-
 def create_rig_structure():
     rig_grp = cmds.group(em=True, n="rig")
     motion_grp = cmds.group(em=True, n="motion_system")
@@ -74,6 +73,7 @@ def create_rig_structure():
     const_grp = cmds.group(em=True, n="constraints")
     driver_grp = cmds.group(em=True, n="drivers_system")
     fkik_grp = cmds.group(em=True, n="fkik_system")
+    stretch_grp = cmds.group(em=True, n="stretch_system")
     grp_follow_main_fkik = cmds.group(em=True, n="follow_ikfk_main")
     grp_follow_root_fkik = cmds.group(em=True, n="follow_ikfk_root")
     cmds.parent(grp_follow_main_fkik, fkik_grp)
@@ -90,6 +90,7 @@ def create_rig_structure():
     cmds.parent(driver_grp, motion_grp)
     cmds.parent(fkik_grp, motion_grp)
     cmds.parent(root_grp, motion_grp)
+    cmds.parent(stretch_grp, motion_grp)
 
     cmds.pointConstraint(main_ctrl, glob_main_grp)
     cmds.orientConstraint(main_ctrl, glob_main_grp)
@@ -100,11 +101,12 @@ def create_rig_structure():
     nd_main_scale = cmds.createNode('multiplyDivide', ss=True, n='main_scale_multi')
     cmds.connectAttr(main_ctrl[0] + ".scale", nd_main_scale + '.input1')
     cmds.connectAttr(nd_main_scale + '.output', glob_grp + ".scale")
-    cmds.connectAttr(nd_main_scale + '.output', main_grp + ".scale")
+    # cmds.connectAttr(nd_main_scale + '.output', main_grp + ".scale")
     cmds.connectAttr(nd_main_scale + '.output', root_grp + ".scale")
     cmds.connectAttr(nd_main_scale + '.output', fk_grp + ".scale")
     cmds.connectAttr(nd_main_scale + '.output', ik_grp + ".scale")
     cmds.connectAttr(nd_main_scale + '.output', driver_grp + ".scale")
     cmds.connectAttr(nd_main_scale + '.output', fkik_grp + ".scale")
     cmds.connectAttr(nd_main_scale + '.output', "joint_reference.scale")
+    cmds.connectAttr(nd_main_scale + '.output', stretch_grp + ".scale")
 

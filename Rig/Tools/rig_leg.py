@@ -1,10 +1,11 @@
 import maya.cmds as cmds
-from Rig.Tools.reference_tools import joint_dictionary_creator
+from Rig.Tools.layout_tools import joint_dictionary_creator
 from System.utils import calculatePVPosition as calc_pv
 from System.file_handle import import_ctrl
 from System.utils import connect_point_constraint, connect_orient_constraint, mirror_object
 from definitions import CONTROLS_DIR
 from System.file_handle import file_read_yaml, import_curve
+from System.utils import create_stretch
 
 # TODO: Refactor to Class objects
 # TODO: Hide all atributes that are not directly controllable
@@ -108,7 +109,7 @@ def create_leg_rig(dict):
         if "_L" in side:
             mirror_object(ctrl_leg, "x")
         cmds.setAttr(ctrl_leg + ".overrideEnabled", 1)
-        cmds.setAttr(ctrl_leg + ".overrideColor", 4)
+        cmds.setAttr(ctrl_leg + ".overrideColor", 13)
 
         grp_offset_leg = cmds.group(n="ik_offset_Leg{0}".format(side), em=True)
         grp_offset_hip = cmds.group(n="ik_offset_Hip{0}".format(side), em=True)
@@ -136,7 +137,7 @@ def create_leg_rig(dict):
         # ctrl_heel = cmds.circle(n="ik_Heel{0}".format(side), r=5, nr=(1, 0, 0))
         ctrl_heel = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_Heel_R.yaml")), "ik_Heel{0}".format(side))
         cmds.setAttr(ctrl_heel + ".overrideEnabled", 1)
-        cmds.setAttr(ctrl_heel + ".overrideColor", 4)
+        cmds.setAttr(ctrl_heel + ".overrideColor", 13)
 
 
         cmds.parent(ctrl_heel, sdk_heel)
@@ -148,7 +149,7 @@ def create_leg_rig(dict):
         # ctrl_toe = cmds.circle(n="ik_Toe{0}".format(side), r=5, nr=(1, 0, 0))
         ctrl_toe = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_Toe_R.yaml")), "ik_Toe{0}".format(side))
         cmds.setAttr(ctrl_toe + ".overrideEnabled", 1)
-        cmds.setAttr(ctrl_toe + ".overrideColor", 4)
+        cmds.setAttr(ctrl_toe + ".overrideColor", 13)
 
         cmds.parent(ctrl_toe, sdk_toe)
         cmds.parent(sdk_toe, grp_toe)
@@ -159,7 +160,7 @@ def create_leg_rig(dict):
         # ctrl_ball = cmds.circle(n="ik_FootBall{0}".format(side), r=5, nr=(1, 0, 0))
         ctrl_ball = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_FootBall_R.yaml")), "ik_FootBall{0}".format(side))
         cmds.setAttr(ctrl_ball + ".overrideEnabled", 1)
-        cmds.setAttr(ctrl_ball + ".overrideColor", 4)
+        cmds.setAttr(ctrl_ball + ".overrideColor", 13)
         cmds.parent(ctrl_ball, sdk_ball)
         cmds.parent(sdk_ball, grp_ball)
         cmds.matchTransform(grp_ball, "Toes{0}".format(side))
@@ -172,7 +173,7 @@ def create_leg_rig(dict):
         # ctrl_flap = cmds.circle(n="ik_FootFlap{0}".format(side), r=5, nr=(0, 1, 0))
         ctrl_flap = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_FootFlap_R.yaml")), "ik_FootFlap{0}".format(side))
         cmds.setAttr(ctrl_flap + ".overrideEnabled", 1)
-        cmds.setAttr(ctrl_flap + ".overrideColor", 4)
+        cmds.setAttr(ctrl_flap + ".overrideColor", 13)
 
         cmds.parent(ctrl_flap, sdk_flap)
         cmds.parent(sdk_flap, grp_flap)
@@ -214,13 +215,13 @@ def create_leg_rig(dict):
         # ctrl_frontroll = cmds.circle(n="ik_sdk_FootRoll{0}".format(side), r=2, nr=(1, 0, 0))
         ctrl_frontroll = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_sdk_FootRoll_R.yaml")), "ik_sdk_FootRoll{0}".format(side))
         cmds.setAttr(ctrl_frontroll + ".overrideEnabled", 1)
-        cmds.setAttr(ctrl_frontroll + ".overrideColor", 4)
+        cmds.setAttr(ctrl_frontroll + ".overrideColor", 13)
 
         grp_sideroll = cmds.group(n="ik_offset_sdk_FootSideRoll{0}".format(side), em=True)
         # ctrl_sideroll = cmds.circle(n="ik_sdk_FootSideRoll{0}".format(side), r=2, nr=(1, 0, 0))
         ctrl_sideroll = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_sdk_FootSideRoll_R.yaml")), "ik_sdk_FootSideRoll{0}".format(side))
         cmds.setAttr(ctrl_sideroll + ".overrideEnabled", 1)
-        cmds.setAttr(ctrl_sideroll + ".overrideColor", 4)
+        cmds.setAttr(ctrl_sideroll + ".overrideColor", 13)
 
         cmds.parent(ctrl_sideroll, grp_sideroll)
         cmds.parent(ctrl_frontroll, grp_frontroll)
@@ -259,7 +260,7 @@ def create_leg_rig(dict):
         pv_leg = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_pv.yaml")), "pv_Leg{0}".format(side))
         mirror_object(pv_leg, "z")
         cmds.setAttr(pv_leg + ".overrideEnabled", 1)
-        cmds.setAttr(pv_leg + ".overrideColor", 4)
+        cmds.setAttr(pv_leg + ".overrideColor", 13)
 
         grp_pv_leg = cmds.group(n="pv_offset_Leg{0}".format(side), em=True)
         cmds.parent(pv_leg, grp_pv_leg)
@@ -322,3 +323,36 @@ def create_leg_rig(dict):
         cmds.delete("Heel{0}".format(side))
         cmds.delete("FootSideOut{0}".format(side))
         cmds.delete("FootSideIn{0}".format(side))
+
+        # Create Stretch
+        create_stretch("Knee{0}".format(side), "Hip{0}".format(side), "ikfk_leg{0}".format(side),
+                       "fk_offset_Knee{0}".format(side), "ikx_Knee{0}".format(side), "Hip_Twist{0}".format(side))
+        create_stretch("Ankle{0}".format(side), "Knee{0}".format(side), "ikfk_leg{0}".format(side),
+                       "fk_offset_Ankle{0}".format(side), "ikx_Ankle{0}".format(side), "Knee_Twist{0}".format(side))
+
+        # Create blend node to control foot scaling
+        blend_node = cmds.shadingNode("blendColors", n="foot_scale_bc{0}".format(side), au=True)
+        cmds.connectAttr("ik_Leg{0}".format(side) + ".scale", blend_node + ".color1")
+        cmds.connectAttr("fk_Ankle{0}".format(side) + ".scale", blend_node + ".color2")
+        cmds.connectAttr(switch_leg_attr, blend_node + ".blender")
+
+        # Create foot scale attribute
+        cmds.addAttr(switch_leg, longName='footScale', attributeType='double3')
+        cmds.addAttr(switch_leg, longName='footScalex', attributeType='double', parent='footScale', dv=1)
+        cmds.addAttr(switch_leg, longName='footScaley', attributeType='double', parent='footScale', dv=1)
+        cmds.addAttr(switch_leg, longName='footScalez', attributeType='double', parent='footScale', dv=1)
+
+        # control the foot scale attribute by the fk hand or ik hand controls
+        cmds.connectAttr(blend_node + ".outputR", switch_leg + '.footScalex')
+        cmds.connectAttr(blend_node + ".outputG", switch_leg + '.footScaley')
+        cmds.connectAttr(blend_node + ".outputB", switch_leg + '.footScalez')
+
+        # output to ankle and toes joints
+        cmds.connectAttr(switch_leg + '.footScalex', "Ankle{0}".format(side) + ".sx")
+        cmds.connectAttr(switch_leg + '.footScaley', "Ankle{0}".format(side) + ".sy")
+        cmds.connectAttr(switch_leg + '.footScalez', "Ankle{0}".format(side) + ".sz")
+
+        cmds.connectAttr(switch_leg + '.footScalex', "Toes{0}".format(side) + ".sx")
+        cmds.connectAttr(switch_leg + '.footScaley', "Toes{0}".format(side) + ".sy")
+        cmds.connectAttr(switch_leg + '.footScalez', "Toes{0}".format(side) + ".sz")
+

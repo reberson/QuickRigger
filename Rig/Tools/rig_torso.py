@@ -1,5 +1,5 @@
 import maya.cmds as cmds
-from Rig.Tools.reference_tools import joint_dictionary_creator
+from Rig.Tools.layout_tools import joint_dictionary_creator
 from System.utils import connect_point_constraint, connect_orient_constraint, mirror_object
 from definitions import CONTROLS_DIR
 from System.file_handle import file_read_yaml, import_curve
@@ -152,7 +152,7 @@ def create_torso_rig(dict):
         elif "Neck_" in joint:
             ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_Neck.yaml")), "ik_" + jd[3])
         cmds.setAttr(ctrl + ".overrideEnabled", 1)
-        cmds.setAttr(ctrl + ".overrideColor", 15)
+        cmds.setAttr(ctrl + ".overrideColor", 4)
         cmds.select(d=True)
         jnt = cmds.joint(n="bind_" + jd[3])
         cmds.setAttr(jnt + ".drawStyle", 2)
@@ -162,6 +162,10 @@ def create_torso_rig(dict):
         cmds.parent(grp_sdk, grp_offset)
         cmds.xform(grp_offset, ws=True, t=jd[0], ro=jd[1], roo=jd[2])
         cmds.parent(grp_offset, ik_spine_ctrls)
+        # set line width for the control
+        shapes = cmds.listRelatives("ik_" + jd[3], ad=True, shapes=True)
+        for shape in shapes:
+            cmds.setAttr(shape + ".lineWidth", 2)
 
     # Bind spine curve to ik controls
     cmds.select(d=True)

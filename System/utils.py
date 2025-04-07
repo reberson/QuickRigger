@@ -1,5 +1,7 @@
 import maya.OpenMaya as OpenMaya
 import maya.cmds as cmds
+from System.file_handle import file_read_yaml, import_curve
+from definitions import CONTROLS_DIR
 
 def mirror_object(object_tr, axis):
     if axis.lower() == "x":
@@ -104,7 +106,11 @@ def create_twist_joint(parent_jnt, child_jnt, name):
     cmds.parent(twist_jnt, parent_jnt)
     cmds.xform(twist_jnt, t=(0, 0, 0), ro=(0, 0, 0))
 
-    cmds.delete(cmds.aimConstraint(child_jnt, twist_jnt, aim=(0, 1, 0)))
+    if "_L" in name:
+        cmds.delete(cmds.aimConstraint(child_jnt, twist_jnt, aim=(0, -1, 0)))
+        length_v *= -1
+    else:
+        cmds.delete(cmds.aimConstraint(child_jnt, twist_jnt, aim=(0, 1, 0)))
     cmds.makeIdentity(twist_jnt, a=True, r=True, jo=False)
 
     cmds.xform(twist_jnt, t=(0, length_v / 2, 0), os=True)
@@ -117,3 +123,71 @@ def create_twist_joint(parent_jnt, child_jnt, name):
     cmds.setAttr(twist_cont[0] + "." + child_jnt + "W1", 0.4)
     return twist_jnt, twist_cont[0]
 
+
+def create_stretch(stretch_jnt, scale_jnt, att_holder, grp_offset, ikx_jnt, twist_jnt=None):
+    # concatenate attribute names
+    stretch_name = stretch_jnt + "_Stretch"
+    diameter_name = scale_jnt + "_Diameter"
+
+    # STRETCH
+    # creates attributes
+    cmds.addAttr(att_holder, longName=stretch_name, attributeType="float", dv=0)
+    offset_value = (cmds.xform(grp_offset, q=True, t=True, r=True))[1]
+    cmds.setAttr(str(att_holder) + "." + stretch_name, e=True, channelBox=True, k=True)
+    stretch_att = att_holder + "." + stretch_name
+    # creates multiply divide node
+    nd_md = cmds.createNode('multiplyDivide', ss=True, n=stretch_name + "_node_md")
+    # the below value is only for Left side
+    if "_L" in stretch_jnt:
+        cmds.setAttr(nd_md + ".input2X", -1)
+    # create plus minus average node
+    nd_pma = cmds.createNode('plusMinusAverage', ss=True, n=stretch_name + "_node_pma")
+    cmds.setAttr(nd_pma + ".operation", 1)
+    cmds.setAttr(nd_pma + ".input1D[1]", offset_value)
+    # connect attributes
+    cmds.connectAttr(stretch_att, nd_md + '.input1X')
+    cmds.connectAttr(nd_md + ".outputX", nd_pma + '.input1D[0]')
+    cmds.connectAttr(nd_pma + '.output1D', grp_offset + ".ty")
+    cmds.connectAttr(nd_pma + '.output1D', ikx_jnt + ".ty")
+
+    # twist jnt
+    if twist_jnt:
+        offset_value_twist = (cmds.xform(twist_jnt, q=True, t=True, r=True))[1]
+        nd_md_twist = cmds.createNode('multiplyDivide', ss=True, n=stretch_name + "_node_md")
+        cmds.setAttr(nd_md_twist + ".input2X", 0.5)
+        nd_pma_twist = cmds.createNode('plusMinusAverage', ss=True, n=stretch_name + "_node_pma_twist")
+        cmds.setAttr(nd_pma_twist + ".operation", 1)
+        cmds.setAttr(nd_pma_twist + ".input1D[1]", offset_value_twist)
+        cmds.connectAttr(nd_md + ".outputX", nd_md_twist + '.input1X')
+        cmds.connectAttr(nd_md_twist + ".outputX", nd_pma_twist + '.input1D[0]')
+        cmds.connectAttr(nd_pma_twist + '.output1D', twist_jnt + ".ty")
+
+    # DIAMETER
+    # creates attributes
+    cmds.addAttr(att_holder, longName=diameter_name, attributeType="float", dv=1)
+    cmds.setAttr(str(att_holder) + "." + diameter_name, e=True, channelBox=True, k=True)
+    scale_att = att_holder + "." + diameter_name
+    # connect attributes
+    cmds.connectAttr(scale_att, scale_jnt + ".sx")
+    cmds.connectAttr(scale_att, scale_jnt + ".sz")
+
+    # create visual controls for stretch and attach to each limb
+    stretch_grp = "stretch_system"
+    off_grp = cmds.group(em=True, n="st_offset_" + stretch_jnt)
+    sdk_grp = cmds.group(em=True, n="st_sdk_" + stretch_jnt)
+    flip_grp = cmds.group(em=True, n="st_flip_" + stretch_jnt)
+    st_ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "cntrl_stretch_limb.yaml")), "cntrl_stretch_" + scale_jnt)
+    cmds.setAttr(st_ctrl + ".overrideEnabled", 1)
+    cmds.setAttr(st_ctrl + ".overrideColor", 16)
+    cmds.parent(st_ctrl, flip_grp)
+    cmds.parent(flip_grp, sdk_grp)
+    cmds.parent(sdk_grp, off_grp)
+    cmds.parent(off_grp, stretch_grp)
+    cmds.matchTransform(off_grp, scale_jnt)
+    cmds.pointConstraint(scale_jnt, off_grp)
+    cmds.orientConstraint(scale_jnt, off_grp)
+    cmds.connectAttr(st_ctrl + ".ty", stretch_att)
+    cmds.connectAttr(st_ctrl + ".sx", scale_att)
+
+    if "_L" in stretch_jnt:
+        cmds.xform(flip_grp, r=True, ro=(180, 0, 0))

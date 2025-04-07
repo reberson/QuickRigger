@@ -1,5 +1,5 @@
 import maya.cmds as cmds
-from Rig.Tools.reference_tools import joint_dictionary_creator
+from Rig.Tools.layout_tools import joint_dictionary_creator
 from definitions import CONTROLS_DIR
 from System.file_handle import import_ctrl
 from System.utils import connect_point_constraint, connect_orient_constraint, mirror_object
