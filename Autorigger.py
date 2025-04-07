@@ -1,5 +1,5 @@
 from maya.api import OpenMaya
-from Menu.Create import menu
+from scripts.autorigger.ui.Autorigger_menu import menu
 
 maya_useNewAPI = True
 
@@ -9,7 +9,7 @@ class Autorigger():
     # Maya provides the node ids from
     # 0x00000000 to 0x0007ffff
     # for users to customize.
-    type_id = OpenMaya.MTypeId(0x00000000)
+    type_id = OpenMaya.MTypeId(0x00006000)
     type_name = "autoRigger"
 
     @classmethod
