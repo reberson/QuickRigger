@@ -10,6 +10,7 @@ def create_eye(dict):
     # check all eyes (can be just one, or even more than 2)
     jnt_list_all = cmds.listRelatives("Facial", ad=True)
     jnt_list = []
+    jnt_list_ends = []
     for jnt in jnt_list_all:
         if "eye_" in jnt.lower():
             jnt_list.append(jnt)
@@ -40,13 +41,13 @@ def create_eye(dict):
         cmds.select(d=True)
         cmds.setAttr(xjnt + ".drawStyle", 2)
         if "_end" in jnt.lower():
-            cmds.setAttr(ctrl[0] + ".overrideVisibility", 0)
+            # cmds.setAttr(ctrl[0] + ".overrideVisibility", 0)
+            jnt_list_ends.append(jnt)
         cmds.parent(xjnt, ctrl[0])
         cmds.parent(ctrl[0], grp_flip)
         cmds.parent(grp_flip, grp_sdk)
         cmds.parent(grp_sdk, grp_offset)
         cmds.parent(grp_offset, grp_ctrl)
-
         # create space locator to be the Up aim vector
         cmds.parent(loc_up[0], grp_ctrl)
         cmds.xform(loc_up[0], ws=True, t=jd[0], ro=jd[1], roo=jd[2])
@@ -56,10 +57,14 @@ def create_eye(dict):
         cmds.xform(grp_offset, ws=True, t=jd[0], ro=jd[1], roo=jd[2])
         if "_l" in jnt.lower():
             cmds.xform(grp_flip, r=True, ro=(0, 180, 0))
-
         # constrain def joints to ctrl joints
         cmds.parent(cmds.pointConstraint("fkx_" + jnt, jnt), "face_constraints")
         cmds.parent(cmds.orientConstraint("fkx_" + jnt, jnt), "face_constraints")
+
+    # Parent end joints to their respective eye jnts
+    for jnt in jnt_list_ends:
+        jnt_parent = jnt.split("_End")[0] + jnt.split("_End")[1]
+        cmds.parent("fk_offset_" + jnt, "fkx_" + jnt_parent)
 
     # Create AIM Main Eye control
     aim_follow_grp = cmds.group(em=True, n="group_follow_EyeAim")
