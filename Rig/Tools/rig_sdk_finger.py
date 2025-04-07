@@ -1,5 +1,4 @@
 import maya.cmds as cmds
-from System.utils import connect_point_constraint, connect_orient_constraint, mirror_object
 from definitions import CONTROLS_DIR
 from System.file_handle import file_read_yaml, import_curve
 
@@ -18,26 +17,40 @@ def create_finger_sdk():
         grp_constraint = cmds.group(em=True, n="parentconstraint_sdk_fingers{0}".format(side))
         grp_flip = cmds.group(em=True, n="flip_sdk_fingers{0}".format(side))
         grp_holder = cmds.group(em=True, n="offset_holder_sdk_fingers{0}".format(side))
-        # ctrl_holder = cmds.circle(n="holder_sdk_fingers{0}".format(side), r=10, nr=(0, 1, 0))
         ctrl_holder = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "holder_sdk_fingers.yaml")), "holder_sdk_fingers{0}".format(side))
         cmds.setAttr(ctrl_holder + ".overrideEnabled", 1)
         cmds.setAttr(ctrl_holder + ".overrideColor", 14)
+        cmds.setAttr(ctrl_holder + ".tx", lock=True, k=False, cb=False)
+        cmds.setAttr(ctrl_holder + ".ty", lock=True, k=False, cb=False)
+        cmds.setAttr(ctrl_holder + ".tz", lock=True, k=False, cb=False)
+        cmds.setAttr(ctrl_holder + ".rx", lock=True, k=False, cb=False)
+        cmds.setAttr(ctrl_holder + ".ry", lock=True, k=False, cb=False)
+        cmds.setAttr(ctrl_holder + ".rz", lock=True, k=False, cb=False)
+        cmds.setAttr(ctrl_holder + ".sx", lock=True, k=False, cb=False)
+        cmds.setAttr(ctrl_holder + ".sy", lock=True, k=False, cb=False)
+        cmds.setAttr(ctrl_holder + ".sz", lock=True, k=False, cb=False)
 
         grp_ctrl = cmds.group(em=True, n="offset_cntrl_sdk_fingers{0}".format(side))
-        # ctrl = cmds.circle(n="cntrl_sdk_fingers{0}".format(side), r=2, nr=(0, 1, 0))  # Define the object that will hold the switch attribute.
         ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "cntrl_sdk_fingers.yaml")), "cntrl_sdk_fingers{0}".format(side))
         cmds.setAttr(ctrl + ".overrideEnabled", 1)
         cmds.setAttr(ctrl + ".overrideColor", 14)
+        cmds.setAttr(ctrl + ".ty", lock=True, k=False, cb=False)
+        cmds.setAttr(ctrl + ".rx", lock=True, k=False, cb=False)
+        cmds.setAttr(ctrl + ".ry", lock=True, k=False, cb=False)
+        cmds.setAttr(ctrl + ".rz", lock=True, k=False, cb=False)
+        cmds.setAttr(ctrl + ".sx", lock=True, k=False, cb=False)
+        cmds.setAttr(ctrl + ".sy", lock=True, k=False, cb=False)
+        cmds.setAttr(ctrl + ".sz", lock=True, k=False, cb=False)
 
         # create metacarpal ctrl
         grp_offset_metacarpal = cmds.group(em=True, n="offset_metacarpal{0}".format(side))
         grp_extra_metacarpal = cmds.group(em=True, n="extra_metacarpal{0}".format(side))
-        # ctrl_metacarpal = cmds.circle(n="cntrl_metacarpal{0}".format(side), r=4, nr=(0, 0, 1))
         ctrl_metacarpal = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "cntrl_metacarpal_R.yaml")), "cntrl_metacarpal{0}".format(side))
-        # if "_L" in side:
-        #     mirror_object(ctrl_metacarpal, "x")
         cmds.setAttr(ctrl_metacarpal + ".overrideEnabled", 1)
         cmds.setAttr(ctrl_metacarpal + ".overrideColor", 14)
+        cmds.setAttr(ctrl_metacarpal + ".sx", lock=True, k=False, cb=False)
+        cmds.setAttr(ctrl_metacarpal + ".sy", lock=True, k=False, cb=False)
+        cmds.setAttr(ctrl_metacarpal + ".sz", lock=True, k=False, cb=False)
 
         cmds.parent(ctrl, grp_ctrl)
         cmds.parent(grp_ctrl, ctrl_holder)
@@ -79,6 +92,9 @@ def create_finger_sdk():
         # create controlling attributes
         cmds.addAttr(ctrl_holder, ln="movex", at="float", keyable=True, min=-10, max=10)
         cmds.addAttr(ctrl_holder, ln="movez", at="float", keyable=True, min=-10, max=10)
+        cmds.setAttr(ctrl_holder + ".movex", k=False, cb=False)
+        cmds.setAttr(ctrl_holder + ".movez", k=False, cb=False)
+
         cmds.addAttr(ctrl_holder, ln="spread", at="float", keyable=True, min=-10, max=10)
         cmds.addAttr(ctrl_holder, ln="thumbcurl", at="float", keyable=True, min=-10, max=10)
         cmds.addAttr(ctrl_holder, ln="indexcurl", at="float", keyable=True, min=-10, max=10)
@@ -133,7 +149,6 @@ def create_finger_sdk():
             cmds.setDrivenKeyframe(finger_joint, at="rotateX", cd="holder_sdk_fingers{0}.movex".format(side), dv=-0, v=0)
             cmds.setDrivenKeyframe(finger_joint, at="rotateX", cd="holder_sdk_fingers{0}.movex".format(side), dv=10, v=30)
 
-
         # create driven keys for finger spread
         cmds.setDrivenKeyframe("fk_sdk_IndexFinger1{0}".format(side), at="rotateZ", cd="holder_sdk_fingers{0}.spread".format(side), dv=-10, v=-15)
         cmds.setDrivenKeyframe("fk_sdk_IndexFinger1{0}".format(side), at="rotateZ", cd="holder_sdk_fingers{0}.spread".format(side), dv=-0, v=0)
@@ -146,7 +161,6 @@ def create_finger_sdk():
         cmds.setDrivenKeyframe("fk_sdk_PinkyFinger1{0}".format(side), at="rotateZ", cd="holder_sdk_fingers{0}.spread".format(side), dv=-10, v=20)
         cmds.setDrivenKeyframe("fk_sdk_PinkyFinger1{0}".format(side), at="rotateZ", cd="holder_sdk_fingers{0}.spread".format(side), dv=-0, v=0)
         cmds.setDrivenKeyframe("fk_sdk_PinkyFinger1{0}".format(side), at="rotateZ", cd="holder_sdk_fingers{0}.spread".format(side), dv=10, v=-15)
-
 
         # create driven keys on Y affecting only first joint
         cmds.setDrivenKeyframe("fk_sdk_IndexFinger1{0}".format(side), at="rotateX", cd="holder_sdk_fingers{0}.movez".format(side), dv=-10, v=-45)

@@ -1,11 +1,11 @@
 import maya.cmds as cmds
-from Rig.Tools.layout_tools import joint_dictionary_creator
 from System.utils import calculatePVPosition as calc_pv
 from System.utils import connect_point_constraint, connect_orient_constraint, mirror_object
 from definitions import CONTROLS_DIR
 from System.file_handle import file_read_yaml, import_curve
 from System.utils import create_stretch
 # TODO: Refactor to Class objects
+
 
 def create_arm_rig(dict):
     # List all necessary joints
@@ -18,7 +18,6 @@ def create_arm_rig(dict):
         grp_offset = cmds.group(n="fk_offset_" + jd[3], em=True)
         grp_sdk = cmds.group(n="fk_sdk_" + jd[3], em=True)
         grp_flip = cmds.group(n="fk_flip_" + jd[3], em=True)
-        # ctrl = cmds.circle(n="fk_" + jd[3], r=10, nr=(0, 1, 0))
         if "Shoulder_" in joint:
             ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Shoulder_R.yaml")), "fk_" + jd[3])
         elif "Elbow_" in joint:
@@ -33,6 +32,7 @@ def create_arm_rig(dict):
 
         cmds.setAttr(ctrl + ".overrideEnabled", 1)
         cmds.setAttr(ctrl + ".overrideColor", 18)
+        cmds.setAttr(ctrl + ".v", lock=True, k=False, cb=False)
         cmds.select(d=True)
         jnt = cmds.joint(n="fkx_" + jd[3])
         cmds.setAttr(jnt + ".drawStyle", 2)
@@ -102,13 +102,13 @@ def create_arm_rig(dict):
         cmds.makeIdentity(jnt_shoulder, a=True, r=True)
         cmds.makeIdentity(jnt_elbow, a=True, r=True)
         cmds.makeIdentity(jnt_wrist, a=True, r=True)
-        # ctrl_arm = import_ctrl(CONTROLS_DIR + 'square.ma', "ik_Arm{0}".format(side))
         ctrl_arm = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_Arm_R.yaml")), "ik_Arm{0}".format(side))
         if "_L" in side:
             mirror_object(ctrl_arm, "x")
 
         cmds.setAttr(ctrl_arm + ".overrideEnabled", 1)
         cmds.setAttr(ctrl_arm + ".overrideColor", 13)
+        cmds.setAttr(ctrl_arm + ".v", lock=True, k=False, cb=False)
         grp_offset_arm = cmds.group(n="ik_offset_Arm{0}".format(side), em=True)
         grp_offset_shoulder = cmds.group(n="ik_offset_Shoulder{0}".format(side), em=True)
         cmds.matchTransform(grp_offset_shoulder, "Shoulder{0}".format(side))
@@ -124,10 +124,10 @@ def create_arm_rig(dict):
         cmds.parent(ikh[0], ctrl_arm)
         cmds.setAttr(ikh[0] + ".visibility", 0)
         # Create PV
-        # pv_arm = cmds.circle(n="pv_Arm{0}".format(side), r=5, nr=(0, 0, 1))
         pv_arm = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_pv.yaml")), "pv_Arm{0}".format(side))
         cmds.setAttr(pv_arm + ".overrideEnabled", 1)
         cmds.setAttr(pv_arm + ".overrideColor", 13)
+        cmds.setAttr(pv_arm + ".v", lock=True, k=False, cb=False)
         grp_pv_arm = cmds.group(n="pv_offset_Arm{0}".format(side), em=True)
         cmds.parent(pv_arm, grp_pv_arm)
         pv_pos = calc_pv(["Shoulder{0}".format(side), "Elbow{0}".format(side), "Wrist{0}".format(side)], 20)
@@ -137,10 +137,19 @@ def create_arm_rig(dict):
         cmds.poleVectorConstraint(pv_arm, ikh[0])
 
         # Create ik/fk switch
-        # switch_arm = cmds.circle(n="ikfk_arm{0}".format(side), nr=(0, 1, 0), c=(0, 0, 0), r=2)
         switch_arm = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ikfk.yaml")), "ikfk_arm{0}".format(side))
         cmds.setAttr(switch_arm + ".overrideEnabled", 1)
         cmds.setAttr(switch_arm + ".overrideColor", 21)
+        cmds.setAttr(switch_arm + ".tx", lock=True, k=False, cb=False)
+        cmds.setAttr(switch_arm + ".ty", lock=True, k=False, cb=False)
+        cmds.setAttr(switch_arm + ".tz", lock=True, k=False, cb=False)
+        cmds.setAttr(switch_arm + ".rx", lock=True, k=False, cb=False)
+        cmds.setAttr(switch_arm + ".ry", lock=True, k=False, cb=False)
+        cmds.setAttr(switch_arm + ".rz", lock=True, k=False, cb=False)
+        cmds.setAttr(switch_arm + ".sx", lock=True, k=False, cb=False)
+        cmds.setAttr(switch_arm + ".sy", lock=True, k=False, cb=False)
+        cmds.setAttr(switch_arm + ".sz", lock=True, k=False, cb=False)
+
         grp_switch_arm = cmds.group(n="offset_switch_arm{0}".format(side), em=True)
         cmds.matchTransform(grp_switch_arm, "Shoulder{0}".format(side), pos=True)
         if side == "_R":

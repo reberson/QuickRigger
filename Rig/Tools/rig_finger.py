@@ -1,10 +1,9 @@
 import maya.cmds as cmds
-from Rig.Tools.layout_tools import joint_dictionary_creator
-from System.utils import connect_point_constraint, connect_orient_constraint, mirror_object
 from definitions import CONTROLS_DIR
 from System.file_handle import file_read_yaml, import_curve
 
 # TODO: Refactor to Class objects
+
 
 def create_finger_rig(dict):
     sides = ["_R", "_L"]
@@ -13,7 +12,6 @@ def create_finger_rig(dict):
         finger_grp = cmds.group(em=True, n="fk_offset_fingers{0}".format(side))
         cmds.matchTransform(finger_grp, "Wrist{0}".format(side))
         cmds.parent(finger_grp, "fk_system")
-        # TODO: replace this absurd manual setup to list comprehension
         # List all necessary joints
         finger_list = ["IndexMeta{0}".format(side), "MiddleMeta{0}".format(side), "RingMeta{0}".format(side), "PinkyMeta{0}".format(side), "ThumbFinger1{0}".format(side), "ThumbFinger2{0}".format(side), "ThumbFinger3{0}".format(side), "IndexFinger1{0}".format(side), "IndexFinger2{0}".format(side), "IndexFinger3{0}".format(side), "MiddleFinger1{0}".format(side), "MiddleFinger2{0}".format(side), "MiddleFinger3{0}".format(side), "RingFinger1{0}".format(side), "RingFinger2{0}".format(side), "RingFinger3{0}".format(side),  "PinkyFinger1{0}".format(side),  "PinkyFinger2{0}".format(side),  "PinkyFinger3{0}".format(side)]
 
@@ -30,6 +28,7 @@ def create_finger_rig(dict):
                 ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Finger_R.yaml")), "fk_" + jd[3])
             cmds.setAttr(ctrl + ".overrideEnabled", 1)
             cmds.setAttr(ctrl + ".overrideColor", 18)
+            cmds.setAttr(ctrl + ".v", lock=True, k=False, cb=False)
             cmds.select(d=True)
             jnt = cmds.joint(n="fkx_" + jd[3])
             cmds.setAttr(jnt + ".drawStyle", 2)

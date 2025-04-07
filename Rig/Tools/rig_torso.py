@@ -1,5 +1,4 @@
 import maya.cmds as cmds
-from Rig.Tools.layout_tools import joint_dictionary_creator
 from System.utils import connect_point_constraint, connect_orient_constraint, mirror_object
 from definitions import CONTROLS_DIR
 from System.file_handle import file_read_yaml, import_curve
@@ -19,16 +18,14 @@ def create_torso_rig(dict):
         grp_sdk = cmds.group(n="fk_sdk_" + jd[3], em=True)
         grp_flip = cmds.group(n="fk_flip_" + jd[3], em=True)
         if "Spine1_" in joint:
-            # ctrl = cmds.circle(n="fk_" + jd[3], r=10, nr=(0, 1, 0))
             ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Spine1.yaml")), "fk_" + jd[3])
         elif "Spine2_" in joint:
-            # ctrl = cmds.circle(n="fk_" + jd[3], r=10, nr=(0, 1, 0))
             ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Spine2.yaml")), "fk_" + jd[3])
         elif "Chest_" in joint:
-            # ctrl = cmds.circle(n="fk_" + jd[3], r=10, nr=(0, 1, 0))
             ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Chest.yaml")), "fk_" + jd[3])
         cmds.setAttr(ctrl + ".overrideEnabled", 1)
         cmds.setAttr(ctrl + ".overrideColor", 17)
+        cmds.setAttr(ctrl + ".v", lock=True, k=False, cb=False)
         cmds.select(d=True)
         jnt = cmds.joint(n="fkx_" + jd[3])
         cmds.setAttr(jnt + ".drawStyle", 2)
@@ -73,6 +70,7 @@ def create_torso_rig(dict):
             mirror_object(ctrl, "z")
         cmds.setAttr(ctrl + ".overrideEnabled", 1)
         cmds.setAttr(ctrl + ".overrideColor", 17)
+        cmds.setAttr(ctrl + ".v", lock=True, k=False, cb=False)
         cmds.select(d=True)
         jnt = cmds.joint(n="fkx_" + jd[3])
         cmds.setAttr(jnt + ".drawStyle", 2)
@@ -153,6 +151,7 @@ def create_torso_rig(dict):
             ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_Neck.yaml")), "ik_" + jd[3])
         cmds.setAttr(ctrl + ".overrideEnabled", 1)
         cmds.setAttr(ctrl + ".overrideColor", 4)
+        cmds.setAttr(ctrl + ".v", lock=True, k=False, cb=False)
         cmds.select(d=True)
         jnt = cmds.joint(n="bind_" + jd[3])
         cmds.setAttr(jnt + ".drawStyle", 2)
@@ -184,12 +183,20 @@ def create_torso_rig(dict):
     cmds.connectAttr(spine_pma_node + ".output1D", "ikh_Spine.twist")
 
     # Create ik/fk switch
-    # switch_torso = cmds.circle(n="ikfk_torso", nr=(0, 1, 0), c=(0, 0, 0), r=2)
     switch_torso = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ikfk.yaml")), "ikfk_torso")
     cmds.addAttr(switch_torso, longName="ikSwitch", attributeType="double", min=0, max=1, dv=0)
     cmds.setAttr(str(switch_torso) + ".ikSwitch", e=True, channelBox=True)
     cmds.setAttr(switch_torso + ".overrideEnabled", 1)
     cmds.setAttr(switch_torso + ".overrideColor", 21)
+    cmds.setAttr(switch_torso + ".tx", lock=True, k=False, cb=False)
+    cmds.setAttr(switch_torso + ".ty", lock=True, k=False, cb=False)
+    cmds.setAttr(switch_torso + ".tz", lock=True, k=False, cb=False)
+    cmds.setAttr(switch_torso + ".rx", lock=True, k=False, cb=False)
+    cmds.setAttr(switch_torso + ".ry", lock=True, k=False, cb=False)
+    cmds.setAttr(switch_torso + ".rz", lock=True, k=False, cb=False)
+    cmds.setAttr(switch_torso + ".sx", lock=True, k=False, cb=False)
+    cmds.setAttr(switch_torso + ".sy", lock=True, k=False, cb=False)
+    cmds.setAttr(switch_torso + ".sz", lock=True, k=False, cb=False)
     switch_torso_attr = switch_torso + ".ikSwitch"
     # Create unhide attribute
     cmds.addAttr(switch_torso, longName="unhide", attributeType="double", min=0, max=1, dv=0)

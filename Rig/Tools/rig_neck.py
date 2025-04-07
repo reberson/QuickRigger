@@ -1,13 +1,8 @@
 import maya.cmds as cmds
-from Rig.Tools.layout_tools import joint_dictionary_creator
-from definitions import CONTROLS_DIR
-from System.file_handle import import_ctrl
 from System.utils import connect_point_constraint, connect_orient_constraint, mirror_object
 from definitions import CONTROLS_DIR
 from System.file_handle import file_read_yaml, import_curve
 
-# TODO: Refactor to Class objects
-# TODO: Add support for twist joint
 
 def create_neck_rig(dict):
     # List all necessary joints
@@ -27,6 +22,8 @@ def create_neck_rig(dict):
 
         cmds.setAttr(ctrl + ".overrideEnabled", 1)
         cmds.setAttr(ctrl + ".overrideColor", 17)
+        cmds.setAttr(ctrl + ".v", lock=True, k=False, cb=False)
+
         cmds.select(d=True)
         jnt = cmds.joint(n="fkx_" + jd[3])
         cmds.setAttr(jnt + ".drawStyle", 2)
@@ -36,8 +33,10 @@ def create_neck_rig(dict):
         cmds.parent(grp_flip, grp_sdk)
         cmds.parent(grp_sdk, grp_offset)
         cmds.xform(grp_offset, ws=True, t=jd[0], ro=jd[1], roo=jd[2])
-        cmds.orientConstraint(jnt, joint)
-        cmds.orientConstraint(jnt, joint)
+        const_ori = cmds.orientConstraint(jnt, joint)
+        const_point = cmds.pointConstraint(jnt, joint)
+        cmds.parent(const_ori, "constraints")
+        cmds.parent(const_point, "constraints")
         # Create additional head groups for global follow
         if "Head" in joint:
             grp_master = cmds.group(n="fk_master_" + jd[3], em=True)
@@ -61,10 +60,8 @@ def create_neck_rig(dict):
             cmds.addAttr("fk_" + jd[3], longName="global", attributeType="double", min=0, max=1, dv=0)
             cmds.setAttr("fk_" + jd[3] + ".global", e=True, channelBox=True)
             cmds.setAttr("fk_" + jd[3] + ".global", 1)
-            # Constrain the fk shoulder to both follow chest and follow global
+            # Constrain the fk head to both follow chest and follow global
             connect_orient_constraint(grp_fl, grp_fl_neck, grp_fl_global, "fk_" + jd[3] + ".global")
-            # cmds.parent("fk_offset_{0}".format(shoulder), grp_fk_shld_flw)
-            # Constraint global to globalsystem and follow neck to neck joint
             cmds.orientConstraint(grp_gl_head, grp_fl_global, mo=True, n="follow_global_" + jd[3])
             cmds.orientConstraint("Neck_M", grp_fl_neck, mo=True, n="follow_neck_" + jd[3])
 

@@ -4,6 +4,7 @@ import Rig
 from Rig.Tools import layout_tools
 from Rig.Tools import constructor_tools
 from Rig.Tools import rig_root, rig_torso, rig_arm, rig_leg, rig_finger, rig_sdk_finger, rig_neck
+from Rig.Tools import rig_facial_brow
 from System.file_handle import file_dialog_yaml as fd
 from System.file_handle import export_curve, import_curve
 import System.utils
@@ -40,13 +41,16 @@ def menu():
     # Rig builder
     cmds.menuItem('builder', p=menu_name, l='Builder', subMenu=True, tearOff=True)
 
-    # Rig build -- Main Action
-    cmds.menuItem(p='builder', l='Build rig', stp='python',
+    # Rig body
+    cmds.menuItem('body', p='builder', l='Body', subMenu=True, tearOff=True)
+
+    # Rig body - build -- Main Action
+    cmds.menuItem(p='body', l='Build rig', stp='python',
                   c=lambda *args: build_rig(),
                   ann='Generates the complete rig based on reference joints')
 
-    # Rig build -- Step by step actions
-    cmds.menuItem('steps', p='builder', l='Step by step', subMenu=True, tearOff=True)
+    # Rig body - build -- Step by step actions
+    cmds.menuItem('steps', p='body', l='Step by step', subMenu=True, tearOff=True)
 
     cmds.menuItem(p='steps', l='Create deform', stp='python',
                   c=lambda *args: constructor_tools.create_deform_rig(),
@@ -80,6 +84,27 @@ def menu():
                   c=lambda *args: rig_sdk_finger.create_finger_sdk(),
                   ann='Creates the sdk controls for fingers')
 
+    # Rig face
+    cmds.menuItem('face', p='builder', l='Face', subMenu=True, tearOff=True)
+
+    # Rig face - Steps
+    cmds.menuItem('facesteps', p='face', l='Step by step', subMenu=True, tearOff=True)
+
+    cmds.menuItem(p='facesteps', l='face structure', stp='python',
+                  c=lambda *args: constructor_tools.create_rig_structure_face(),
+                  ann='Creates the base structure for face rig')
+
+    cmds.menuItem(p='facesteps', l='brow rig', stp='python',
+                  c=lambda *args: rig_facial_brow.create_brow(layout_tools.joint_dictionary_creator()),
+                  ann='Creates the rig controls for the brow')
+    # Rig face - Tools
+    cmds.menuItem('facetools', p='face', l='Face Tools', subMenu=True, tearOff=True)
+    cmds.menuItem(p='facetools', l='Attach Brow', stp='python',
+                  c=lambda *args: rig_facial_brow.attach_brow(),
+                  ann='Attach brow control to ribbon')
+    cmds.menuItem(p='facetools', l='Detach Brow', stp='python',
+                  c=lambda *args: rig_facial_brow.detach_brow(),
+                  ann='Detach brow control from ribbon')
 
     # Tools Menu
     cmds.menuItem('tools', p=menu_name, l='Tools', subMenu=True, tearOff=True)

@@ -120,4 +120,5 @@ def import_curve(curve_dict):
     for empty_curve in created_curves_new:
         cmds.delete(empty_curve)
     cmds.select(d=True)
+    cmds.setAttr(ctrl_grp + ".v", lock=True, k=False, cb=False)
     return ctrl_grp

@@ -90,6 +90,7 @@ def connect_orient_constraint(def_jnt, fk_jnt, ik_jnt, attribute):
     cmds.connectAttr(reverse_node + ".output.outputX", orient_constraint[0] + "." + fk_jnt + "W1")
     return orient_constraint
 
+
 # Todo: Find a way to make sure the Left twist joints are on the oposite orientation. Might not brake as is, but it's good to set
 def create_twist_joint(parent_jnt, child_jnt, name):
     start = cmds.xform(parent_jnt, q=True, ws=True, t=True)
@@ -179,6 +180,12 @@ def create_stretch(stretch_jnt, scale_jnt, att_holder, grp_offset, ikx_jnt, twis
     st_ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "cntrl_stretch_limb.yaml")), "cntrl_stretch_" + scale_jnt)
     cmds.setAttr(st_ctrl + ".overrideEnabled", 1)
     cmds.setAttr(st_ctrl + ".overrideColor", 16)
+    cmds.setAttr(st_ctrl + ".tx", lock=True, k=False, cb=False)
+    cmds.setAttr(st_ctrl + ".tz", lock=True, k=False, cb=False)
+    cmds.setAttr(st_ctrl + ".rx", lock=True, k=False, cb=False)
+    cmds.setAttr(st_ctrl + ".ry", lock=True, k=False, cb=False)
+    cmds.setAttr(st_ctrl + ".rz", lock=True, k=False, cb=False)
+
     cmds.parent(st_ctrl, flip_grp)
     cmds.parent(flip_grp, sdk_grp)
     cmds.parent(sdk_grp, off_grp)
@@ -191,3 +198,86 @@ def create_stretch(stretch_jnt, scale_jnt, att_holder, grp_offset, ikx_jnt, twis
 
     if "_L" in stretch_jnt:
         cmds.xform(flip_grp, r=True, ro=(180, 0, 0))
+
+
+def create_ribbon(ribbon_name, transform_list):
+    point_list = []
+    for index, jnt in enumerate(transform_list):
+        point = cmds.xform(jnt, q=True, ws=True, t=True)
+        vector = OpenMaya.MVector(point[0], point[1], point[2])
+        # add twice the value of the first and last, so it has one span for each joint position
+        if index == 0:
+            point_list.append(point)
+        elif index == len(transform_list) - 1:
+            point_list.append(point)
+        point_list.append(point)
+    new_curve = cmds.curve(p=point_list)
+    cmds.reverseCurve(new_curve)
+    extruded_ribbon = cmds.extrude(new_curve, et=0, l=0.5, po=0, d=(0, -1, 0), n=ribbon_name)
+    cmds.delete(new_curve)
+    ribbon_shape = cmds.listRelatives(extruded_ribbon[0])
+    param_u_step = (1 / len(transform_list) / 2)
+    ribbon_follicle_grp = cmds.group(em=True, n="follicles_" + ribbon_name)
+    ribbon = cmds.listRelatives(ribbon_shape, p=True)
+
+    for item in reversed(transform_list):
+        follicle = cmds.createNode("follicle")
+        follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_" + item)
+        follicle = cmds.listRelatives(follicle_transform)[0]
+        # ctrl = cmds.circle(n="ctrl_brow_sec" + str(i), cz=1, r=0.75, nr=(0, 0, 1))
+        cmds.connectAttr(ribbon_shape[0] + ".local", follicle + ".inputSurface")
+        cmds.connectAttr(ribbon_shape[0] + ".worldMatrix", follicle + ".inputWorldMatrix")
+        cmds.connectAttr(follicle + ".outRotate", follicle_transform + ".rotate")
+        cmds.connectAttr(follicle + ".outTranslate", follicle_transform + ".translate")
+        cmds.setAttr(follicle + ".parameterV", 0.5)
+        cmds.setAttr(follicle + ".parameterU", param_u_step)
+        param_u_step += 1 / len(transform_list)
+        cmds.parent(follicle_transform, ribbon_follicle_grp)
+        cmds.select(d=True)
+
+    return ribbon, ribbon_follicle_grp, ribbon_shape, param_u_step
+
+
+def create_ribbon_flat(start_point, end_point, origin_point, ribbon_name, transform_list):
+    start = cmds.xform(start_point, q=True, ws=True, t=True)
+    end = cmds.xform(end_point, q=True, ws=True, t=True)
+    startV = OpenMaya.MVector(start[0], start[1], start[2])
+    endV = OpenMaya.MVector(end[0], end[1], end[2])
+    startEnd = endV[0] - startV[0]
+    ribbon = cmds.nurbsPlane(n=ribbon_name, u=len(transform_list), v=1, axis=(0, 1, 0), d=3, w=startEnd, lr=0.1)
+    cmds.matchTransform(ribbon_name, origin_point, pos=True)
+    cmds.xform(ribbon, ro=(90, 0, 180))
+    cmds.makeIdentity(ribbon, a=True, r=True, t=True)
+    ribbon_shape = cmds.listRelatives(ribbon[0])
+    param_u_step = (1 / len(transform_list) / 2)
+    ribbon_follicle_grp = cmds.group(em=True, n="follicles_" + ribbon_name)
+
+    for item in transform_list:
+        follicle = cmds.createNode("follicle")
+        follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_" + item)
+        follicle = cmds.listRelatives(follicle_transform)[0]
+        # ctrl = cmds.circle(n="ctrl_brow_sec" + str(i), cz=1, r=0.75, nr=(0, 0, 1))
+        cmds.connectAttr(ribbon_shape[0] + ".local", follicle + ".inputSurface")
+        cmds.connectAttr(ribbon_shape[0] + ".worldMatrix", follicle + ".inputWorldMatrix")
+        cmds.connectAttr(follicle + ".outRotate", follicle_transform + ".rotate")
+        cmds.connectAttr(follicle + ".outTranslate", follicle_transform + ".translate")
+        cmds.setAttr(follicle + ".parameterV", 0.5)
+        cmds.setAttr(follicle + ".parameterU", param_u_step)
+        param_u_step += 1 / len(transform_list)
+        cmds.parent(follicle_transform, ribbon_follicle_grp)
+        cmds.select(d=True)
+
+    return ribbon, ribbon_follicle_grp, ribbon_shape, param_u_step
+
+
+def create_lattice_plane(origin_transform, height, width, name):
+    grp = cmds.group(em=True, n="group_" + name)
+    proj_plane = cmds.polyPlane(n=name, ax=(0, 0, 1), h=height, w=width)
+    proj_plane_shape = cmds.listRelatives(proj_plane[0])
+    cmds.delete(proj_plane, constructionHistory=True)
+    proj_plane_lattice = cmds.lattice(proj_plane[0], dv=(5, 5, 2), oc=True, n=name + "_")
+    cmds.parent(proj_plane[0], grp)
+    cmds.parent(proj_plane_lattice[1], grp)
+    cmds.parent(proj_plane_lattice[2], grp)
+    cmds.matchTransform(grp, origin_transform, pos=True)
+    return grp, proj_plane, proj_plane_lattice, proj_plane_shape

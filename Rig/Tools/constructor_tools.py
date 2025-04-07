@@ -110,3 +110,16 @@ def create_rig_structure():
     cmds.connectAttr(nd_main_scale + '.output', "joint_reference.scale")
     cmds.connectAttr(nd_main_scale + '.output', stretch_grp + ".scale")
 
+
+def create_rig_structure_face():
+    grp_sys = cmds.group(em=True, n="face_system")
+    grp_follow_root = cmds.group(em=True, n="face_constrain_root")
+    grp_follow_head = cmds.group(em=True, n="face_constrain_head")
+    grp_mediators = cmds.group(em=True, n="face_mediators")
+    grp_const = cmds.group(em=True, n="face_constraints")
+    cmds.parent(grp_follow_root, grp_sys)
+    cmds.parent(grp_follow_head, grp_sys)
+    cmds.parent(grp_mediators, grp_sys)
+    cmds.parent(grp_const, grp_sys)
+    cmds.pointConstraint("Head_M", grp_follow_head)
+    cmds.orientConstraint("Head_M", grp_follow_head)
