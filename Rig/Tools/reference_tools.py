@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import io
 from definitions import ROOT_DIR
+from System.file_handle import file_dialog_yaml
 
 
 def joint_reference_save():
@@ -16,10 +17,11 @@ def joint_reference_save():
     # combine both joint data and joint hierarchy dictionaries into a single dictionary to save.
     combined_data = {"joints": joint_data, "hierarchy": hierarchy_dict}
     # Prompt a save dialog window for the user to save the information into a YAML file
-    saved_file = cmds.fileDialog2(bbo=1, cap="Save joint references", ds=2, ff="*.yaml;;*.yml", fm=0)
-    output = Path(saved_file[0])
-    with io.open(output, "w") as stream:
-        yaml.dump(combined_data, stream, default_flow_style=False, allow_unicode=True)
+    file_dialog_yaml("Save joint references", mode="w", saved_data=combined_data)
+    # saved_file = cmds.fileDialog2(bbo=1, cap="Save joint references", ds=2, ff="*.yaml;;*.yml", fm=0)
+    # output = Path(saved_file[0])
+    # with io.open(output, "w") as stream:
+    #     yaml.dump(combined_data, stream, default_flow_style=False, allow_unicode=True)
 
 
 def hierarchy_store(parent, tree_dict):
@@ -39,13 +41,14 @@ def hierarchy_load(tree_dict):
         hierarchy_load(child_tree)
 
 
-def load_reference_file():
-    """Prompt an open dialog window to for the user to select a Yaml file to open"""
-    opened_file = cmds.fileDialog2(bbo=1, cap="Load joint reference", ds=2, ff="*.yaml;;*.yml", fm=1)
-    output = Path(opened_file[0])
-    with open(output, "r") as stream:
-        loaded_data = yaml.load(stream, Loader=yaml.FullLoader)
-    return loaded_data
+# def load_reference_file():
+#     """Prompt an open dialog window to for the user to select a Yaml file to open"""
+#     loaded_data = file_dialog_yaml("Load joint reference", mode="r")
+#     # opened_file = cmds.fileDialog2(bbo=1, cap="Load joint reference", ds=2, ff="*.yaml;;*.yml", fm=1)
+#     # output = Path(opened_file[0])
+#     # with open(output, "r") as stream:
+#     #     loaded_data = yaml.load(stream, Loader=yaml.FullLoader)
+#     return loaded_data
 
 
 def load_template_file():

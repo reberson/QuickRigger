@@ -3,7 +3,7 @@ from Rig.Tools.reference_tools import joint_dictionary_creator
 from System.utils import calculatePVPosition as calc_pv
 from System.utils import connect_point_constraint, connect_orient_constraint
 from definitions import CONTROLS_DIR
-from System.import_files import import_ctrl
+from System.file_handle import import_ctrl
 
 # TODO: Refactor to Class objects
 

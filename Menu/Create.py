@@ -4,6 +4,8 @@ import Rig
 from Rig.Tools import reference_tools
 from Rig.Tools import constructor_tools
 from Rig.Tools import rig_root, rig_torso, rig_arm, rig_leg, rig_finger, rig_sdk_finger, rig_neck
+from System.file_handle import file_dialog_yaml as fd
+from System.file_handle import export_curve
 
 
 def Menu():
@@ -27,7 +29,7 @@ def Menu():
                   ann='Save Reference Joints into YAML')
 
     cmds.menuItem(p='reference', l='Load Reference Data', stp='python',
-                  c=lambda *args: reference_tools.joint_reference_create(reference_tools.load_reference_file()),
+                  c=lambda *args: reference_tools.joint_reference_create(fd("Load joint reference", mode="r")),
                   ann='Load Reference Joints from file')
 
     cmds.menuItem(p='reference', l='Load Template', stp='python',
@@ -76,6 +78,14 @@ def Menu():
     cmds.menuItem(p='steps', l='Create fingers sdk', stp='python',
                   c=lambda *args: rig_sdk_finger.create_finger_sdk(),
                   ann='Creates the sdk controls for fingers')
+
+    # Tools Menu
+    cmds.menuItem('tools', p=menu_name, l='Tools', subMenu=True, tearOff=True)
+
+    # Tools Menu -- Actions
+    cmds.menuItem(p='tools', l='Export curve', stp='python',
+                  c=lambda *args: export_curve(),
+                  ann='Save curve object into YAML')
 
 
 def build_rig():
