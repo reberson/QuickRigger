@@ -284,7 +284,8 @@ def create_leg_rig(dict, twist=True):
 
         if side == "_L":
             # cmds.xform(grp_sideroll, r=True, ro=(0, 180, 0))
-            cmds.xform(grp_frontroll, r=True, ro=(0, 180, 0))
+            # cmds.xform(grp_frontroll, r=True, ro=(0, 180, 0))
+            cmds.xform(grp_frontroll, r=True, s=(-1, 1, 1))
 
         # cmds.setDrivenKeyframe("ik_Leg{0}".format(side), at="sideroll", cd="ik_sdk_FootSideRoll{0}.tx".format(side), dv=-10,v=-10)
         # cmds.setDrivenKeyframe("ik_Leg{0}".format(side), at="sideroll", cd="ik_sdk_FootSideRoll{0}.tx".format(side), dv=0, v=0)

@@ -189,7 +189,8 @@ def create_deform_rig_face():
         cmds.makeIdentity(joint, a=True, r=True)
 
 
-def set_scale_compensate(value=0):
-    jnt_list = cmds.listRelatives("deformation_joints", type="joint", ad=True)
+def set_scale_compensate(attr_value=0):
+    jnt_list = cmds.listRelatives("Root", type="joint", ad=True)
     for jnt in jnt_list:
-        cmds.setAttr(jnt + ".segmentScaleCompensate", value)
+        cmds.setAttr(jnt + ".segmentScaleCompensate", attr_value)
+    cmds.setAttr("Root.segmentScaleCompensate", attr_value)
