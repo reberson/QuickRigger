@@ -15,6 +15,21 @@ def mirror_object(object_tr, axis):
     cmds.makeIdentity(object_tr, a=True, s=True)
 
 
+def mirror_joint(first_joint):
+    """Mirrors the joint and gives proper naming"""
+    if "_L" in str(first_joint):
+        cmds.mirrorJoint(first_joint, mb=True, myz=True, sr=["_L", "_R"])
+    elif "_l" in str(first_joint):
+        cmds.mirrorJoint(first_joint, mb=True, myz=True, sr=["_l", "_r"])
+    elif "_R" in str(first_joint):
+        cmds.mirrorJoint(first_joint, mb=True, myz=True, sr=["_R", "_L"])
+    elif "_r" in str(first_joint):
+        cmds.mirrorJoint(first_joint, mb=True, myz=True, sr=["_r", "_l"])
+    else:
+        cmds.error(f"The joint {first_joint} is not eligible to be mirrored")
+    cmds.select(d=True)
+
+
 def calculatePVPosition(jnts, distance):
     start = cmds.xform(jnts[0], q=True, ws=True, t=True)
     mid = cmds.xform(jnts[1], q=True, ws=True, t=True)
@@ -213,10 +228,12 @@ def create_ribbon(ribbon_name, transform_list):
         point_list.append(point)
     new_curve = cmds.curve(p=point_list)
     cmds.reverseCurve(new_curve)
-    extruded_ribbon = cmds.extrude(new_curve, et=0, l=0.5, po=0, d=(0, -1, 0), n=ribbon_name)
+    extruded_ribbon = cmds.extrude(new_curve, et=0, l=0.2, po=0, d=(0, -1, 0), n=ribbon_name)
     cmds.delete(new_curve)
     ribbon_shape = cmds.listRelatives(extruded_ribbon[0])
-    param_u_step = (1 / len(transform_list) / 2)
+    steps = len(transform_list) - 1
+    param_u_step = 1 / steps
+    param_u_step_sum = 0
     ribbon_follicle_grp = cmds.group(em=True, n="follicles_" + ribbon_name)
     ribbon = cmds.listRelatives(ribbon_shape, p=True)
 
@@ -224,14 +241,13 @@ def create_ribbon(ribbon_name, transform_list):
         follicle = cmds.createNode("follicle")
         follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_" + item)
         follicle = cmds.listRelatives(follicle_transform)[0]
-        # ctrl = cmds.circle(n="ctrl_brow_sec" + str(i), cz=1, r=0.75, nr=(0, 0, 1))
         cmds.connectAttr(ribbon_shape[0] + ".local", follicle + ".inputSurface")
         cmds.connectAttr(ribbon_shape[0] + ".worldMatrix", follicle + ".inputWorldMatrix")
         cmds.connectAttr(follicle + ".outRotate", follicle_transform + ".rotate")
         cmds.connectAttr(follicle + ".outTranslate", follicle_transform + ".translate")
-        cmds.setAttr(follicle + ".parameterV", 0.5)
-        cmds.setAttr(follicle + ".parameterU", param_u_step)
-        param_u_step += 1 / len(transform_list)
+        cmds.setAttr(follicle + ".parameterV", 0)
+        cmds.setAttr(follicle + ".parameterU", param_u_step_sum)
+        param_u_step_sum += param_u_step
         cmds.parent(follicle_transform, ribbon_follicle_grp)
         cmds.select(d=True)
 
@@ -281,3 +297,5 @@ def create_lattice_plane(origin_transform, height, width, name):
     cmds.parent(proj_plane_lattice[2], grp)
     cmds.matchTransform(grp, origin_transform, pos=True)
     return grp, proj_plane, proj_plane_lattice, proj_plane_shape
+
+

@@ -11,8 +11,9 @@ def create_brow(dict):
     cmds.matchTransform(grp_ctrl, "Head_M")
     cmds.parent(grp_ctrl, "face_constrain_head")
 
-    jnt_list = ['Brow_4_R', 'Brow_3_R', 'Brow_2_R', 'Brow_1_R', 'Brow_M', 'Brow_1_L', 'Brow_2_L', 'Brow_3_L',
-                'Brow_4_L']
+    # jnt_list = ['Brow_4_R', 'Brow_3_R', 'Brow_2_R', 'Brow_1_R', 'Brow_M', 'Brow_1_L', 'Brow_2_L', 'Brow_3_L',
+    #             'Brow_4_L']
+    jnt_list = cmds.listRelatives("Brows")
 
     # create base controls
     for jnt in jnt_list:

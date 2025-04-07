@@ -34,9 +34,14 @@ def menu():
                   c=lambda *args: layout_tools.joint_layout_create(fd("Load joint reference", mode="r")),
                   ann='Load layout joints from file')
 
-    cmds.menuItem(p='layout', l='Load template', stp='python',
-                  c=lambda *args: layout_tools.joint_layout_create(layout_tools.load_template_file()),
-                  ann='Load a template rig structure')
+
+    cmds.menuItem(p='layout', l='Load body template', stp='python',
+                  c=lambda *args: layout_tools.joint_layout_create(layout_tools.load_template_file('template_humanoid.yaml')),
+                  ann='Load a template body rig structure')
+
+    cmds.menuItem(p='layout', l='Load face template', stp='python',
+                  c=lambda *args: layout_tools.joint_layout_create(layout_tools.load_template_file('template_face.yaml')),
+                  ann='Load a template face rig structure')
 
     # Rig builder
     cmds.menuItem('builder', p=menu_name, l='Builder', subMenu=True, tearOff=True)
@@ -51,6 +56,10 @@ def menu():
 
     # Rig body - build -- Step by step actions
     cmds.menuItem('steps', p='body', l='Step by step', subMenu=True, tearOff=True)
+
+    cmds.menuItem(p='steps', l='Create rig structure', stp='python',
+                  c=lambda *args: constructor_tools.create_rig_structure(),
+                  ann='Creates the structure for the rig')
 
     cmds.menuItem(p='steps', l='Create deform', stp='python',
                   c=lambda *args: constructor_tools.create_deform_rig(),
@@ -87,12 +96,21 @@ def menu():
     # Rig face
     cmds.menuItem('face', p='builder', l='Face', subMenu=True, tearOff=True)
 
+    # Rig face - build -- Main Action
+    cmds.menuItem(p='face', l='Build face rig', stp='python',
+                  c=lambda *args: build_rig_face(),
+                  ann='Generates the complete face rig based on reference joints')
+
     # Rig face - Steps
     cmds.menuItem('facesteps', p='face', l='Step by step', subMenu=True, tearOff=True)
 
     cmds.menuItem(p='facesteps', l='face structure', stp='python',
                   c=lambda *args: constructor_tools.create_rig_structure_face(),
                   ann='Creates the base structure for face rig')
+
+    cmds.menuItem(p='facesteps', l='face deform', stp='python',
+                  c=lambda *args: constructor_tools.create_deform_rig_face(),
+                  ann='Creates a complete deformation rig')
 
     cmds.menuItem(p='facesteps', l='brow rig', stp='python',
                   c=lambda *args: rig_facial_brow.create_brow(layout_tools.joint_dictionary_creator()),
@@ -120,6 +138,7 @@ def menu():
 
 
 def build_rig():
+    constructor_tools.create_rig_structure()
     constructor_tools.create_deform_rig()
     rig_root.create_root_rig(layout_tools.joint_dictionary_creator())
     rig_torso.create_torso_rig(layout_tools.joint_dictionary_creator())
@@ -130,4 +149,7 @@ def build_rig():
     rig_sdk_finger.create_finger_sdk()
 
 
-
+def build_rig_face():
+    constructor_tools.create_rig_structure_face()
+    constructor_tools.create_deform_rig_face()
+    rig_facial_brow.create_brow(layout_tools.joint_dictionary_creator())
