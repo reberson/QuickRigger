@@ -15,6 +15,8 @@ def create_finger_sdk():
     sides = ["_R", "_L"]
     for side in sides:
         grp_constraint = cmds.group(em=True, n="parentconstraint_sdk_fingers{0}".format(side))
+        # constraint scale to hand
+        cmds.scaleConstraint("Wrist{0}".format(side), grp_constraint)
         grp_flip = cmds.group(em=True, n="flip_sdk_fingers{0}".format(side))
         grp_holder = cmds.group(em=True, n="offset_holder_sdk_fingers{0}".format(side))
         ctrl_holder = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "holder_sdk_fingers.yaml")), "holder_sdk_fingers{0}".format(side))
@@ -223,6 +225,6 @@ def create_finger_sdk():
         cmds.setAttr(constraint_point_metacarpal_middle[0] + "." + grp_extra_metacarpal + "W0", 0.75)
         cmds.setAttr(constraint_point_metacarpal_middle[0] + "." + ctrl_metacarpal + "W1", 0.25)
 
-        # Scale constraint
-        blend_node = (cmds.listConnections("ikfk_arm{0}".format(side) + ".ikSwitch", t="blendColors"))[0]
-        cmds.connectAttr(blend_node + ".output", grp_constraint + ".scale")
+        # # Scale constraint
+        # blend_node = (cmds.listConnections("ikfk_arm{0}".format(side) + ".ikSwitch", t="blendColors"))[0]
+        # cmds.connectAttr(blend_node + ".output", grp_constraint + ".scale")

@@ -81,6 +81,20 @@ def create_finger_rig(dict):
         #     else:
         #         print("Warning: skipping " + finger_joint)
 
+        # New Metacarpal reparenting
+        finger_meta_list = ["fk_offset_IndexMeta{0}".format(side), "fk_offset_MiddleMeta{0}".format(side), "fk_offset_RingMeta{0}".format(side), "fk_offset_PinkyMeta{0}".format(side)]
+        for finger_meta in finger_meta_list:
+            if cmds.objExists(finger_meta):
+                if "Index" in finger_meta:
+                    cmds.parent("fk_offset_IndexFinger1{0}".format(side), "fkx_IndexMeta{0}".format(side))
+                elif "Middle" in finger_meta:
+                    cmds.parent("fk_offset_MiddleFinger1{0}".format(side), "fkx_MiddleMeta{0}".format(side))
+                elif "Ring" in finger_meta:
+                    cmds.parent("fk_offset_RingFinger1{0}".format(side), "fkx_RingMeta{0}".format(side))
+                else:
+                    cmds.parent("fk_offset_PinkyFinger1{0}".format(side), "fkx_PinkyMeta{0}".format(side))
+
+
         # Connect both fk ik rigs to def joints through pont/orient constraint workflow
         for jnt in finger_list:
             if cmds.objExists(jnt):

@@ -11,6 +11,7 @@ from System.file_handle import file_dialog_yaml as fd
 from System.file_handle import export_curve, import_curve
 from System.skin_handler import save_selected_skin_yaml, load_selected_skin_yaml
 import System.utils
+from Menu import Toolshelf
 
 
 def menu():
@@ -25,6 +26,10 @@ def menu():
 
     cmds.setParent(menu_name, menu=True)
 
+    cmds.menuItem(p=menu_name, l='Open Window', stp='python',
+                  c=lambda *args: Toolshelf.toolshelf_open(),
+                  ann='Open the Autorig main toolshelf')
+
     # Layout Menu
     cmds.menuItem('layout', p=menu_name, l='Layout', subMenu=True, tearOff=True)
 
@@ -36,7 +41,6 @@ def menu():
     cmds.menuItem(p='layout', l='Load layout data', stp='python',
                   c=lambda *args: layout_tools.joint_layout_create(fd("Load joint reference", mode="r")),
                   ann='Load layout joints from file')
-
 
     cmds.menuItem(p='layout', l='Load body template', stp='python',
                   c=lambda *args: layout_tools.joint_layout_create(layout_tools.load_template_file('template_humanoid.yaml')),
