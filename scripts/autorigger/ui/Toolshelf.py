@@ -431,66 +431,6 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         # config_file[3].clicked.connect(
         #     functools.partial(self.run_rig_config, config_file[2], dict_rig_config))
 
-    def run_rig_config(self, line_edit, dict_config):
-
-        self.load_file_path_yaml_action(line_edit, "Load Build Configuration File")
-
-        loaded_dict = file_handle.file_read_yaml(line_edit.text())
-
-        # 0 - set mesh path line:
-        dict_config['Paths'][0].setText(loaded_dict['Paths'][0])
-        # self.import_file_maya_action(dict_config['Paths'][0])
-
-        # 1 - set placement path line:
-        dict_config['Paths'][1].setText(loaded_dict['Paths'][1])
-        # self.import_file_yaml_action(dict_config['Paths'][1])
-
-        # 2 - set skin weights path line:
-        dict_config['Paths'][2].setText(loaded_dict['Paths'][2])
-        # TODO: place here code for loading skin weights (WIP)
-
-        # 3 - Face Ribbons Skins
-        dict_config['Paths'][3].setText(loaded_dict['Paths'][3])
-        # TODO: place here code for loading FACE RIBBONS skin weights (WIP)
-
-        # 4 - Face Lattice Shapes
-        dict_config['Paths'][4].setText(loaded_dict['Paths'][4])
-        # TODO: place here code for loading FACE LATTICE SHAPES (WIP)
-
-        # 5 - Face Lattice Skins
-        dict_config['Paths'][5].setText(loaded_dict['Paths'][5])
-        # TODO: place here code for loading FACE LATTICE skin weights (WIP)
-
-        # Checklist - Body
-        for index, body_item in enumerate(dict_config['Checklist_Body']):
-            body_item[0].setChecked(loaded_dict['Checklist_Body'][index])
-
-        # Checklist - Face
-        for index, face_item in enumerate(dict_config['Checklist_Face']):
-            face_item[0].setChecked(loaded_dict['Checklist_Face'][index])
-
-        # Checklist - Misc
-        for index, misc_item in enumerate(dict_config['Checklist_Misc']):
-            misc_item[0].setChecked(loaded_dict['Checklist_Misc'][index])
-
-
-    def save_rig_config(self, dict_config):
-        """ Transfer the values from the config dictionary to a new dictionary and save it"""
-        saved_data = {'Paths': [], 'Checklist_Body': [], 'Checklist_Face': [], 'Checklist_Misc': []}
-        for path_line in dict_config['Paths']:
-            saved_data['Paths'].append(path_line.text())
-
-        for body_item in dict_config['Checklist_Body']:
-            saved_data['Checklist_Body'].append(body_item[0].isChecked())
-
-        for face_item in dict_config['Checklist_Face']:
-            saved_data['Checklist_Face'].append(face_item[0].isChecked())
-
-        for misc_item in dict_config['Checklist_Misc']:
-            saved_data['Checklist_Misc'].append(misc_item[0].isChecked())
-
-        file_handle.file_dialog_yaml('Save Configuration File', 'w', saved_data)
-
     def create_tools_tab(self, tabs, face=False):
         tab_layout = QtWidgets.QVBoxLayout()
         tab = QtWidgets.QWidget()
@@ -534,10 +474,16 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         line_1.setFrameShape(QtWidgets.QFrame.HLine)
         grid_layout_placement.addWidget(line_1, 2, 0, 1, 2)
 
+        # Rig Tools
+        # Title
+        title_rig = QtWidgets.QLabel("Rig Tools")
+        title_rig.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+        grid_layout_placement.addWidget(title_rig, 3, 0, 1, 2)
+
         # Placement Tools
         # Title
         title_placement = QtWidgets.QLabel("Placement Tools")
-        grid_layout_placement.addWidget(title_placement, 3, 0, 1, 2)
+        grid_layout_placement.addWidget(title_placement, 4, 0, 1, 2)
 
         # Buttons
         button_template_body_load = QtWidgets.QPushButton('Load Body Template')
@@ -557,18 +503,12 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         # Separator
         line_1 = QtWidgets.QFrame()
         line_1.setFrameShape(QtWidgets.QFrame.HLine)
-        grid_layout_placement.addWidget(line_1, 6, 0, 1, 2)
-
-        # Rig Tools
-        # Title
-        title_rig = QtWidgets.QLabel("Rig Tools")
-        title_rig.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-        grid_layout_placement.addWidget(title_rig, 7, 0, 1, 2)
+        grid_layout_placement.addWidget(line_1, 7, 0, 1, 2)
 
         # Skin SubTitle
         title_skinweights_ctrls = QtWidgets.QLabel("Skin Weights Controls")
         title_skinweights_ctrls.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-        grid_layout_placement.addWidget(title_skinweights_ctrls, 8, 0, 1, 2)
+        grid_layout_placement.addWidget(title_skinweights_ctrls, 9, 0, 1, 2)
 
         # Buttons
         button_skinweights_load_sel = QtWidgets.QPushButton('Load Skin Weights')
@@ -582,7 +522,7 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         title_ribbon_ctrls = QtWidgets.QLabel("Face Ribbon Controls")
         face_widgets_list.append(title_ribbon_ctrls)
         title_ribbon_ctrls.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-        grid_layout_placement.addWidget(title_ribbon_ctrls, 10, 0, 1, 2)
+        grid_layout_placement.addWidget(title_ribbon_ctrls, 11, 0, 1, 2)
 
         # Buttons
         button_face_rib_attach = QtWidgets.QPushButton('Attach Face Ribbons')
@@ -603,12 +543,12 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         # Lattice SubTitle
         title_lattice_ctrls = QtWidgets.QLabel("Face Lattice Controls")
         title_lattice_ctrls.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-        grid_layout_placement.addWidget(title_lattice_ctrls, 13, 0, 1, 2)
+        grid_layout_placement.addWidget(title_lattice_ctrls, 14, 0, 1, 2)
 
         # Buttons
         button_face_lat_create = QtWidgets.QPushButton('Create Face Lattices')
         button_face_lat_create.clicked.connect(self.create_face_lattice)
-        grid_layout_placement.addWidget(button_face_lat_create, 14, 0, 1, 2)
+        grid_layout_placement.addWidget(button_face_lat_create, 15, 0, 1, 2)
         button_face_lat_attach = QtWidgets.QPushButton('Attach Face Lattices')
         button_face_lat_attach.clicked.connect(self.attach_face_lattice)
         grid_layout_placement.addWidget(button_face_lat_attach)
@@ -627,7 +567,7 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         # Generic Chain Subtitle
         title_generic_chain = QtWidgets.QLabel("Generic Chain Controls")
         title_generic_chain.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-        grid_layout_placement.addWidget(title_generic_chain, 17, 0, 1, 2)
+        grid_layout_placement.addWidget(title_generic_chain, 18, 0, 1, 2)
 
         # Buttons
         button_chain_attr_add = QtWidgets.QPushButton('Add Chain Attr')
@@ -638,12 +578,12 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         grid_layout_placement.addWidget(button_build_chain_selected)
         button_build_chain_all = QtWidgets.QPushButton('Build All Chains')
         button_build_chain_all.clicked.connect(rig.rig_generic_chain.create_chain_all)
-        grid_layout_placement.addWidget(button_build_chain_all, 19, 0, 1, 2)
+        grid_layout_placement.addWidget(button_build_chain_all, 20, 0, 1, 2)
 
         # Misc Subtitle
         title_misc = QtWidgets.QLabel("Misc")
         title_misc.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-        grid_layout_placement.addWidget(title_misc, 20, 0, 1, 2)
+        grid_layout_placement.addWidget(title_misc, 21, 0, 1, 2)
 
         # Buttons
         button_scale_comp_enable = QtWidgets.QPushButton('Enable Scale Compensate')
@@ -653,18 +593,6 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         button_scale_comp_disable.clicked.connect(self.scale_compensate_disable)
         grid_layout_placement.addWidget(button_scale_comp_disable)
 
-        # button_build_rig_body = QtWidgets.QPushButton('Build Basic Body Rig')
-        # button_build_rig_body.clicked.connect(self.build_rig_body)
-        # grid_layout_placement.addWidget(button_build_rig_body)
-        #
-        # button_build_rig_body_simple = QtWidgets.QPushButton('Build Basic Simple Body Rig')
-        # button_build_rig_body_simple.clicked.connect(self.build_rig_body_simple)
-        # grid_layout_placement.addWidget(button_build_rig_body_simple)
-        #
-        # button_build_rig_face = QtWidgets.QPushButton('Build Face Rig')
-        # button_build_rig_face.clicked.connect(self.build_rig_face)
-        # grid_layout_placement.addWidget(button_build_rig_face)
-
         # Control visibility of the entire Face Module:
         if face:
             for face_widget in face_widgets_list:
@@ -673,9 +601,76 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
             for face_widget in face_widgets_list:
                 face_widget.setVisible(False)
 
-    # Default action
-    def default_action(self):
-        print("Action executed")
+    def save_rig_config(self, dict_config):
+        """
+        Transfer the values from the config dictionary to a new dictionary and save it into a Yaml file
+
+        Args:
+        dict_config (dictionary): the dictionary containing all the file paths and the checklist states from the UI
+        """
+        saved_data = {'Paths': [], 'Checklist_Body': [], 'Checklist_Face': [], 'Checklist_Misc': []}
+        for path_line in dict_config['Paths']:
+            saved_data['Paths'].append(path_line.text())
+
+        for body_item in dict_config['Checklist_Body']:
+            saved_data['Checklist_Body'].append(body_item[0].isChecked())
+
+        for face_item in dict_config['Checklist_Face']:
+            saved_data['Checklist_Face'].append(face_item[0].isChecked())
+
+        for misc_item in dict_config['Checklist_Misc']:
+            saved_data['Checklist_Misc'].append(misc_item[0].isChecked())
+
+        file_handle.file_dialog_yaml('Save Configuration File', 'w', saved_data)
+
+    def run_rig_config(self, line_edit, dict_config):
+        """
+        Loads a configuration YAML file and runs all the steps
+
+        :param line_edit: the input field containing the file path of the configuration file
+        :param dict_config: the dictionary containing all the file paths and the checklist states from the UI
+        :return: None
+        """
+
+        self.load_file_path_yaml_action(line_edit, "Load Build Configuration File")
+
+        loaded_dict = file_handle.file_read_yaml(line_edit.text())
+
+        # 0 - set mesh path line:
+        dict_config['Paths'][0].setText(loaded_dict['Paths'][0])
+        # self.import_file_maya_action(dict_config['Paths'][0])
+
+        # 1 - set placement path line:
+        dict_config['Paths'][1].setText(loaded_dict['Paths'][1])
+        # self.import_file_yaml_action(dict_config['Paths'][1])
+
+        # 2 - set skin weights path line:
+        dict_config['Paths'][2].setText(loaded_dict['Paths'][2])
+        # TODO: place here code for loading skin weights (WIP)
+
+        # 3 - Face Ribbons Skins
+        dict_config['Paths'][3].setText(loaded_dict['Paths'][3])
+        # TODO: place here code for loading FACE RIBBONS skin weights (WIP)
+
+        # 4 - Face Lattice Shapes
+        dict_config['Paths'][4].setText(loaded_dict['Paths'][4])
+        # TODO: place here code for loading FACE LATTICE SHAPES (WIP)
+
+        # 5 - Face Lattice Skins
+        dict_config['Paths'][5].setText(loaded_dict['Paths'][5])
+        # TODO: place here code for loading FACE LATTICE skin weights (WIP)
+
+        # Checklist - Body
+        for index, body_item in enumerate(dict_config['Checklist_Body']):
+            body_item[0].setChecked(loaded_dict['Checklist_Body'][index])
+
+        # Checklist - Face
+        for index, face_item in enumerate(dict_config['Checklist_Face']):
+            face_item[0].setChecked(loaded_dict['Checklist_Face'][index])
+
+        # Checklist - Misc
+        for index, misc_item in enumerate(dict_config['Checklist_Misc']):
+            misc_item[0].setChecked(loaded_dict['Checklist_Misc'][index])
 
     def build_complete_rig(self, list_body, list_face, list_misc, exe_me=None, exe_pl=None, exe_sw=None, exe_swrib=None, exe_shlat=None, exe_swlat=None, buildribbon=False, buildLattice=False):
         # Load Mesh
@@ -740,9 +735,16 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         if exe_sw[2].text() == "":
             print("Skipping Skin Weights load")
         else:
-            skin_handler.load_skin_yaml_with_file(exe_sw[2].text)
+            skin_path = exe_sw[2].text()
+            skin_handler.load_skin_yaml_with_file(skin_path)
 
     def run_module_list(self, list_modules):
+        """
+        Runs all checked modules from a category list (Body, Face or Misc)
+
+        :param list_modules: The provided list of modules from a category
+        :return: None
+        """
         for module in list_modules:
             checkbox = module[0]
             module_action = module[2]
@@ -884,45 +886,6 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
 
         if 'mouth_control_group' in face_controls_list:
             rig.rig_facial_mouth.detach_mouth_lattice()
-
-    def build_rig_body(self):
-        rig.constructor_tools.create_rig_structure()
-        rig.rig_mesh_setup.move_meshes()
-        rig.constructor_tools.create_deform_rig()
-        rig.rig_root.create_root_rig(layout_tools.joint_dictionary_creator())
-        rig.rig_torso.create_torso_rig(layout_tools.joint_dictionary_creator())
-        rig.rig_neck.create_neck_rig(layout_tools.joint_dictionary_creator(), twist=True)
-        rig.rig_arm.create_arm_rig(layout_tools.joint_dictionary_creator(), twist=True)
-        rig.rig_leg.create_leg_rig(layout_tools.joint_dictionary_creator(), twist=True)
-        rig.rig_finger.create_finger_rig(layout_tools.joint_dictionary_creator())
-        rig.rig_sdk_finger.create_finger_sdk()
-        rig.constructor_tools.set_scale_compensate(0)
-
-    def build_rig_body_simple(self):
-        rig.constructor_tools.create_rig_structure()
-        rig.rig_mesh_setup.move_meshes()
-        rig.constructor_tools.create_deform_rig()
-        rig.rig_root.create_root_rig(layout_tools.joint_dictionary_creator())
-        rig.rig_torso.create_torso_rig(layout_tools.joint_dictionary_creator())
-        rig.rig_neck.create_neck_rig(layout_tools.joint_dictionary_creator(), twist=False)
-        rig.rig_arm.create_arm_rig(layout_tools.joint_dictionary_creator(), twist=False)
-        rig.rig_leg.create_leg_rig(layout_tools.joint_dictionary_creator(), twist=False)
-        rig.rig_finger.create_finger_rig(layout_tools.joint_dictionary_creator())
-        rig.constructor_tools.set_scale_compensate(0)
-
-    def build_rig_face(self):
-        rig.constructor_tools.create_rig_structure_face()
-        rig.constructor_tools.create_deform_rig_face()
-        rig.rig_facial_brow.create_brow(layout_tools.joint_dictionary_creator())
-        rig.rig_facial_eyelid.create_eyelid(layout_tools.joint_dictionary_creator())
-        rig.rig_facial_nasolabial.create_nasolabial(layout_tools.joint_dictionary_creator())
-        rig.rig_facial_mouth.create_mouth(layout_tools.joint_dictionary_creator())
-        rig.rig_facial_nose.create_nose(layout_tools.joint_dictionary_creator())
-        rig.rig_facial_cheek.create_cheek(layout_tools.joint_dictionary_creator())
-        rig.rig_facial_jaw.create_jaw(layout_tools.joint_dictionary_creator())
-        rig.rig_facial_tongue.create_tongue(layout_tools.joint_dictionary_creator())
-        rig.rig_facial_eye.create_eye(layout_tools.joint_dictionary_creator())
-        rig.constructor_tools.set_scale_compensate(0)
 
 
 def show():

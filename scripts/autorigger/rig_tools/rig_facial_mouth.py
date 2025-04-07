@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 from scripts.autorigger.shared.utils import create_lattice_plane, create_ribbon
 from scripts.autorigger.rig_tools.layout_tools import lattice_load
-from scripts.autorigger.shared.skin_handler import load_skin
+from scripts.autorigger.shared.skin_handler import load_skin_selected
 from scripts.autorigger.shared.file_handle import file_read_yaml
 from scripts.autorigger.resources.definitions import TEMPLATE_DIR
 
@@ -239,7 +239,7 @@ def create_lattice_mouth():
     cmds.select(d=True)
     # load and apply saved skin weights from yaml to have a better starting point
     proj_skin_data = file_read_yaml(TEMPLATE_DIR + "skin_lattice_mouth.yaml")
-    load_skin(proj_skin_data, proj_surface[3][0])
+    load_skin_selected(proj_skin_data, proj_surface[3][0])
     # declare all controls that will be projected
     rib_point_list = ["mouthCorner_R", "mouthUpper_M", "mouthCorner_L", "mouthLower_M"]
     for rib_point in rib_point_list:
