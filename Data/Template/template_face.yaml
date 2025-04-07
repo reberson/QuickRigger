@@ -2,15 +2,15 @@ hierarchy:
   Head_M: !!python/tuple
   - - Facial
   - Facial: !!python/tuple
-    - - Jaw_M
+    - - Tongue1_M
+      - Nose
+      - Nasolabial
+      - Mouth
+      - Jaw_M
+      - Eyelids
       - Eye_R
       - Cheeks
       - Brows
-      - Nasolabial
-      - Mouth
-      - Nose
-      - Eyelids
-      - Tongue1_M
     - Brows: !!python/tuple
       - - Brow_M
         - Brow3_R
@@ -18,21 +18,21 @@ hierarchy:
         - Brow1_R
       - {}
       Cheeks: !!python/tuple
-      - - LowerCheek1_R
-        - UpperCheek1_R
+      - - CheekLower1_R
+        - CheekUpper1_R
       - {}
       Eye_R: !!python/tuple
       - - Eye_End_R
       - {}
       Eyelids: !!python/tuple
-      - - Eyelid_Upper2_R
-        - Eyelid_Upper1_R
-        - Eyelid_InnerCourner_R
-        - Eyelid_Upper3_R
-        - Eyelid_OuterCorner_R
-        - Eyelid_Lower2_R
-        - Eyelid_Lower3_R
-        - Eyelid_Lower1_R
+      - - EyelidUpper2_R
+        - EyelidUpper1_R
+        - EyelidInnerCourner_R
+        - EyelidUpper3_R
+        - EyelidOuterCorner_R
+        - EyelidLower2_R
+        - EyelidLower3_R
+        - EyelidLower1_R
       - {}
       Jaw_M: !!python/tuple
       - - Jaw_End_M
@@ -115,6 +115,26 @@ joints:
   - xyz
   - Brows
   - Facial
+  CheekLower1_R: !!python/tuple
+  - - -7.024297605127217
+    - 168.9268919223783
+    - 5.540948983028391
+  - - 85.89712078671306
+    - 45.91173288901772
+    - -179.1956506327913
+  - xyz
+  - CheekLower1_R
+  - Cheeks
+  CheekUpper1_R: !!python/tuple
+  - - -4.5301947593688965
+    - 171.47166442871094
+    - 8.903875350952148
+  - - 91.9347045037067
+    - 9.710457982527558
+    - 177.9258637428341
+  - xyz
+  - CheekUpper1_R
+  - Cheeks
   Cheeks: !!python/tuple
   - - 0.0
     - 168.76710510253906
@@ -126,7 +146,7 @@ joints:
   - Cheeks
   - Facial
   Chin_M: !!python/tuple
-  - - 1.4519053188303815e-16
+  - - 1.4519053188304204e-16
     - 163.31344170572643
     - 9.427602060822926
   - - 82.89349833184711
@@ -136,9 +156,9 @@ joints:
   - Chin_M
   - Jaw_M
   Eye_End_R: !!python/tuple
-  - - -4.373104572296113
-    - 174.50399780273347
-    - 8.564855575561559
+  - - -4.3731045722961115
+    - 174.5039978027334
+    - 8.564855575561563
   - - 89.99917398993132
     - 4.54718629950834
     - -180.0
@@ -155,7 +175,7 @@ joints:
   - xyz
   - Eye_R
   - Facial
-  Eyelid_InnerCourner_R: !!python/tuple
+  EyelidInnerCourner_R: !!python/tuple
   - - -2.5180377819067448
     - 173.8982227444221
     - 8.092081942891776
@@ -163,9 +183,9 @@ joints:
     - -20.562585840392625
     - 175.33111127398433
   - xyz
-  - Eyelid_InnerCourner_R
+  - EyelidInnerCourner_R
   - Eyelids
-  Eyelid_Lower1_R: !!python/tuple
+  EyelidLower1_R: !!python/tuple
   - - -3.746588035330793
     - 173.13465422918162
     - 8.239763302123638
@@ -173,19 +193,19 @@ joints:
     - 0.7686441644008536
     - -163.15586346781453
   - xyz
-  - Eyelid_Lower1_R
+  - EyelidLower1_R
   - Eyelids
-  Eyelid_Lower2_R: !!python/tuple
+  EyelidLower2_R: !!python/tuple
   - - -5.0106899028625
     - 173.06627331390044
     - 8.08737692199842
   - - 62.22070389168513
-    - 16.913985786245668
+    - 16.913985786245693
     - 177.17304682454238
   - xyz
-  - Eyelid_Lower2_R
+  - EyelidLower2_R
   - Eyelids
-  Eyelid_Lower3_R: !!python/tuple
+  EyelidLower3_R: !!python/tuple
   - - -6.374453606556882
     - 173.43891161199923
     - 7.385819991268608
@@ -193,9 +213,9 @@ joints:
     - 39.1310762434186
     - 165.63692445739005
   - xyz
-  - Eyelid_Lower3_R
+  - EyelidLower3_R
   - Eyelids
-  Eyelid_OuterCorner_R: !!python/tuple
+  EyelidOuterCorner_R: !!python/tuple
   - - -7.0443489097691145
     - 174.579001885698
     - 6.793869843867245
@@ -203,19 +223,19 @@ joints:
     - 56.62361787013427
     - 173.35255320032007
   - xyz
-  - Eyelid_OuterCorner_R
+  - EyelidOuterCorner_R
   - Eyelids
-  Eyelid_Upper1_R: !!python/tuple
+  EyelidUpper1_R: !!python/tuple
   - - -3.3048132842961326
     - 175.0147495231317
     - 8.498903780421193
-  - - 100.62957696800346
+  - - 100.62957696800345
     - -11.79543387802074
     - 176.6325602879454
   - xyz
-  - Eyelid_Upper1_R
+  - EyelidUpper1_R
   - Eyelids
-  Eyelid_Upper2_R: !!python/tuple
+  EyelidUpper2_R: !!python/tuple
   - - -4.6969912748962726
     - 175.58131582256465
     - 8.332014194448913
@@ -223,9 +243,9 @@ joints:
     - 9.548029692967118
     - -178.95781824204676
   - xyz
-  - Eyelid_Upper2_R
+  - EyelidUpper2_R
   - Eyelids
-  Eyelid_Upper3_R: !!python/tuple
+  EyelidUpper3_R: !!python/tuple
   - - -6.155658539764812
     - 175.31429848294474
     - 7.702757839683944
@@ -233,7 +253,7 @@ joints:
     - 38.2292367260184
     - -174.38539693016705
   - xyz
-  - Eyelid_Upper3_R
+  - EyelidUpper3_R
   - Eyelids
   Eyelids: !!python/tuple
   - - 0.0
@@ -275,16 +295,6 @@ joints:
   - xyz
   - Jaw_M
   - Facial
-  LowerCheek1_R: !!python/tuple
-  - - -7.024297605127217
-    - 168.9268919223783
-    - 5.540948983028391
-  - - 85.89712078671306
-    - 45.91173288901772
-    - -179.1956506327913
-  - xyz
-  - LowerCheek1_R
-  - Cheeks
   LowerLip1_R: !!python/tuple
   - - -1.3325900154558614
     - 165.75334753680642
@@ -428,7 +438,7 @@ joints:
   Tongue2_M: !!python/tuple
   - - -0.02887942482831014
     - 166.1812020731287
-    - 6.055284008793615
+    - 6.055284008793629
   - - 84.48361843644199
     - 0.0
     - 180.0
@@ -436,9 +446,9 @@ joints:
   - Tongue2_M
   - Tongue1_M
   Tongue3_M: !!python/tuple
-  - - -0.02887942482831017
+  - - -0.028879424828310164
     - 165.89764061168887
-    - 8.588858209462442
+    - 8.588858209462439
   - - 79.06861330146872
     - 0.0
     - 180.0
@@ -446,31 +456,21 @@ joints:
   - Tongue3_M
   - Tongue2_M
   Tongue_End_M: !!python/tuple
-  - - -0.02887942482831024
+  - - -0.028879424828310234
     - 165.44088641642136
-    - 10.953771455796304
+    - 10.953771455796318
   - - 79.06861330146872
     - 0.0
     - 180.0
   - xyz
   - Tongue_End_M
   - Tongue3_M
-  UpperCheek1_R: !!python/tuple
-  - - -4.5301947593688965
-    - 171.47166442871094
-    - 8.903875350952148
-  - - 91.9347045037067
-    - 9.710457982527558
-    - 177.9258637428341
-  - xyz
-  - UpperCheek1_R
-  - Cheeks
   UpperLip1_R: !!python/tuple
   - - -1.3012974247035378
     - 166.61288071019177
     - 10.095114225745114
   - - 91.192224794536
-    - 12.886028260400654
+    - 12.886028260400655
     - 178.1541842502005
   - xyz
   - UpperLip1_R

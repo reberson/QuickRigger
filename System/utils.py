@@ -299,3 +299,31 @@ def create_lattice_plane(origin_transform, height, width, name):
     return grp, proj_plane, proj_plane_lattice, proj_plane_shape
 
 
+def joint_list(parent, middle_joint=None, last_joint=None, first_half=None, second_half=None):
+    jnts = cmds.listRelatives(parent)
+    jnt_list_first_half = []
+    jnt_list_second_half = []
+
+    for jnt in jnts:
+        if first_half in jnt.lower():
+            jnt_list_first_half.append(jnt)
+        elif second_half in jnt.lower():
+            jnt_list_second_half.append(jnt)
+
+    jnt_list_first_half.sort(reverse=True)
+    jnt_list_second_half.sort()
+
+    jnt_list = []
+
+    for jnt in jnt_list_first_half:
+        jnt_list.append(jnt)
+    if middle_joint:
+        jnt_list.append(middle_joint)
+    for jnt in jnt_list_second_half:
+        jnt_list.append(jnt)
+    if last_joint:
+        jnt_list.append(last_joint)
+    first_jnt = jnt_list[0]
+    last_jnt = len(jnt_list) - 1
+
+    return jnt_list

@@ -3,7 +3,6 @@ from Rig.Tools.layout_tools import joint_dictionary_creator, joint_dictionary_cr
 import System.file_handle
 from System.utils import create_twist_joint, mirror_joint
 
-
 # TODO: Make possible to build body rig AFTER face rig being built. (low priority)
 # TODO: Create a finalization pass where we can clean unused joints
 def create_rig_structure():

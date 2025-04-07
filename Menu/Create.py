@@ -4,7 +4,7 @@ import Rig
 from Rig.Tools import layout_tools
 from Rig.Tools import constructor_tools
 from Rig.Tools import rig_root, rig_torso, rig_arm, rig_leg, rig_finger, rig_sdk_finger, rig_neck
-from Rig.Tools import rig_facial_brow
+from Rig.Tools import rig_facial_brow, rig_facial_eyelid
 from System.file_handle import file_dialog_yaml as fd
 from System.file_handle import export_curve, import_curve
 import System.utils
@@ -115,6 +115,13 @@ def menu():
     cmds.menuItem(p='facesteps', l='brow rig', stp='python',
                   c=lambda *args: rig_facial_brow.create_brow(layout_tools.joint_dictionary_creator()),
                   ann='Creates the rig controls for the brow')
+
+    cmds.menuItem(p='facesteps', l='eyelid rig', stp='python',
+                  c=lambda *args: rig_facial_eyelid.create_eyelid(layout_tools.joint_dictionary_creator()),
+                  ann='Creates the rig controls for the brow')
+
+
+
     # Rig face - Tools
     cmds.menuItem('facetools', p='face', l='Face Tools', subMenu=True, tearOff=True)
     cmds.menuItem(p='facetools', l='Attach Brow', stp='python',
@@ -153,3 +160,4 @@ def build_rig_face():
     constructor_tools.create_rig_structure_face()
     constructor_tools.create_deform_rig_face()
     rig_facial_brow.create_brow(layout_tools.joint_dictionary_creator())
+    rig_facial_eyelid.create_eyelid(layout_tools.joint_dictionary_creator())

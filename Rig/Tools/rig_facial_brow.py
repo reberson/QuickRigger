@@ -1,19 +1,20 @@
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
-from System.utils import create_ribbon_flat, create_lattice_plane, create_ribbon
+from System.utils import create_ribbon_flat, create_lattice_plane, create_ribbon, joint_list
 
 
 # TODO: create a toggle for follicle visibility
-
+# TODO: change the code to be number agnostic of joints.
+# TODO: Change the way the follicle controls attach to the far left, far right and center joints
 
 def create_brow(dict):
     grp_ctrl = cmds.group(em=True, n="brow_control_group")
-    cmds.matchTransform(grp_ctrl, "Head_M")
+    cmds.matchTransform(grp_ctrl, "Facial")
     cmds.parent(grp_ctrl, "face_constrain_head")
 
-    # jnt_list = ['Brow_4_R', 'Brow_3_R', 'Brow_2_R', 'Brow_1_R', 'Brow_M', 'Brow_1_L', 'Brow_2_L', 'Brow_3_L',
-    #             'Brow_4_L']
-    jnt_list = cmds.listRelatives("Brows")
+    jnt_list = joint_list("Brows", "Brow_M", first_half="_r", second_half="_l")
+    first_jnt = jnt_list[0]
+    last_jnt = jnt_list[len(jnt_list) - 1]
 
     # create base controls
     for jnt in jnt_list:
@@ -75,7 +76,7 @@ def create_brow(dict):
         follicle = cmds.createNode("follicle")
         if rib_point == "brow_R":
             # cmds.matchTransform(grp_offset, "follicle_Brow_4_R", pos=True)
-            cmds.matchTransform(grp_offset, "follicle_Brow_4_R", pos=True)
+            cmds.matchTransform(grp_offset, "follicle_" + jnt_list[0], pos=True)
             follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_plane_brow_R")
             cmds.select(d=True)
             rib_cjoint = cmds.joint(n="ribbon_cjoint_brow_R")
@@ -85,7 +86,7 @@ def create_brow(dict):
             cmds.select(d=True)
             rib_cjoint = cmds.joint(n="ribbon_cjoint_brow_M")
         elif rib_point == "brow_L":
-            cmds.matchTransform(grp_offset, "follicle_Brow_4_L", pos=True)
+            cmds.matchTransform(grp_offset, "follicle_" + last_jnt, pos=True)
             follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_plane_brow_L")
             cmds.select(d=True)
             rib_cjoint = cmds.joint(n="ribbon_cjoint_brow_L")
@@ -119,9 +120,9 @@ def create_brow(dict):
         # cmds.xform(rib_cjoint, t=(0, 0, 0), ro=(90, 0, 90))
         # cmds.makeIdentity(rib_cjoint, a=True, r=True)
 
-    cmds.matchTransform("offset_brow_R", "Brow_4_R")
+    cmds.matchTransform("offset_brow_R", jnt_list[0])
     cmds.matchTransform("offset_brow_M", "Brow_M")
-    cmds.matchTransform("offset_brow_L", "Brow_4_L")
+    cmds.matchTransform("offset_brow_L", last_jnt)
     cmds.skinCluster("ribbon_cjoint_brow_R", "ribbon_cjoint_brow_M", "ribbon_cjoint_brow_L", ribbon[0], tsb=True)
 
     # attach def joints to ctrl jnts
@@ -132,8 +133,12 @@ def create_brow(dict):
 
 def attach_brow():
     # make sure brow ctrls are all zeroed out
-    ctrl_list = ['Brow_4_R', 'Brow_3_R', 'Brow_2_R', 'Brow_1_R', 'Brow_M', 'Brow_1_L', 'Brow_2_L', 'Brow_3_L',
-                 'Brow_4_L', "brow_R", "brow_M", "brow_L"]
+    # ctrl_list = ['Brow_4_R', 'Brow_3_R', 'Brow_2_R', 'Brow_1_R', 'Brow_M', 'Brow_1_L', 'Brow_2_L', 'Brow_3_L',
+    #              'Brow_4_L', "brow_R", "brow_M", "brow_L"]
+    ctrl_list = joint_list("Brows", "Brow_M")
+    ctrl_list.append("brow_R")
+    ctrl_list.append("brow_M")
+    ctrl_list.append("brow_L")
     for ctrl in ctrl_list:
         cmds.xform("ctrl_" + ctrl, t=(0, 0, 0), ro=(0, 0, 0))
 
@@ -148,8 +153,10 @@ def attach_brow():
         # cmds.makeIdentity("ribbon_cjoint_" + jnt, a=True, r=True)
     cmds.select(d=True)
 
-    jnt_list = ['Brow_4_R', 'Brow_3_R', 'Brow_2_R', 'Brow_1_R', 'Brow_M', 'Brow_1_L', 'Brow_2_L', 'Brow_3_L',
-                'Brow_4_L']
+    # jnt_list = ['Brow_4_R', 'Brow_3_R', 'Brow_2_R', 'Brow_1_R', 'Brow_M', 'Brow_1_L', 'Brow_2_L', 'Brow_3_L',
+    #             'Brow_4_L']
+    jnt_list = joint_list("Brows", "Brow_M")
+
     for jnt in jnt_list:
         const_pnt = cmds.pointConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
         const_ori = cmds.orientConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
@@ -158,11 +165,13 @@ def attach_brow():
     cmds.select(d=True)
 
 
-
-
 def detach_brow():
-    ctrl_list = ['Brow_4_R', 'Brow_3_R', 'Brow_2_R', 'Brow_1_R', 'Brow_M', 'Brow_1_L', 'Brow_2_L', 'Brow_3_L',
-                 'Brow_4_L', "brow_R", "brow_M", "brow_L"]
+    # ctrl_list = ['Brow_4_R', 'Brow_3_R', 'Brow_2_R', 'Brow_1_R', 'Brow_M', 'Brow_1_L', 'Brow_2_L', 'Brow_3_L',
+    #              'Brow_4_L', "brow_R", "brow_M", "brow_L"]
+    ctrl_list = joint_list("Brows", "Brow_M")
+    ctrl_list.append("brow_R")
+    ctrl_list.append("brow_M")
+    ctrl_list.append("brow_L")
     for ctrl in ctrl_list:
         cmds.xform("ctrl_" + ctrl, t=(0, 0, 0), ro=(0, 0, 0))
     # make sure brow ctrls are all zeroed out
@@ -173,5 +182,7 @@ def detach_brow():
     for jnt in rib_jnts:
         cmds.parent("ribbon_cjoint_" + jnt, "ctrl_" + jnt)
         cmds.xform("ribbon_cjoint_" + jnt, t=(0, 0, 0))
-        #cmds.makeIdentity("ribbon_cjoint_" + jnt, a=True, r=True)
+        # cmds.makeIdentity("ribbon_cjoint_" + jnt, a=True, r=True)
     cmds.select(d=True)
+
+
