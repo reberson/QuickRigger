@@ -5,7 +5,7 @@ from definitions import CONTROLS_DIR
 from System.import_files import import_ctrl
 
 # TODO: Refactor to Class objects
-
+# TODO: toggle visibility for ik fk
 
 def create_torso_rig(dict):
     # List all necessary joints
@@ -127,7 +127,7 @@ def create_torso_rig(dict):
         grp_offset = cmds.group(n="ik_offset_" + jd[3], em=True)
         grp_sdk = cmds.group(n="ik_sdk_" + jd[3], em=True)
 
-        ctrl = cmds.circle(n="ik_" + jd[3], r=10, nr=(0, 1, 0))
+        ctrl = cmds.circle(n="ik_" + jd[3], r=15, nr=(0, 1, 0))
         cmds.select(d=True)
         jnt = cmds.joint(n="bind_" + jd[3])
         cmds.setAttr(jnt + ".drawStyle", 2)
@@ -167,6 +167,14 @@ def create_torso_rig(dict):
     cmds.orientConstraint("Root", grp_switch_follow_main)
     cmds.pointConstraint("Root", grp_switch_follow_main)
     cmds.xform(grp_switch_torso, t=(30, 0, 0), r=True)
+
+    # Set visibility state for ik fk ctrls
+    nd_ikfk_vis_cond = cmds.createNode('condition', ss=True, n="ikfk_torso_vis_cond")
+    cmds.setAttr(nd_ikfk_vis_cond + ".colorIfTrueR", 1)
+    cmds.setAttr(nd_ikfk_vis_cond + ".colorIfFalseR", 0)
+    cmds.connectAttr(switch_torso_attr, 'ik_spine_controls.visibility')
+    cmds.connectAttr(switch_torso_attr, nd_ikfk_vis_cond + '.firstTerm')
+    cmds.connectAttr(nd_ikfk_vis_cond + ".outColorR", 'fk_offset_Spine1_M.visibility')
 
     # Connect both fk ik rigs to def joints through pont/orient constraint workflow
 

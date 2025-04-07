@@ -129,6 +129,19 @@ def create_arm_rig(dict):
         switch_arm_attr = "ikfk_arm{0}.ikSwitch".format(side)
         cmds.parent(switch_arm[0], grp_switch_arm)
         cmds.parent(grp_switch_arm, "follow_ikfk_main")
+
+        # Set visibility state for ik fk ctrls
+        nd_ikfk_vis_cond = cmds.createNode('condition', ss=True, n="ikfk_arm_vis_cond{0}".format(side))
+        cmds.setAttr(nd_ikfk_vis_cond + ".colorIfTrueR", 1)
+        cmds.setAttr(nd_ikfk_vis_cond + ".colorIfFalseR", 0)
+        cmds.connectAttr(switch_arm_attr, grp_pv_arm + '.visibility')
+        cmds.connectAttr(switch_arm_attr, grp_offset_arm + '.visibility')
+        cmds.connectAttr(switch_arm_attr, nd_ikfk_vis_cond + '.firstTerm')
+        cmds.connectAttr(nd_ikfk_vis_cond + ".outColorR", 'fk_master_Shoulder{0}.visibility'.format(side))
+
+
+
+
         # Connect both fk ik rigs to def joints through pont/orient constraint workflow
         arm_list = ["Shoulder{0}".format(side), "Elbow{0}".format(side), "Wrist{0}".format(side)]
         for jnt in arm_list:

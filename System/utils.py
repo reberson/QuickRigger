@@ -52,27 +52,27 @@ def connect_bc(def_jnt, fk_jnt, ik_jnt, attribute_name, switch_name):
 
 def connect_point_constraint(def_jnt, fk_jnt, ik_jnt, attribute):
     # creates point constraint between 2 sources to 1 target (ik/fk to def)
-    point_constraint = cmds.pointConstraint(fk_jnt, ik_jnt, def_jnt)
+    point_constraint = cmds.pointConstraint(ik_jnt, fk_jnt, def_jnt)
 
     # connect custom attribute to first source weight
-    cmds.connectAttr(attribute, point_constraint[0] + "." + fk_jnt + "W0")
+    cmds.connectAttr(attribute, point_constraint[0] + "." + ik_jnt + "W0")
 
     # create reverse node for ik source
-    reverse_node = cmds.createNode('reverse', n="reverse_" + ik_jnt)
+    reverse_node = cmds.createNode('reverse', n="reverse_" + fk_jnt)
     cmds.connectAttr(attribute, reverse_node + ".input.inputX")
-    cmds.connectAttr(reverse_node + ".output.outputX", point_constraint[0] + "." + ik_jnt + "W1")
+    cmds.connectAttr(reverse_node + ".output.outputX", point_constraint[0] + "." + fk_jnt + "W1")
     return point_constraint
 
 
 def connect_orient_constraint(def_jnt, fk_jnt, ik_jnt, attribute):
     # creates orient constraint between 2 sources to 1 target (ik/fk to def)
-    orient_constraint = cmds.orientConstraint(fk_jnt, ik_jnt, def_jnt)
+    orient_constraint = cmds.orientConstraint(ik_jnt, fk_jnt, def_jnt)
 
     # connect custom attribute to first source weight
-    cmds.connectAttr(attribute, orient_constraint[0] + "." + fk_jnt + "W0")
+    cmds.connectAttr(attribute, orient_constraint[0] + "." + ik_jnt + "W0")
 
     # create reverse node for ik source
-    reverse_node = cmds.createNode('reverse', n="reverse_" + ik_jnt)
+    reverse_node = cmds.createNode('reverse', n="reverse_" + fk_jnt)
     cmds.connectAttr(attribute, reverse_node + ".input.inputX")
-    cmds.connectAttr(reverse_node + ".output.outputX", orient_constraint[0] + "." + ik_jnt + "W1")
+    cmds.connectAttr(reverse_node + ".output.outputX", orient_constraint[0] + "." + fk_jnt + "W1")
     return orient_constraint

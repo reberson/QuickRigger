@@ -3,7 +3,7 @@ import maya.mel as mel
 import Rig
 from Rig.Tools import reference_tools
 from Rig.Tools import constructor_tools
-from Rig.Tools import rig_root, rig_torso, rig_arm, rig_leg, rig_finger, rig_sdk_finger
+from Rig.Tools import rig_root, rig_torso, rig_arm, rig_leg, rig_finger, rig_sdk_finger, rig_neck
 
 
 def Menu():
@@ -49,6 +49,10 @@ def Menu():
     cmds.menuItem(p='builder', l='Create torso rig', stp='python',
                   c=lambda *args: rig_torso.create_torso_rig(reference_tools.joint_dictionary_creator()),
                   ann='Creates the rig controls for the torso')
+
+    cmds.menuItem(p='builder', l='Create neck rig', stp='python',
+                  c=lambda *args: rig_neck.create_neck_rig(reference_tools.joint_dictionary_creator()),
+                  ann='Creates the rig controls for the neck')
 
     cmds.menuItem(p='builder', l='Create arm rig', stp='python',
                   c=lambda *args: rig_arm.create_arm_rig(reference_tools.joint_dictionary_creator()),

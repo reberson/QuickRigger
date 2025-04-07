@@ -212,6 +212,17 @@ def create_leg_rig(dict):
         switch_leg_attr = switch_leg[0] + ".ikSwitch"
         cmds.parent(switch_leg[0], grp_switch_leg)
         cmds.parent(grp_switch_leg, "follow_ikfk_root")
+
+        # Set visibility state for ik fk ctrls
+        nd_ikfk_vis_cond = cmds.createNode('condition', ss=True, n="ikfk_leg_vis_cond{0}".format(side))
+        cmds.setAttr(nd_ikfk_vis_cond + ".colorIfTrueR", 1)
+        cmds.setAttr(nd_ikfk_vis_cond + ".colorIfFalseR", 0)
+        cmds.connectAttr(switch_leg_attr, grp_pv_leg + '.visibility')
+        cmds.connectAttr(switch_leg_attr, grp_offset_leg + '.visibility')
+        cmds.connectAttr(switch_leg_attr, grp_footdrivers + '.visibility')
+        cmds.connectAttr(switch_leg_attr, nd_ikfk_vis_cond + '.firstTerm')
+        cmds.connectAttr(nd_ikfk_vis_cond + ".outColorR", 'fk_offset_Hip{0}.visibility'.format(side))
+
         # Connect both fk ik rigs to def joints through pont/orient constraint workflow
         leg_list = ["Hip{0}".format(side), "Knee{0}".format(side), "Ankle{0}".format(side), "Toes{0}".format(side), "Toes_End{0}".format(side)]
         for jnt in leg_list:
