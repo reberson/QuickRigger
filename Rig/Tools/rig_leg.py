@@ -6,6 +6,7 @@ from definitions import CONTROLS_DIR
 from System.import_files import import_ctrl
 
 # TODO: Refactor to Class objects
+# TODO: Hide all atributes that are not directly controllable
 
 def create_leg_rig(dict):
     # List all necessary joints
@@ -38,9 +39,24 @@ def create_leg_rig(dict):
         if "Hip_" not in joint:
             cmds.parent("fk_offset_" + jd[3], "fkx_" + jd[4])
 
+    # Remove curve shape component from toes end
+    cmds.delete("fk_Toes_End_RShape")
+    cmds.delete("fk_Toes_End_LShape")
+
     cmds.select(d=True)
-    cmds.parent("fk_offset_Hip_R", "fk_constraint_root")
-    cmds.parent("fk_offset_Hip_L", "fk_constraint_root")
+    # Create FK swing constraint groop
+    grp_const_swing = cmds.group(em=True, n="fk_constraint_swing")
+    cmds.parent(grp_const_swing, "fk_system")
+    cmds.orientConstraint("xSwing", grp_const_swing)
+    cmds.pointConstraint("xSwing", grp_const_swing)
+    cmds.parent("fk_offset_Hip_R", grp_const_swing)
+    cmds.parent("fk_offset_Hip_L", grp_const_swing)
+
+    # Create IK swing constraint groop
+    grp_const_swing_ik = cmds.group(em=True, n="ik_constraint_swing")
+    cmds.parent(grp_const_swing_ik, "ik_system")
+    cmds.orientConstraint("xSwing", grp_const_swing_ik)
+    cmds.pointConstraint("xSwing", grp_const_swing_ik)
 
     # Create IK rig
     for side in sides:
@@ -73,7 +89,7 @@ def create_leg_rig(dict):
         cmds.matchTransform(grp_offset_leg, "Ankle{0}".format(side), pos=True)
         cmds.parent(jnt_hip, grp_offset_hip)
         cmds.parent(ctrl_leg, grp_offset_leg)
-        cmds.parent(grp_offset_hip, "ik_constraint_root")
+        cmds.parent(grp_offset_hip, grp_const_swing_ik)
         cmds.parent(grp_offset_leg, "ik_constraint_main")
 
         # Create Foot IK Controls
@@ -108,6 +124,7 @@ def create_leg_rig(dict):
         cmds.parent(sdk_ball, grp_ball)
         cmds.matchTransform(grp_ball, "Toes{0}".format(side))
         ikh_ball = cmds.ikHandle(sol="ikSCsolver", sj="ikx_Ankle{0}".format(side), ee="ikx_Toes{0}".format(side), n="ikh_FootBall{0}".format(side), p=1, w=1)
+        cmds.setAttr(ikh_ball[0] + ".visibility", 0)
         cmds.parent(ikh_ball[0], ctrl_ball[0])
 
         grp_flap = cmds.group(n="ik_offset_FootFlap{0}".format(side), em=True)
@@ -117,6 +134,7 @@ def create_leg_rig(dict):
         cmds.parent(sdk_flap, grp_flap)
         cmds.matchTransform(grp_flap, "Toes{0}".format(side))
         ikh_flap = cmds.ikHandle(sol="ikSCsolver", sj="ikx_Toes{0}".format(side), ee="ikx_Toes_End{0}".format(side), n="ikh_FootFlap{0}".format(side), p=0, w=1)
+        cmds.setAttr(ikh_flap[0] + ".visibility", 0)
         cmds.parent(ikh_flap[0], ctrl_flap[0])
 
         # Reparent Foot controls
@@ -181,14 +199,10 @@ def create_leg_rig(dict):
         cmds.orientConstraint("ik_Leg{0}".format(side), grp_footdrivers, mo=True)
         cmds.pointConstraint("ik_Leg{0}".format(side), grp_footdrivers, mo=True)
 
-
-        # TODO: Remove control for FK Toes_End
-        # TODO: Remove heel and foot side joints from deform hierarchy
-        # TODO: Hide all atributes that are not directly controllable
-
         # Create IK handle
         ikh = cmds.ikHandle(sol="ikRPsolver", sj="ikx_Hip{0}".format(side), ee="ikx_Ankle{0}".format(side), n="ikh_Leg{0}".format(side), p=2, w=1)
         cmds.parent(ikh[0], ctrl_ball[0])
+        cmds.setAttr(ikh[0] + ".visibility", 0)
         # Create PV
         pv_leg = cmds.circle(n="pv_Leg{0}".format(side), r=5, nr=(0, 0, 1))
         grp_pv_leg = cmds.group(n="pv_offset_Leg{0}".format(side), em=True)
@@ -203,25 +217,38 @@ def create_leg_rig(dict):
         grp_switch_leg = cmds.group(n="offset_switch_leg{0}".format(side), em=True)
         cmds.matchTransform(grp_switch_leg, "Hip{0}".format(side), pos=True)
         if side == "_R":
-            cmds.xform(grp_switch_leg, t=(-30, 0, 0), r=True)
+            cmds.xform(grp_switch_leg, t=(-20, 0, 0), r=True)
         else:
-            cmds.xform(grp_switch_leg, t=(30, 0, 0), r=True)
+            cmds.xform(grp_switch_leg, t=(20, 0, 0), r=True)
         cmds.matchTransform(switch_leg, grp_switch_leg)
         cmds.addAttr(switch_leg, longName="ikSwitch", attributeType="double", min=0, max=1, dv=0)
         cmds.setAttr(str(switch_leg[0]) + ".ikSwitch", e=True, channelBox=True)
+        cmds.setAttr(str(switch_leg[0]) + ".ikSwitch", 1)
         switch_leg_attr = switch_leg[0] + ".ikSwitch"
         cmds.parent(switch_leg[0], grp_switch_leg)
         cmds.parent(grp_switch_leg, "follow_ikfk_root")
+        # Create unhide attribute
+        cmds.addAttr(switch_leg, longName="unhide", attributeType="double", min=0, max=1, dv=0)
+        cmds.setAttr(str(switch_leg[0]) + ".unhide", e=True, channelBox=True)
+        unhide_attr = switch_leg[0] + ".unhide"
 
         # Set visibility state for ik fk ctrls
         nd_ikfk_vis_cond = cmds.createNode('condition', ss=True, n="ikfk_leg_vis_cond{0}".format(side))
+        nd_ikfk_vis_pma_fk = cmds.createNode('plusMinusAverage', ss=True, n="ikfk_leg_vis_pma_fk{0}".format(side))
+        nd_ikfk_vis_pma_ik = cmds.createNode('plusMinusAverage', ss=True, n="ikfk_leg_vis_pma_ik{0}".format(side))
         cmds.setAttr(nd_ikfk_vis_cond + ".colorIfTrueR", 1)
         cmds.setAttr(nd_ikfk_vis_cond + ".colorIfFalseR", 0)
-        cmds.connectAttr(switch_leg_attr, grp_pv_leg + '.visibility')
-        cmds.connectAttr(switch_leg_attr, grp_offset_leg + '.visibility')
-        cmds.connectAttr(switch_leg_attr, grp_footdrivers + '.visibility')
+
+        cmds.connectAttr(switch_leg_attr, nd_ikfk_vis_pma_ik + ".input1D[0]")
+        cmds.connectAttr(unhide_attr, nd_ikfk_vis_pma_ik + ".input1D[1]")
+        cmds.connectAttr(nd_ikfk_vis_pma_ik + ".output1D", grp_pv_leg + '.visibility')
+        cmds.connectAttr(nd_ikfk_vis_pma_ik + ".output1D", grp_offset_leg + '.visibility')
+        cmds.connectAttr(nd_ikfk_vis_pma_ik + ".output1D", grp_footdrivers + '.visibility')
+
         cmds.connectAttr(switch_leg_attr, nd_ikfk_vis_cond + '.firstTerm')
-        cmds.connectAttr(nd_ikfk_vis_cond + ".outColorR", 'fk_offset_Hip{0}.visibility'.format(side))
+        cmds.connectAttr(nd_ikfk_vis_cond + ".outColorR", nd_ikfk_vis_pma_fk + ".input1D[0]")
+        cmds.connectAttr(unhide_attr, nd_ikfk_vis_pma_fk + ".input1D[1]")
+        cmds.connectAttr(nd_ikfk_vis_pma_fk + ".output1D", 'fk_offset_Hip{0}.visibility'.format(side))
 
         # Connect both fk ik rigs to def joints through pont/orient constraint workflow
         leg_list = ["Hip{0}".format(side), "Knee{0}".format(side), "Ankle{0}".format(side), "Toes{0}".format(side), "Toes_End{0}".format(side)]
@@ -232,3 +259,7 @@ def create_leg_rig(dict):
             cmds.parent(orient_constraint, "constraints")
         cmds.orientConstraint(ctrl_leg, "ikx_Ankle{0}".format(side), mo=True)
 
+        # After the foot rig is built, delete the heel and side ref joints from deform hierarchy
+        cmds.delete("Heel{0}".format(side))
+        cmds.delete("FootSideOut{0}".format(side))
+        cmds.delete("FootSideIn{0}".format(side))

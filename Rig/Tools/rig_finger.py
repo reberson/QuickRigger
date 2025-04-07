@@ -41,20 +41,8 @@ def create_finger_rig(dict):
         if "Meta_" not in joint or "ThumbFinger1_" not in joint:
             cmds.parent("fk_offset_" + jd[3], "fkx_" + jd[4])
 
-    # TODO: redo this ugly stuff
-    # Parent all first finger joints to grp
+
     cmds.select(d=True)
-    # cmds.parent("fk_offset_ThumbFinger1_R", finger_grp_r)
-    # cmds.parent("fk_offset_IndexFinger1_R", finger_grp_r)
-    # cmds.parent("fk_offset_MiddleFinger1_R", finger_grp_r)
-    # cmds.parent("fk_offset_RingFinger1_R", finger_grp_r)
-    # cmds.parent("fk_offset_PinkyFinger1_R", finger_grp_r)
-    #
-    # cmds.parent("fk_offset_ThumbFinger1_L", finger_grp_l)
-    # cmds.parent("fk_offset_IndexFinger1_L", finger_grp_l)
-    # cmds.parent("fk_offset_MiddleFinger1_L", finger_grp_l)
-    # cmds.parent("fk_offset_RingFinger1_L", finger_grp_l)
-    # cmds.parent("fk_offset_PinkyFinger1_L", finger_grp_l)
 
     # Metacarpal version
     cmds.parent("fk_offset_ThumbFinger1_R", finger_grp_r)
@@ -68,7 +56,6 @@ def create_finger_rig(dict):
     cmds.parent("fk_offset_MiddleMeta_L", finger_grp_l)
     cmds.parent("fk_offset_RingMeta_L", finger_grp_l)
     cmds.parent("fk_offset_PinkyMeta_L", finger_grp_l)
-
 
 
     # Connect both fk ik rigs to def joints through pont/orient constraint workflow

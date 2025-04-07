@@ -43,8 +43,8 @@ def create_torso_rig(dict):
     cmds.parent(grp_cst_chest, "fk_system")
 
     grp_cst_root = cmds.group(em=True, n="fk_constraint_root")
-    cmds.pointConstraint("Root", grp_cst_root)
-    cmds.orientConstraint("Root", grp_cst_root)
+    cmds.pointConstraint("xRoot", grp_cst_root)
+    cmds.orientConstraint("xRoot", grp_cst_root)
     cmds.parent(grp_cst_root, "fk_system")
 
     cmds.parent("fk_offset_Spine1_M", grp_cst_root)
@@ -102,8 +102,8 @@ def create_torso_rig(dict):
     ik_spine_ctrls = cmds.group(em=True, n="ik_spine_controls")
     cmds.parent(ik_grp_spine_jnts, ik_const_root)
     cmds.parent(ik_spine_ctrls, ik_const_root)
-    cmds.pointConstraint("Root", ik_const_root)
-    cmds.orientConstraint("Root", ik_const_root)
+    cmds.pointConstraint("xRoot", ik_const_root)
+    cmds.orientConstraint("xRoot", ik_const_root)
     cmds.pointConstraint("Main", ik_const_main)
     cmds.orientConstraint("Main", ik_const_main)
     cmds.parent(ik_const_root, "ik_system")
@@ -113,6 +113,8 @@ def create_torso_rig(dict):
     # Create IK spline handle
     ikh_spine = cmds.ikHandle(sol="ikSplineSolver", sj="ikx_Spine1_M", ee="ikx_Neck_M", n="ikh_Spine", ccv=True,
                               pcv=False, scv=False, tws="linear", roc=False, ap=True, w=1)
+    cmds.setAttr(ikh_spine[0] + ".visibility", 0)
+    cmds.setAttr(ikh_spine[2] + ".visibility", 0)
     cmds.parent(ikh_spine[0], ik_const_root)
     ikh_curve = ikh_spine[2]
     ikh_curve = cmds.rename(ikh_curve, "ikh_spine_curve")
@@ -159,22 +161,35 @@ def create_torso_rig(dict):
     cmds.addAttr(switch_torso, longName="ikSwitch", attributeType="double", min=0, max=1, dv=0)
     cmds.setAttr(str(switch_torso[0]) + ".ikSwitch", e=True, channelBox=True)
     switch_torso_attr = switch_torso[0] + ".ikSwitch"
+    # Create unhide attribute
+    cmds.addAttr(switch_torso, longName="unhide", attributeType="double", min=0, max=1, dv=0)
+    cmds.setAttr(str(switch_torso[0]) + ".unhide", e=True, channelBox=True)
+    unhide_attr = switch_torso[0] + ".unhide"
+
     grp_switch_torso = cmds.group(n="offset_ikfk_torso", em=True)
     grp_switch_follow_main = cmds.group(n="follow_ikfk_torso", em=True)
     cmds.parent(switch_torso[0], grp_switch_torso)
     cmds.parent(grp_switch_torso, grp_switch_follow_main)
     cmds.parent(grp_switch_follow_main, "fkik_system")
-    cmds.orientConstraint("Root", grp_switch_follow_main)
-    cmds.pointConstraint("Root", grp_switch_follow_main)
+    cmds.orientConstraint("xRoot", grp_switch_follow_main)
+    cmds.pointConstraint("xRoot", grp_switch_follow_main)
     cmds.xform(grp_switch_torso, t=(30, 0, 0), r=True)
 
     # Set visibility state for ik fk ctrls
     nd_ikfk_vis_cond = cmds.createNode('condition', ss=True, n="ikfk_torso_vis_cond")
+    nd_ikfk_vis_pma_fk = cmds.createNode('plusMinusAverage', ss=True, n="ikfk_torso_vis_pma_fk")
+    nd_ikfk_vis_pma_ik = cmds.createNode('plusMinusAverage', ss=True, n="ikfk_torso_vis_pma_ik")
     cmds.setAttr(nd_ikfk_vis_cond + ".colorIfTrueR", 1)
     cmds.setAttr(nd_ikfk_vis_cond + ".colorIfFalseR", 0)
-    cmds.connectAttr(switch_torso_attr, 'ik_spine_controls.visibility')
+
+    cmds.connectAttr(switch_torso_attr, nd_ikfk_vis_pma_ik + ".input1D[0]")
+    cmds.connectAttr(unhide_attr, nd_ikfk_vis_pma_ik + ".input1D[1]")
+    cmds.connectAttr(nd_ikfk_vis_pma_ik + ".output1D", 'ik_spine_controls.visibility')
+
     cmds.connectAttr(switch_torso_attr, nd_ikfk_vis_cond + '.firstTerm')
-    cmds.connectAttr(nd_ikfk_vis_cond + ".outColorR", 'fk_offset_Spine1_M.visibility')
+    cmds.connectAttr(nd_ikfk_vis_cond + ".outColorR", nd_ikfk_vis_pma_fk + ".input1D[0]")
+    cmds.connectAttr(unhide_attr, nd_ikfk_vis_pma_fk + ".input1D[1]")
+    cmds.connectAttr(nd_ikfk_vis_pma_fk + ".output1D", 'fk_offset_Spine1_M.visibility')
 
     # Connect both fk ik rigs to def joints through pont/orient constraint workflow
 

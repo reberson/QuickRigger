@@ -8,9 +8,6 @@ from System.import_files import import_ctrl
 # TODO: Refactor to Class objects
 
 def create_arm_rig(dict):
-    # Create FK system group
-    # fk_grp = cmds.group(em=True, n="fk_system")
-    # cmds.parent(fk_grp, "rig")
     # List all necessary joints
     arm_joints = ["Shoulder_R", "Elbow_R", "Wrist_R", "Shoulder_L", "Elbow_L", "Wrist_L"]
     arm_switchers = ["ikfk_arm_R", "ikfk_arm_L"]
@@ -60,6 +57,7 @@ def create_arm_rig(dict):
         # Create global attribute on fk shoulder ctrl
         cmds.addAttr("fk_{0}".format(shoulder), longName="global", attributeType="double", min=0, max=1, dv=0)
         cmds.setAttr("fk_{0}".format(shoulder) + ".global", e=True, channelBox=True)
+        cmds.setAttr("fk_{0}".format(shoulder) + ".global", 1)
         # Constrain the fk shoulder to both follow chest and follow global
         connect_orient_constraint(grp_fk_shld_flw, grp_fk_shld_chest, grp_fk_shld_global, "fk_" + shoulder + ".global")
         cmds.parent("fk_offset_{0}".format(shoulder), grp_fk_shld_flw)
@@ -106,6 +104,7 @@ def create_arm_rig(dict):
         # Create IK handle
         ikh = cmds.ikHandle(sol="ikRPsolver", sj="ikx_Shoulder{0}".format(side), ee="ikx_Wrist{0}".format(side), n="ikh_Arm{0}".format(side), ap=True, w=1)
         cmds.parent(ikh[0], ctrl_arm)
+        cmds.setAttr(ikh[0] + ".visibility", 0)
         # Create PV
         pv_arm = cmds.circle(n="pv_Arm{0}".format(side), r=5, nr=(0, 0, 1))
         grp_pv_arm = cmds.group(n="pv_offset_Arm{0}".format(side), em=True)
@@ -115,6 +114,7 @@ def create_arm_rig(dict):
         cmds.parent(grp_pv_arm, "ik_constraint_main")
         # assign constraint pole vector
         cmds.poleVectorConstraint(pv_arm, ikh[0])
+
         # Create ik/fk switch
         switch_arm = cmds.circle(n="ikfk_arm{0}".format(side), nr=(0, 1, 0), c=(0, 0, 0), r=2)
         grp_switch_arm = cmds.group(n="offset_switch_arm{0}".format(side), em=True)
@@ -128,19 +128,28 @@ def create_arm_rig(dict):
         cmds.setAttr(str(switch_arm[0]) + ".ikSwitch", e=True, channelBox=True)
         switch_arm_attr = "ikfk_arm{0}.ikSwitch".format(side)
         cmds.parent(switch_arm[0], grp_switch_arm)
-        cmds.parent(grp_switch_arm, "follow_ikfk_main")
+        cmds.parent(grp_switch_arm, "follow_ikfk_root")
+        # Create unhide attribute
+        cmds.addAttr(switch_arm, longName="unhide", attributeType="double", min=0, max=1, dv=0)
+        cmds.setAttr(str(switch_arm[0]) + ".unhide", e=True, channelBox=True)
+        unhide_attr = switch_arm[0] + ".unhide"
 
         # Set visibility state for ik fk ctrls
         nd_ikfk_vis_cond = cmds.createNode('condition', ss=True, n="ikfk_arm_vis_cond{0}".format(side))
+        nd_ikfk_vis_pma_fk = cmds.createNode('plusMinusAverage', ss=True, n="ikfk_arm_vis_pma_fk{0}".format(side))
+        nd_ikfk_vis_pma_ik = cmds.createNode('plusMinusAverage', ss=True, n="ikfk_arm_vis_pma_ik{0}".format(side))
         cmds.setAttr(nd_ikfk_vis_cond + ".colorIfTrueR", 1)
         cmds.setAttr(nd_ikfk_vis_cond + ".colorIfFalseR", 0)
-        cmds.connectAttr(switch_arm_attr, grp_pv_arm + '.visibility')
-        cmds.connectAttr(switch_arm_attr, grp_offset_arm + '.visibility')
+
+        cmds.connectAttr(switch_arm_attr, nd_ikfk_vis_pma_ik + ".input1D[0]")
+        cmds.connectAttr(unhide_attr, nd_ikfk_vis_pma_ik + ".input1D[1]")
+        cmds.connectAttr(nd_ikfk_vis_pma_ik + ".output1D", grp_pv_arm + '.visibility')
+        cmds.connectAttr(nd_ikfk_vis_pma_ik + ".output1D", grp_offset_arm + '.visibility')
+
         cmds.connectAttr(switch_arm_attr, nd_ikfk_vis_cond + '.firstTerm')
-        cmds.connectAttr(nd_ikfk_vis_cond + ".outColorR", 'fk_master_Shoulder{0}.visibility'.format(side))
-
-
-
+        cmds.connectAttr(nd_ikfk_vis_cond + ".outColorR", nd_ikfk_vis_pma_fk + ".input1D[0]")
+        cmds.connectAttr(unhide_attr, nd_ikfk_vis_pma_fk + ".input1D[1]")
+        cmds.connectAttr(nd_ikfk_vis_pma_fk + ".output1D", 'fk_master_Shoulder{0}.visibility'.format(side))
 
         # Connect both fk ik rigs to def joints through pont/orient constraint workflow
         arm_list = ["Shoulder{0}".format(side), "Elbow{0}".format(side), "Wrist{0}".format(side)]

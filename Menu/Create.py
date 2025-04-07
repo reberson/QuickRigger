@@ -7,7 +7,7 @@ from Rig.Tools import rig_root, rig_torso, rig_arm, rig_leg, rig_finger, rig_sdk
 
 
 def Menu():
-    menu_name = 'Auto_Rigger'
+    menu_name = 'AutoRigger'
     main_window = mel.eval('$x = $gMainWindow')
 
     if cmds.menu(menu_name, exists=True):
@@ -37,35 +37,53 @@ def Menu():
     # Rig builder
     cmds.menuItem('builder', p=menu_name, l='Builder', subMenu=True, tearOff=True)
 
-    # Rig build -- Actions
-    cmds.menuItem(p='builder', l='Create deform', stp='python',
+    # Rig build -- Main Action
+    cmds.menuItem(p='builder', l='Build rig', stp='python',
+                  c=lambda *args: build_rig(),
+                  ann='Generates the complete rig based on reference joints')
+
+    # Rig build -- Step by step actions
+    cmds.menuItem('steps', p='builder', l='Step by step', subMenu=True, tearOff=True)
+
+    cmds.menuItem(p='steps', l='Create deform', stp='python',
                   c=lambda *args: constructor_tools.create_deform_rig(),
                   ann='Creates a complete deformation rig')
 
-    cmds.menuItem(p='builder', l='Create root rig', stp='python',
+    cmds.menuItem(p='steps', l='Create root rig', stp='python',
                   c=lambda *args: rig_root.create_root_rig(reference_tools.joint_dictionary_creator()),
                   ann='Creates the rig controls for the root')
 
-    cmds.menuItem(p='builder', l='Create torso rig', stp='python',
+    cmds.menuItem(p='steps', l='Create torso rig', stp='python',
                   c=lambda *args: rig_torso.create_torso_rig(reference_tools.joint_dictionary_creator()),
                   ann='Creates the rig controls for the torso')
 
-    cmds.menuItem(p='builder', l='Create neck rig', stp='python',
+    cmds.menuItem(p='steps', l='Create neck rig', stp='python',
                   c=lambda *args: rig_neck.create_neck_rig(reference_tools.joint_dictionary_creator()),
                   ann='Creates the rig controls for the neck')
 
-    cmds.menuItem(p='builder', l='Create arm rig', stp='python',
+    cmds.menuItem(p='steps', l='Create arm rig', stp='python',
                   c=lambda *args: rig_arm.create_arm_rig(reference_tools.joint_dictionary_creator()),
                   ann='Creates the rig controls for the arms')
 
-    cmds.menuItem(p='builder', l='Create leg rig', stp='python',
+    cmds.menuItem(p='steps', l='Create leg rig', stp='python',
                   c=lambda *args: rig_leg.create_leg_rig(reference_tools.joint_dictionary_creator()),
                   ann='Creates the rig controls for the legs')
 
-    cmds.menuItem(p='builder', l='Create fingers rig', stp='python',
+    cmds.menuItem(p='steps', l='Create fingers rig', stp='python',
                   c=lambda *args: rig_finger.create_finger_rig(reference_tools.joint_dictionary_creator()),
                   ann='Creates the rig controls for the fingers')
 
-    cmds.menuItem(p='builder', l='Create fingers sdk', stp='python',
+    cmds.menuItem(p='steps', l='Create fingers sdk', stp='python',
                   c=lambda *args: rig_sdk_finger.create_finger_sdk(),
                   ann='Creates the sdk controls for fingers')
+
+
+def build_rig():
+    constructor_tools.create_deform_rig()
+    rig_root.create_root_rig(reference_tools.joint_dictionary_creator())
+    rig_torso.create_torso_rig(reference_tools.joint_dictionary_creator())
+    rig_neck.create_neck_rig(reference_tools.joint_dictionary_creator())
+    rig_arm.create_arm_rig(reference_tools.joint_dictionary_creator())
+    rig_leg.create_leg_rig(reference_tools.joint_dictionary_creator())
+    rig_finger.create_finger_rig(reference_tools.joint_dictionary_creator())
+    rig_sdk_finger.create_finger_sdk()

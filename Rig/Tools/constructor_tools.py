@@ -77,8 +77,6 @@ def create_rig_structure():
     cmds.orientConstraint(main_ctrl, glob_main_grp)
     cmds.orientConstraint(main_ctrl, grp_follow_main_fkik)
     cmds.pointConstraint(main_ctrl, grp_follow_main_fkik)
-    cmds.orientConstraint("Root", grp_follow_root_fkik)
-    cmds.pointConstraint("Root", grp_follow_root_fkik)
 
     # Connect Scale from main control to the groups
     nd_main_scale = cmds.createNode('multiplyDivide', ss=True, n='main_scale_multi')
