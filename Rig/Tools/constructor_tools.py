@@ -25,8 +25,11 @@ def create_rig_structure():
     driver_grp = cmds.group(em=True, n="drivers_system")
     fkik_grp = cmds.group(em=True, n="fkik_system")
     stretch_grp = cmds.group(em=True, n="stretch_system")
+    scale_grp = cmds.group(em=True, n="scale_system")
     grp_follow_main_fkik = cmds.group(em=True, n="follow_ikfk_main")
     grp_follow_root_fkik = cmds.group(em=True, n="follow_ikfk_root")
+    geo_grp = cmds.group(em=True, n="geometry")
+
     cmds.parent(grp_follow_main_fkik, fkik_grp)
     cmds.parent(grp_follow_root_fkik, fkik_grp)
 
@@ -42,7 +45,10 @@ def create_rig_structure():
     cmds.parent(fkik_grp, motion_grp)
     cmds.parent(root_grp, motion_grp)
     cmds.parent(stretch_grp, motion_grp)
+    cmds.parent(scale_grp, motion_grp)
     cmds.parent(construction_grp, rig_grp)
+    cmds.parent(geo_grp, rig_grp)
+    cmds.parent(def_grp, rig_grp)
 
     cmds.pointConstraint(main_ctrl, glob_main_grp)
     cmds.orientConstraint(main_ctrl, glob_main_grp)
@@ -62,16 +68,14 @@ def create_rig_structure():
     # cmds.connectAttr(nd_main_scale + '.output', "joint_reference.scale")
     cmds.connectAttr(nd_main_scale + '.output', def_grp + ".scale")
     cmds.connectAttr(nd_main_scale + '.output', stretch_grp + ".scale")
+    cmds.connectAttr(nd_main_scale + '.output', scale_grp + ".scale")
 
 
 def create_deform_rig():
     """Completes the existing reference rig to become a complete deformation joint"""
     joint_data = joint_dictionary_creator_source("Root")
 
-    cmds.parent("deformation_joints", "rig")
     cmds.parent("Root", "deformation_joints")
-    geo_grp = cmds.group(em=True, n="geometry")
-    cmds.parent(geo_grp, "rig")
 
     for key in joint_data:
         # if "scapula_r" or "hip_r" or "eye_r" or "scapula_l" or "hip_l" or "eye_l" == str(key).lower():

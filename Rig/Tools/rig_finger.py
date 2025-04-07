@@ -50,21 +50,36 @@ def create_finger_rig(dict):
         for joint in finger_list:
             if cmds.objExists(joint):
                 jd = dict[joint]
-                if "Meta_" not in joint or "ThumbFinger1_" not in joint:
+                # if "Meta_" not in joint or "ThumbFinger1_" not in joint:
+                #     cmds.parent("fk_offset_" + jd[3], "fkx_" + jd[4])
+                # if "Finger1_" in joint:
+                #     cmds.parent("fk_offset_" + jd[3], finger_grp)
+                if "Meta_" in joint:
+                    cmds.parent("fk_offset_" + jd[3], finger_grp)
+                elif "Finger1_" in joint:
+                    cmds.parent("fk_offset_" + jd[3], finger_grp)
+                else:
                     cmds.parent("fk_offset_" + jd[3], "fkx_" + jd[4])
+
+
 
         cmds.select(d=True)
 
         # Metacarpal version
-        finger_firsts_list = ["fk_offset_ThumbFinger1{0}".format(side), "fk_offset_IndexMeta{0}".format(side), "fk_offset_MiddleMeta{0}".format(side), "fk_offset_RingMeta{0}".format(side), "fk_offset_PinkyMeta{0}".format(side)]
-        # cmds.parent("fk_offset_ThumbFinger1{0}".format(side), finger_grp)
-        # cmds.parent("fk_offset_IndexMeta{0}".format(side), finger_grp)
-        # cmds.parent("fk_offset_MiddleMeta{0}".format(side), finger_grp)
-        # cmds.parent("fk_offset_RingMeta{0}".format(side), finger_grp)
-        # cmds.parent("fk_offset_PinkyMeta{0}".format(side), finger_grp)
-        for finger_joint in finger_firsts_list:
-            if cmds.objExists(finger_joint):
-                cmds.parent(finger_joint, finger_grp)
+        # finger_firsts_list = ["fk_offset_ThumbFinger1{0}".format(side), "fk_offset_IndexMeta{0}".format(side), "fk_offset_MiddleMeta{0}".format(side), "fk_offset_RingMeta{0}".format(side), "fk_offset_PinkyMeta{0}".format(side)]
+        # # cmds.parent("fk_offset_ThumbFinger1{0}".format(side), finger_grp)
+        # # cmds.parent("fk_offset_IndexMeta{0}".format(side), finger_grp)
+        # # cmds.parent("fk_offset_MiddleMeta{0}".format(side), finger_grp)
+        # # cmds.parent("fk_offset_RingMeta{0}".format(side), finger_grp)
+        # # cmds.parent("fk_offset_PinkyMeta{0}".format(side), finger_grp)
+        # for finger_joint in finger_firsts_list:
+        #     if cmds.objExists(finger_joint):
+        #         if cmds.listRelatives(finger_joint, p=True) != "fk_offset_fingers{0}".format(side):
+        #             print(finger_joint)
+        #             # cmds.parent(finger_joint, finger_grp)
+        #             cmds.parent(finger_joint, "fk_offset_fingers{0}".format(side))
+        #     else:
+        #         print("Warning: skipping " + finger_joint)
 
         # Connect both fk ik rigs to def joints through pont/orient constraint workflow
         for jnt in finger_list:
@@ -75,18 +90,24 @@ def create_finger_rig(dict):
                 cmds.parent(orient_constraint, "constraints")
                 # scale_constraint = cmds.scaleConstraint("fkx_" + jnt, jnt)
                 # cmds.parent(scale_constraint, "constraints")
+
                 # Connect hand scaler attribute to joint scale
-                cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScalex', jnt + ".sx")
-                cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScaley', jnt + ".sy")
-                cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScalez', jnt + ".sz")
+                # cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScalex', jnt + ".sx")
+                # cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScaley', jnt + ".sy")
+                # cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScalez', jnt + ".sz")
 
         # Constraint finger offset groups to wrist joints
         cmds.pointConstraint("Wrist{0}".format(side), finger_grp)
         cmds.orientConstraint("Wrist{0}".format(side), finger_grp)
+        cmds.scaleConstraint("Wrist{0}".format(side), finger_grp)
 
-        blend_node = (cmds.listConnections("ikfk_arm{0}".format(side) + ".ikSwitch", t="blendColors"))[0]
-        cmds.connectAttr(blend_node + ".output", finger_grp + ".scale")
+        # blend_node = (cmds.listConnections("ikfk_arm{0}".format(side) + ".ikSwitch", t="blendColors"))[0]
+        # cmds.connectAttr(blend_node + ".output", finger_grp + ".scale")
+        # cmds.connectAttr("Wrist{0}".format(side) + ".scale", finger_grp + ".scale")
 
-
+        # if cmds.objExists("cntrl_scale_Wrist{0}".format(side)):
+        #     scl_ctrl = "cntrl_scale_Wrist{0}".format(side)
+        #     scale_const = cmds.scaleConstraint(scl_ctrl, finger_grp)
+        #     cmds.parent(scale_const, "constraints")
 
 

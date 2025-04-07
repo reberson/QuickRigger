@@ -6,6 +6,7 @@ from Rig.Tools import constructor_tools
 from Rig.Tools import rig_root, rig_torso, rig_arm, rig_leg, rig_finger, rig_sdk_finger, rig_neck
 from Rig.Tools import rig_facial_brow, rig_facial_eyelid, rig_facial_nasolabial, rig_facial_mouth, rig_facial_cheek, rig_facial_nose, rig_facial_jaw, rig_facial_tongue, rig_facial_eye
 from Rig.Tools import rig_generic_chain
+from Rig.Tools import rig_mesh_setup
 from System.file_handle import file_dialog_yaml as fd
 from System.file_handle import export_curve, import_curve
 from System.skin_handler import save_selected_skin_yaml, load_selected_skin_yaml
@@ -68,6 +69,10 @@ def menu():
                   c=lambda *args: constructor_tools.create_rig_structure(),
                   ann='Creates the structure for the rig')
 
+    cmds.menuItem(p='steps', l='Move meshes', stp='python',
+                  c=lambda *args: rig_mesh_setup.move_meshes(),
+                  ann='Move All meshes into geometry group')
+
     cmds.menuItem(p='steps', l='Create deform', stp='python',
                   c=lambda *args: constructor_tools.create_deform_rig(),
                   ann='Creates a complete deformation rig')
@@ -110,6 +115,7 @@ def menu():
     cmds.menuItem(p='steps', l='Create fingers sdk', stp='python',
                   c=lambda *args: rig_sdk_finger.create_finger_sdk(),
                   ann='Creates the sdk controls for fingers')
+
 
     # Rig face
     cmds.menuItem('face', p='builder', l='Face', subMenu=True, tearOff=True)
@@ -229,6 +235,7 @@ def menu():
 
 def build_rig():
     constructor_tools.create_rig_structure()
+    rig_mesh_setup.move_meshes()
     constructor_tools.create_deform_rig()
     rig_root.create_root_rig(layout_tools.joint_dictionary_creator())
     rig_torso.create_torso_rig(layout_tools.joint_dictionary_creator())
@@ -242,6 +249,7 @@ def build_rig():
 
 def build_rig_simple():
     constructor_tools.create_rig_structure()
+    rig_mesh_setup.move_meshes()
     constructor_tools.create_deform_rig()
     rig_root.create_root_rig(layout_tools.joint_dictionary_creator())
     rig_torso.create_torso_rig(layout_tools.joint_dictionary_creator())

@@ -233,26 +233,66 @@ def create_arm_rig(dict, twist=True):
         # create_stretch("Elbow{0}".format(side), "Shoulder{0}".format(side), "ikfk_arm{0}".format(side), "fk_offset_Elbow{0}".format(side), "ikx_Elbow{0}".format(side), twist_shoulder)
         # create_stretch("Wrist{0}".format(side), "Elbow{0}".format(side), "ikfk_arm{0}".format(side), "fk_offset_Wrist{0}".format(side), "ikx_Wrist{0}".format(side), twist_elbow)
 
-        # Create blend node to control hand scaling
-        blend_node = cmds.shadingNode("blendColors", n="hand_scale_bc{0}".format(side), au=True)
-        cmds.connectAttr("ik_Arm{0}".format(side) + ".scale", blend_node + ".color1")
-        cmds.connectAttr("fk_Wrist{0}".format(side) + ".scale", blend_node + ".color2")
-        cmds.connectAttr(switch_arm_attr, blend_node + ".blender")
-        # Create hand scale attribute
-        cmds.addAttr(switch_arm, longName='handScale', attributeType='double3')
-        cmds.addAttr(switch_arm, longName='handScalex', attributeType='double', parent='handScale', dv=1)
-        cmds.addAttr(switch_arm, longName='handScaley', attributeType='double', parent='handScale', dv=1)
-        cmds.addAttr(switch_arm, longName='handScalez', attributeType='double', parent='handScale', dv=1)
+        # # Create blend node to control hand scaling
+        # blend_node = cmds.shadingNode("blendColors", n="hand_scale_bc{0}".format(side), au=True)
+        # cmds.connectAttr("ik_Arm{0}".format(side) + ".scale", blend_node + ".color1")
+        # cmds.connectAttr("fk_Wrist{0}".format(side) + ".scale", blend_node + ".color2")
+        # cmds.connectAttr(switch_arm_attr, blend_node + ".blender")
+        # # Create hand scale attribute
+        # cmds.addAttr(switch_arm, longName='handScale', attributeType='double3')
+        # cmds.addAttr(switch_arm, longName='handScalex', attributeType='double', parent='handScale', dv=1)
+        # cmds.addAttr(switch_arm, longName='handScaley', attributeType='double', parent='handScale', dv=1)
+        # cmds.addAttr(switch_arm, longName='handScalez', attributeType='double', parent='handScale', dv=1)
+        #
+        # # control the hand scale attribute by the fk hand or ik hand controls
+        # cmds.connectAttr(blend_node + ".outputR", switch_arm + '.handScalex')
+        # cmds.connectAttr(blend_node + ".outputG", switch_arm + '.handScaley')
+        # cmds.connectAttr(blend_node + ".outputB", switch_arm + '.handScalez')
+        #
+        # # output to wrist joint
+        # cmds.connectAttr(switch_arm + '.handScalex', "Wrist{0}".format(side) + ".sx")
+        # cmds.connectAttr(switch_arm + '.handScaley', "Wrist{0}".format(side) + ".sy")
+        # cmds.connectAttr(switch_arm + '.handScalez', "Wrist{0}".format(side) + ".sz")
 
-        # control the hand scale attribute by the fk hand or ik hand controls
-        cmds.connectAttr(blend_node + ".outputR", switch_arm + '.handScalex')
-        cmds.connectAttr(blend_node + ".outputG", switch_arm + '.handScaley')
-        cmds.connectAttr(blend_node + ".outputB", switch_arm + '.handScalez')
+        # Create Scale system for Hands
+        # Follow Hands Groups
+        grp_follow = cmds.group(n="follow_Wrist{0}".format(side), em=True)
+        grp_offset = cmds.group(n="scl_offset_Wrist{0}".format(side), em=True)
+        grp_sdk = cmds.group(n="scl_sdk_Wrist{0}".format(side), em=True)
+        grp_flip = cmds.group(n="scl_flip_Wrist{0}".format(side), em=True)
+        scl_ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "cntrl_stretch_limb.yaml")),
+                               "cntrl_scale_Wrist{0}".format(side))
 
-        # output to wrist joint
-        cmds.connectAttr(switch_arm + '.handScalex', "Wrist{0}".format(side) + ".sx")
-        cmds.connectAttr(switch_arm + '.handScaley', "Wrist{0}".format(side) + ".sy")
-        cmds.connectAttr(switch_arm + '.handScalez', "Wrist{0}".format(side) + ".sz")
+        if "_R" in side:
+            cmds.setAttr(scl_ctrl + ".overrideEnabled", 1)
+            cmds.setAttr(scl_ctrl + ".overrideColor", 31)
+        elif "_L" in side:
+            cmds.setAttr(scl_ctrl + ".overrideEnabled", 1)
+            cmds.setAttr(scl_ctrl + ".overrideColor", 18)
+        cmds.setAttr(scl_ctrl + ".tx", lock=True, k=False, cb=False)
+        cmds.setAttr(scl_ctrl + ".ty", lock=True, k=False, cb=False)
+        cmds.setAttr(scl_ctrl + ".tz", lock=True, k=False, cb=False)
+        cmds.setAttr(scl_ctrl + ".rx", lock=True, k=False, cb=False)
+        cmds.setAttr(scl_ctrl + ".ry", lock=True, k=False, cb=False)
+        cmds.setAttr(scl_ctrl + ".rz", lock=True, k=False, cb=False)
 
+        cmds.parent(scl_ctrl, grp_flip)
+        cmds.parent(grp_flip, grp_sdk)
+        cmds.parent(grp_sdk, grp_offset)
+        cmds.parent(grp_offset, grp_follow)
+        cmds.parent(grp_follow, "scale_system")
+        cmds.matchTransform(grp_follow, "Wrist{0}".format(side))
 
+        if "_L" in side:
+            cmds.xform(grp_flip, r=True, ro=(180, 0, 0))
+
+        # Make Wrists not inherit transform
+        cmds.setAttr("Wrist{0}.inheritsTransform".format(side), 0)
+        # create scale constraint
+        scale_const = cmds.scaleConstraint(scl_ctrl, "Wrist{0}".format(side))
+        cmds.parent(scale_const, "constraints")
+
+        # Make Scale ctrls follow hand position
+        flw_point_constraint = connect_point_constraint(grp_follow, "fkx_Wrist{0}".format(side), "ikx_Wrist{0}".format(side), switch_arm_attr)
+        flw_orient_constraint = connect_orient_constraint(grp_follow, "fkx_Wrist{0}".format(side), "ikx_Wrist{0}".format(side), switch_arm_attr)
 
