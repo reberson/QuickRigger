@@ -5,9 +5,11 @@ from scripts.autorigger.shared.file_handle import file_read_yaml, import_curve
 
 def create_finger_rig(dict):
     sides = ["_R", "_L"]
+    layer1_objects = []
     for side in sides:
         # Create Finger groups
         finger_grp = cmds.group(em=True, n="fk_offset_fingers{0}".format(side))
+        layer1_objects.append(finger_grp)
         cmds.matchTransform(finger_grp, "Wrist{0}".format(side))
         cmds.parent(finger_grp, "fk_system")
         # List all necessary joints
@@ -128,4 +130,5 @@ def create_finger_rig(dict):
         #     scale_const = cmds.scaleConstraint(scl_ctrl, finger_grp)
         #     cmds.parent(scale_const, "constraints")
 
-
+    # add objects to layer
+    cmds.editDisplayLayerMembers("body_secondary", layer1_objects, nr=True)

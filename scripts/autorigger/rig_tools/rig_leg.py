@@ -17,11 +17,13 @@ def create_leg_rig(dict, twist=True):
                   "Hip_L", "Knee_L", "Ankle_L", "Heel_L", "Toes_L", "Toes_End_L", "FootSideIn_L", "FootSideOut_L"]
     leg_joints_fk = ["Hip_R", "Knee_R", "Ankle_R", "Toes_R", "Toes_End_R", "Hip_L", "Knee_L", "Ankle_L", "Toes_L", "Toes_End_L"]
     foot_joints_ik = ["Heel_R", "Toes_R", "Toes_End_R", "FootSideIn_R", "FootSideOut_R","Heel_L", "Toes_L", "Toes_End_L", "FootSideIn_L", "FootSideOut_L"]
+    layer1_objects = []
 
     # Create FK rig
     for joint in leg_joints_fk:
         jd = dict[joint]
         grp_offset = cmds.group(n="fk_offset_" + jd[3], em=True)
+        layer1_objects.append(grp_offset)
         grp_sdk = cmds.group(n="fk_sdk_" + jd[3], em=True)
         grp_flip = cmds.group(n="fk_flip_" + jd[3], em=True)
 
@@ -115,7 +117,9 @@ def create_leg_rig(dict, twist=True):
 
         cmds.setAttr(ctrl_leg + ".v", lock=True, k=False, cb=False)
         grp_offset_leg = cmds.group(n="ik_offset_Leg{0}".format(side), em=True)
+        layer1_objects.append(grp_offset_leg)
         grp_offset_hip = cmds.group(n="ik_offset_Hip{0}".format(side), em=True)
+        layer1_objects.append(grp_offset_hip)
         cmds.matchTransform(grp_offset_hip, "Hip{0}".format(side))
         cmds.matchTransform(ctrl_leg, "Ankle{0}".format(side), pos=True)
         cmds.matchTransform(grp_offset_leg, "Ankle{0}".format(side), pos=True)
@@ -126,16 +130,19 @@ def create_leg_rig(dict, twist=True):
 
         # Create Foot IK controls
         grp_roll_out = cmds.group(n="ik_offset_FootSideOut{0}".format(side), em=True)
+        layer1_objects.append(grp_roll_out)
         sdk_roll_out = cmds.group(n="ik_sdk_FootSideOut{0}".format(side), em=True)
         cmds.parent(sdk_roll_out, grp_roll_out)
         cmds.matchTransform(grp_roll_out, "FootSideOut{0}".format(side))
 
         grp_roll_in = cmds.group(n="ik_offset_FootSideIn{0}".format(side), em=True)
+        layer1_objects.append(grp_roll_in)
         sdk_roll_in = cmds.group(n="ik_sdk_FootSideIn{0}".format(side), em=True)
         cmds.parent(sdk_roll_in, grp_roll_in)
         cmds.matchTransform(grp_roll_in, "FootSideIn{0}".format(side))
 
         grp_heel = cmds.group(n="ik_offset_Heel{0}".format(side), em=True)
+        layer1_objects.append(grp_heel)
         sdk_heel = cmds.group(n="ik_sdk_Heel{0}".format(side), em=True)
         ctrl_heel = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_Heel_R.yaml")), "ik_Heel{0}".format(side))
         if "_R" in side:
@@ -151,6 +158,7 @@ def create_leg_rig(dict, twist=True):
         cmds.matchTransform(grp_heel, "Heel{0}".format(side))
 
         grp_toe = cmds.group(n="ik_offset_Toe{0}".format(side), em=True)
+        layer1_objects.append(grp_toe)
         sdk_toe = cmds.group(n="ik_sdk_Toe{0}".format(side), em=True)
         ctrl_toe = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_Toe{0}.yaml".format(side))),
                                "ik_Toe{0}".format(side))
@@ -168,6 +176,7 @@ def create_leg_rig(dict, twist=True):
         cmds.matchTransform(grp_toe, "Toes_End{0}".format(side))
 
         grp_ball = cmds.group(n="ik_offset_FootBall{0}".format(side), em=True)
+        layer1_objects.append(grp_ball)
         sdk_ball = cmds.group(n="ik_sdk_FootBall{0}".format(side), em=True)
 
 
@@ -191,6 +200,7 @@ def create_leg_rig(dict, twist=True):
         cmds.parent(ikh_ball[0], ctrl_ball)
 
         grp_flap = cmds.group(n="ik_offset_FootFlap{0}".format(side), em=True)
+        layer1_objects.append(grp_flap)
         sdk_flap = cmds.group(n="ik_sdk_FootFlap{0}".format(side), em=True)
 
         if "_R" in side:
@@ -241,7 +251,8 @@ def create_leg_rig(dict, twist=True):
 
         # Visual controls for foot sdks
         grp_footdrivers = cmds.group(n="ik_offset_FootDrivers{0}".format(side), em=True)
-        grp_frontroll = cmds.group(n="ik_offset_sdk_FootRoll{0}".format(side), em=True)
+        grp_footroll = cmds.group(n="ik_offset_sdk_FootRoll{0}".format(side), em=True)
+        layer1_objects.append(grp_footroll)
         # ctrl_frontroll = cmds.circle(n="ik_sdk_FootRoll{0}".format(side), r=2, nr=(1, 0, 0))
         ctrl_frontroll = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_sdk_FootRoll_R.yaml")), "ik_sdk_FootRoll{0}".format(side))
         if "_R" in side:
@@ -261,16 +272,16 @@ def create_leg_rig(dict, twist=True):
         #     cmds.setAttr(ctrl_sideroll + ".overrideColor", 6)
 
         # cmds.parent(ctrl_sideroll, grp_sideroll)
-        cmds.parent(ctrl_frontroll, grp_frontroll)
-        cmds.parent(grp_frontroll, grp_footdrivers)
+        cmds.parent(ctrl_frontroll, grp_footroll)
+        cmds.parent(grp_footroll, grp_footdrivers)
         # cmds.parent(grp_sideroll, grp_footdrivers)
         cmds.parent(grp_footdrivers, "drivers_system")
         cmds.matchTransform(grp_footdrivers, "ik_Leg{0}".format(side), pos=True)
 
         # cmds.matchTransform(grp_frontroll, "FootSideOut{0}".format(side), pos=True)
-        cmds.matchTransform(grp_frontroll, "Toes_End{0}".format(side), pos=True)
+        cmds.matchTransform(grp_footroll, "Toes_End{0}".format(side), pos=True)
 
-        cmds.xform(grp_frontroll, r=True, t=(0, 0, 10))
+        cmds.xform(grp_footroll, r=True, t=(0, 0, 10))
         # if side == "_R":
         #     cmds.xform(grp_frontroll, r=True, t=(-10, 0, 0))
         # else:
@@ -285,7 +296,7 @@ def create_leg_rig(dict, twist=True):
         if side == "_L":
             # cmds.xform(grp_sideroll, r=True, ro=(0, 180, 0))
             # cmds.xform(grp_frontroll, r=True, ro=(0, 180, 0))
-            cmds.xform(grp_frontroll, r=True, s=(-1, 1, 1))
+            cmds.xform(grp_footroll, r=True, s=(-1, 1, 1))
 
         # cmds.setDrivenKeyframe("ik_Leg{0}".format(side), at="sideroll", cd="ik_sdk_FootSideRoll{0}.tx".format(side), dv=-10,v=-10)
         # cmds.setDrivenKeyframe("ik_Leg{0}".format(side), at="sideroll", cd="ik_sdk_FootSideRoll{0}.tx".format(side), dv=0, v=0)
@@ -314,6 +325,7 @@ def create_leg_rig(dict, twist=True):
             cmds.setAttr(pv_leg + ".overrideColor", 6)
 
         grp_pv_leg = cmds.group(n="pv_offset_Leg{0}".format(side), em=True)
+        layer1_objects.append(grp_pv_leg)
         cmds.parent(pv_leg, grp_pv_leg)
         pv_pos = calc_pv(["Hip{0}".format(side), "Knee{0}".format(side), "Ankle{0}".format(side)], 70)
         cmds.xform(grp_pv_leg, t=pv_pos, ws=True)
@@ -344,6 +356,7 @@ def create_leg_rig(dict, twist=True):
         cmds.addAttr(switch_leg, longName='footScalez', attributeType='double', parent='footScale', dv=1)
 
         grp_switch_leg = cmds.group(n="offset_switch_leg{0}".format(side), em=True)
+        layer1_objects.append(grp_switch_leg)
         cmds.matchTransform(grp_switch_leg, "Hip{0}".format(side), pos=True)
         if side == "_R":
             cmds.xform(grp_switch_leg, t=(-20, 0, 0), r=True)
@@ -520,3 +533,11 @@ def create_leg_rig(dict, twist=True):
         cmds.connectAttr(switch_leg + '.footScaley', "Toes_End{0}".format(side) + ".sy")
         cmds.connectAttr(switch_leg + '.footScalez', "Toes_End{0}".format(side) + ".sz")
 
+        # add objects to layer
+        # body layer
+        cmds.editDisplayLayerMembers("body_primary", layer1_objects, nr=True)
+
+        # stretch/scale layer
+        layer_stretch_objects = ['st_offset_Knee{0}'.format(side), 'st_offset_Ankle{0}'.format(side),
+                                 'scl_offset_Ankle{0}'.format(side)]
+        cmds.editDisplayLayerMembers("body_stretch", layer_stretch_objects, nr=True)

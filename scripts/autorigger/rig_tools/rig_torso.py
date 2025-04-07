@@ -1,5 +1,5 @@
 import maya.cmds as cmds
-from scripts.autorigger.shared.utils import connect_point_constraint, connect_orient_constraint, mirror_object
+from scripts.autorigger.shared.utils import connect_point_constraint, connect_orient_constraint, mirror_object, disconnect_shape_drawinfo
 from scripts.autorigger.resources.definitions import CONTROLS_DIR
 from scripts.autorigger.shared.file_handle import file_read_yaml, import_curve
 
@@ -10,11 +10,13 @@ def create_torso_rig(dict):
     # List all necessary joints
     torso_joints = ["Spine1_M", "Spine2_M", "Chest_M"]
     scapula_joints = ["Scapula_R", "Scapula_L"]
+    Layer1_objects = []
 
     # Create FK rig
     for joint in torso_joints:
         jd = dict[joint]
         grp_offset = cmds.group(n="fk_offset_" + jd[3], em=True)
+        Layer1_objects.append(grp_offset)
         grp_sdk = cmds.group(n="fk_sdk_" + jd[3], em=True)
         grp_flip = cmds.group(n="fk_flip_" + jd[3], em=True)
         if "Spine1_" in joint:
@@ -23,6 +25,7 @@ def create_torso_rig(dict):
             ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Spine2.yaml")), "fk_" + jd[3])
         elif "Chest_" in joint:
             ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Chest.yaml")), "fk_" + jd[3])
+
         cmds.setAttr(ctrl + ".overrideEnabled", 1)
         cmds.setAttr(ctrl + ".overrideColor", 17)
         cmds.setAttr(ctrl + ".v", lock=True, k=False, cb=False)
@@ -60,9 +63,11 @@ def create_torso_rig(dict):
     for joint in scapula_joints:
         jd = dict[joint]
         grp_offset = cmds.group(n="fk_offset_" + jd[3], em=True)
+        Layer1_objects.append(grp_offset)
         grp_sdk = cmds.group(n="fk_sdk_" + jd[3], em=True)
         grp_flip = cmds.group(n="fk_flip_" + jd[3], em=True)
         ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Scapula_R.yaml")), "fk_" + jd[3])
+
         cmds.setAttr(ctrl + ".overrideEnabled", 1)
         if "_L" in joint:
             mirror_object(ctrl, "x")
@@ -136,7 +141,7 @@ def create_torso_rig(dict):
     ikh_curve = ikh_spine[2]
     ikh_curve = cmds.rename(ikh_curve, "ikh_spine_curve")
     cmds.parent(ikh_curve, ik_const_main)
-    # connect inverse matrix from follow main group to offset parent materix curve
+    # connect inverse matrix from follow main group to offset parent matrix curve
     cmds.connectAttr(ik_const_main + ".worldInverseMatrix", ikh_curve + ".offsetParentMatrix")
 
     # Create ik controls
@@ -144,6 +149,7 @@ def create_torso_rig(dict):
     for joint in torso_ik_refs:
         jd = dict[joint]
         grp_offset = cmds.group(n="ik_offset_" + jd[3], em=True)
+        Layer1_objects.append(grp_offset)
         grp_sdk = cmds.group(n="ik_sdk_" + jd[3], em=True)
         if "Spine1_" in joint:
             ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_Spine1.yaml")), "ik_" + jd[3])
@@ -151,6 +157,7 @@ def create_torso_rig(dict):
             ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_Chest.yaml")), "ik_" + jd[3])
         elif "Neck_" in joint:
             ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_Neck.yaml")), "ik_" + jd[3])
+
         cmds.setAttr(ctrl + ".overrideEnabled", 1)
         cmds.setAttr(ctrl + ".overrideColor", 17)
         cmds.setAttr(ctrl + ".v", lock=True, k=False, cb=False)
@@ -206,6 +213,8 @@ def create_torso_rig(dict):
     unhide_attr = switch_torso + ".unhide"
 
     grp_switch_torso = cmds.group(n="offset_ikfk_torso", em=True)
+    Layer1_objects.append(grp_switch_torso)
+
     grp_switch_follow_main = cmds.group(n="follow_ikfk_torso", em=True)
     cmds.parent(switch_torso, grp_switch_torso)
     cmds.parent(grp_switch_torso, grp_switch_follow_main)
@@ -238,3 +247,21 @@ def create_torso_rig(dict):
         cmds.parent(point_constraint, "constraints")
         orient_constraint = connect_orient_constraint(jnt, "fkx_" + jnt, "ikx_" + jnt, switch_torso_attr)
         cmds.parent(orient_constraint, "constraints")
+
+    # add objects to layer
+    cmds.editDisplayLayerMembers("body_primary", Layer1_objects, nr=True)
+
+    # # Reestabilish ctrl colors
+    # for ctrl_obj in Layer1_objects:
+    #     # Disconnect ".drawOverride" attr from each shape inside the control
+    #     disconnect_shape_drawinfo(ctrl_obj)
+    #     # Unlock the overrideEnabled attribute if it's locked
+    #     cmds.setAttr(ctrl_obj + ".overrideEnabled", lock=False)
+    #
+    #     cmds.setAttr(ctrl_obj + ".overrideEnabled", 1)
+    #     if "_l" in ctrl_obj.lower():
+    #         cmds.setAttr(ctrl_obj + ".overrideColor", 6)
+    #     elif "_r" in ctrl_obj.lower():
+    #         cmds.setAttr(ctrl_obj + ".overrideColor", 13)
+    #     else:
+    #         cmds.setAttr(ctrl_obj + ".overrideColor", 17)

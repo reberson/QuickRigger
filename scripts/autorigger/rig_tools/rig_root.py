@@ -5,10 +5,11 @@ from scripts.autorigger.shared.file_handle import file_read_yaml, import_curve
 
 
 def create_root_rig(dictionary):
-
+    layer1_objects = []
     # main root hierarchy control
     jd = dictionary["Root"]
     grp_offset = cmds.group(n="offset_Root", em=True)
+    layer1_objects.append(grp_offset)
     grp_extra = cmds.group(n="extra_Root", em=True)
     grp_sdk = cmds.group(n="sdk_Root", em=True)
     # ctrl = cmds.circle(n="Root_CTRL", r=20, nr=(0, 1, 0))
@@ -27,6 +28,7 @@ def create_root_rig(dictionary):
     cmds.parent(grp_offset, "root_system")
     # Create hip swing structure
     grp_swing_offset = cmds.group(n="offset_Swing", em=True)
+    layer1_objects.append(grp_swing_offset)
     grp_swing_extra = cmds.group(n="extra_Swing", em=True)
     grp_swing_sdk = cmds.group(n="sdk_Swing", em=True)
     # ctrl_swing = cmds.circle(n="Swing_CTRL", r=20, nr=(0, 0, 1))
@@ -69,3 +71,5 @@ def create_root_rig(dictionary):
     cmds.orientConstraint(grp_center, grp_extra)
     cmds.pointConstraint(grp_center, grp_extra)
 
+    # add objects to layer
+    cmds.editDisplayLayerMembers("body_primary", layer1_objects, nr=True)

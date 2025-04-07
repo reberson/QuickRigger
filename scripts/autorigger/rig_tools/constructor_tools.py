@@ -2,9 +2,6 @@ import maya.cmds as cmds
 from scripts.autorigger.rig_tools.layout_tools import joint_dictionary_creator_source
 from scripts.autorigger.shared.utils import mirror_joint
 
-# TODO: Make possible to build body rig AFTER face rig being built. (low priority)
-# TODO: Create a finalization pass where we can clean unused joints
-
 
 def create_rig_structure():
     rig_grp = cmds.group(em=True, n="rig")
@@ -68,6 +65,51 @@ def create_rig_structure():
     cmds.connectAttr(nd_main_scale + '.output', def_grp + ".scale")
     cmds.connectAttr(nd_main_scale + '.output', stretch_grp + ".scale")
     cmds.connectAttr(nd_main_scale + '.output', scale_grp + ".scale")
+
+    # Meshes Layer
+    # create layer
+    layer_meshes = cmds.createDisplayLayer(n="meshes", e=True)
+    # unlocked layer = 0, locked = 2
+    cmds.setAttr(layer_meshes + ".displayType", 2)
+    # visible layer
+    cmds.setAttr(layer_meshes + ".visibility", 1)
+    # disable color override
+    cmds.setAttr(layer_meshes + ".color", 0)
+    # add objects to layer
+    objects_to_move = cmds.ls("geometry")
+    cmds.editDisplayLayerMembers(layer_meshes, objects_to_move, nr=False)
+
+    # Deformation joints layer
+    layer_deformation = cmds.createDisplayLayer(n="deformation", e=True)
+    cmds.setAttr(layer_deformation + ".displayType", 2)
+    cmds.setAttr(layer_deformation + ".visibility", 0)
+    cmds.setAttr(layer_deformation + ".color", 0)
+    objects_to_move = cmds.ls("deformation_joints")
+    cmds.editDisplayLayerMembers(layer_deformation, objects_to_move, nr=False)
+
+    # Primary controls layer - Will move the objects later, just the actual controls (inside each module)
+    layer_ctrls_primary = cmds.createDisplayLayer(n="body_primary", e=True)
+    cmds.setAttr(layer_ctrls_primary + ".displayType", 0)
+    cmds.setAttr(layer_ctrls_primary + ".visibility", 1)
+    cmds.setAttr(layer_ctrls_primary + ".color", 0)
+
+    # Secondary controls layer - Will move the objects later, just the actual controls (inside each module)
+    layer_ctrls_secondary = cmds.createDisplayLayer(n="body_secondary", e=True)
+    cmds.setAttr(layer_ctrls_secondary + ".displayType", 0)
+    cmds.setAttr(layer_ctrls_secondary + ".visibility", 1)
+    cmds.setAttr(layer_ctrls_secondary + ".color", 0)
+
+    # Tweak controls layer - Will move the objects later, just the actual controls (inside each module)
+    layer_ctrls_tweak = cmds.createDisplayLayer(n="body_tweaks", e=True)
+    cmds.setAttr(layer_ctrls_secondary + ".displayType", 0)
+    cmds.setAttr(layer_ctrls_secondary + ".visibility", 1)
+    cmds.setAttr(layer_ctrls_secondary + ".color", 0)
+
+    # Stretch/Squash controls layer - Will move the objects later, just the actual controls (inside each module)
+    layer_ctrls_stretch = cmds.createDisplayLayer(n="body_stretch", e=True)
+    cmds.setAttr(layer_ctrls_secondary + ".displayType", 0)
+    cmds.setAttr(layer_ctrls_secondary + ".visibility", 1)
+    cmds.setAttr(layer_ctrls_secondary + ".color", 0)
 
 
 def create_deform_rig():
@@ -151,6 +193,19 @@ def create_rig_structure_face():
     cmds.parent(grp_proj_fol, grp_origin)
     cmds.matchTransform(grp_proj_sys, grp_follow_head)
     cmds.parent(grp_proj_sys, grp_follow_head)
+
+    # Face Control Layer - Will move objects after inside each module
+    # create layer
+    layer_ctrls_face_primary = cmds.createDisplayLayer(n="face_primary", e=True)
+    layer_ctrls_face_secondary = cmds.createDisplayLayer(n="face_secondary", e=True)
+    # unlocked layer = 0, locked = 2
+    cmds.setAttr(layer_ctrls_face_primary + ".displayType", 0)
+    cmds.setAttr(layer_ctrls_face_secondary + ".displayType", 0)
+    # visible layer
+    cmds.setAttr(layer_ctrls_face_primary + ".visibility", 1)
+    cmds.setAttr(layer_ctrls_face_secondary + ".visibility", 1)
+    cmds.setAttr(layer_ctrls_face_primary + ".color", 0)
+    cmds.setAttr(layer_ctrls_face_secondary + ".color", 0)
 
 
 def create_deform_rig_face():

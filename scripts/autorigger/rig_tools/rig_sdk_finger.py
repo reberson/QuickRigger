@@ -13,8 +13,10 @@ from scripts.autorigger.shared.file_handle import file_read_yaml, import_curve
 
 def create_finger_sdk():
     sides = ["_R", "_L"]
+    layer1_objects = []
     for side in sides:
         grp_constraint = cmds.group(em=True, n="parentconstraint_sdk_fingers{0}".format(side))
+        layer1_objects.append(grp_constraint)
         # constraint scale to hand
         cmds.scaleConstraint("Wrist{0}".format(side), grp_constraint)
         grp_flip = cmds.group(em=True, n="flip_sdk_fingers{0}".format(side))
@@ -228,3 +230,6 @@ def create_finger_sdk():
         # # Scale constraint
         # blend_node = (cmds.listConnections("ikfk_arm{0}".format(side) + ".ikSwitch", t="blendColors"))[0]
         # cmds.connectAttr(blend_node + ".output", grp_constraint + ".scale")
+
+    # add objects to layer
+    cmds.editDisplayLayerMembers("body_tweaks", layer1_objects, nr=True)

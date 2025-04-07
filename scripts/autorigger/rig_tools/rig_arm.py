@@ -1,6 +1,7 @@
 import maya.cmds as cmds
 from scripts.autorigger.shared.utils import calculatePVPosition as calc_pv
 from scripts.autorigger.shared.utils import connect_point_constraint, connect_orient_constraint, mirror_object
+from scripts.autorigger.shared.utils import disconnect_shape_drawinfo
 from scripts.autorigger.resources.definitions import CONTROLS_DIR
 from scripts.autorigger.shared.file_handle import file_read_yaml, import_curve
 from scripts.autorigger.shared.utils import create_stretch, create_twist_joint
@@ -11,7 +12,7 @@ def create_arm_rig(dict, twist=True):
     # List all necessary joints
     arm_joints = ["Shoulder_R", "Elbow_R", "Wrist_R", "Shoulder_L", "Elbow_L", "Wrist_L"]
     arm_switchers = ["ikfk_arm_R", "ikfk_arm_L"]
-
+    layer1_objects = []
 
     # Create FK rig
     for joint in arm_joints:
@@ -25,6 +26,9 @@ def create_arm_rig(dict, twist=True):
             ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Elbow_R.yaml")), "fk_" + jd[3])
         elif "Wrist_" in joint:
             ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Wrist_R.yaml")), "fk_" + jd[3])
+
+        # add ctrl to list to move to display layer later
+        layer1_objects.append(grp_offset)
 
         if "_l" in joint.lower():
             mirror_object(ctrl, "x")
@@ -108,6 +112,7 @@ def create_arm_rig(dict, twist=True):
         cmds.makeIdentity(jnt_elbow, a=True, r=True)
         cmds.makeIdentity(jnt_wrist, a=True, r=True)
         ctrl_arm = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_Arm_R.yaml")), "ik_Arm{0}".format(side))
+
         if "_L" in side:
             mirror_object(ctrl_arm, "x")
             cmds.setAttr(ctrl_arm + ".overrideEnabled", 1)
@@ -118,7 +123,9 @@ def create_arm_rig(dict, twist=True):
 
         cmds.setAttr(ctrl_arm + ".v", lock=True, k=False, cb=False)
         grp_offset_arm = cmds.group(n="ik_offset_Arm{0}".format(side), em=True)
+        layer1_objects.append(grp_offset_arm)
         grp_offset_shoulder = cmds.group(n="ik_offset_Shoulder{0}".format(side), em=True)
+        layer1_objects.append(grp_offset_shoulder)
         cmds.matchTransform(grp_offset_shoulder, "Shoulder{0}".format(side))
         cmds.matchTransform(ctrl_arm, "Wrist{0}".format(side), pos=True)
         cmds.matchTransform(grp_offset_arm, "Wrist{0}".format(side), pos=True)
@@ -133,6 +140,7 @@ def create_arm_rig(dict, twist=True):
         cmds.setAttr(ikh[0] + ".visibility", 0)
         # Create PV
         pv_arm = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "ik_pv.yaml")), "pv_Arm{0}".format(side))
+
         if "_r" in side.lower():
             cmds.setAttr(pv_arm + ".overrideEnabled", 1)
             cmds.setAttr(pv_arm + ".overrideColor", 13)
@@ -141,6 +149,7 @@ def create_arm_rig(dict, twist=True):
             cmds.setAttr(pv_arm + ".overrideColor", 6)
         cmds.setAttr(pv_arm + ".v", lock=True, k=False, cb=False)
         grp_pv_arm = cmds.group(n="pv_offset_Arm{0}".format(side), em=True)
+        layer1_objects.append(grp_pv_arm)
         cmds.parent(pv_arm, grp_pv_arm)
         pv_pos = calc_pv(["Shoulder{0}".format(side), "Elbow{0}".format(side), "Wrist{0}".format(side)], 20)
         cmds.xform(grp_pv_arm, t=pv_pos, ws=True)
@@ -167,6 +176,7 @@ def create_arm_rig(dict, twist=True):
         cmds.setAttr(switch_arm + ".sz", lock=True, k=False, cb=False)
 
         grp_switch_arm = cmds.group(n="offset_switch_arm{0}".format(side), em=True)
+        layer1_objects.append(grp_switch_arm)
         cmds.matchTransform(grp_switch_arm, "Shoulder{0}".format(side), pos=True)
         if side == "_R":
             cmds.xform(grp_switch_arm, t=(-30, 0, 0), r=True)
@@ -220,6 +230,7 @@ def create_arm_rig(dict, twist=True):
             # Create Stretch
             create_stretch("Elbow{0}".format(side), "Shoulder{0}".format(side), "ikfk_arm{0}".format(side),
                            "fk_offset_Elbow{0}".format(side), "ikx_Elbow{0}".format(side), twist_shoulder)
+
             create_stretch("Wrist{0}".format(side), "Elbow{0}".format(side), "ikfk_arm{0}".format(side),
                            "fk_offset_Wrist{0}".format(side), "ikx_Wrist{0}".format(side), twist_elbow)
         else:
@@ -228,6 +239,8 @@ def create_arm_rig(dict, twist=True):
                            "fk_offset_Elbow{0}".format(side), "ikx_Elbow{0}".format(side))
             create_stretch("Wrist{0}".format(side), "Elbow{0}".format(side), "ikfk_arm{0}".format(side),
                            "fk_offset_Wrist{0}".format(side), "ikx_Wrist{0}".format(side))
+
+
 
         # # Create Stretch
         # create_stretch("Elbow{0}".format(side), "Shoulder{0}".format(side), "ikfk_arm{0}".format(side), "fk_offset_Elbow{0}".format(side), "ikx_Elbow{0}".format(side), twist_shoulder)
@@ -301,3 +314,24 @@ def create_arm_rig(dict, twist=True):
         flw_point_constraint = connect_point_constraint(grp_follow, "fkx_Wrist{0}".format(side), "ikx_Wrist{0}".format(side), switch_arm_attr)
         flw_orient_constraint = connect_orient_constraint(grp_follow, "fkx_Wrist{0}".format(side), "ikx_Wrist{0}".format(side), switch_arm_attr)
 
+        # add objects to visibility layers
+
+        # body layer
+        cmds.editDisplayLayerMembers("body_primary", layer1_objects, nr=True)
+
+        # stretch/scale layer
+        layer_stretch_objects = ['st_offset_Elbow{0}'.format(side), 'st_offset_Wrist{0}'.format(side),'scl_offset_Wrist{0}'.format(side)]
+        cmds.editDisplayLayerMembers("body_stretch", layer_stretch_objects, nr=True)
+
+        # # reenable color override for the ctrls
+        # for ctrl_obj in ctrl_objects:
+        #     # Disconnect ".drawOverride" attr from each shape inside the control
+        #     disconnect_shape_drawinfo(ctrl_obj)
+        #     # Unlock the overrideEnabled attribute if it's locked
+        #     cmds.setAttr(ctrl_obj + ".overrideEnabled", lock=False)
+        #
+        #     cmds.setAttr(ctrl_obj + ".overrideEnabled", 1)
+        #     if "_l" in ctrl_obj.lower():
+        #         cmds.setAttr(ctrl_obj + ".overrideColor", 6)
+        #     else:
+        #         cmds.setAttr(ctrl_obj + ".overrideColor", 13)

@@ -429,3 +429,26 @@ def joint_list(parent, middle_joint=None, last_joint=None, first_half=None, seco
 
     return jnt_list
 
+
+def disconnect_shape_drawinfo(ctrl):
+    ctrl_connections = cmds.listConnections(ctrl + '.drawOverride', plugs=True, source=True,
+                                                             destination=False)
+    # Check if there are any connections directly to the control
+    if ctrl_connections:
+        for connection in ctrl_connections:
+            # Disconnect each connection
+            cmds.disconnectAttr(connection, ctrl + '.drawOverride')
+
+    # Do the same for child shape objects (if any)
+    ctrl_shapes = cmds.listRelatives(ctrl, type='shape')
+    if ctrl_shapes:
+        for shape in ctrl_shapes:
+            # Get connections to the drawOverride attribute
+            draw_override_connections = cmds.listConnections(shape + '.drawOverride', plugs=True, source=True,
+                                                             destination=False)
+            # Check if there are any connections
+            if draw_override_connections:
+                for connection in draw_override_connections:
+                    # Disconnect each connection
+                    cmds.disconnectAttr(connection, shape + '.drawOverride')
+

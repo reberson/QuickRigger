@@ -7,11 +7,13 @@ from scripts.autorigger.shared.file_handle import file_read_yaml, import_curve
 def create_neck_rig(dict, twist=True):
     # List all necessary joints
     neck_joints = ["Neck_M", "Head_M"]
-
+    # group for layers
+    layer1_objects = []
     # Create FK rig
     for joint in neck_joints:
         jd = dict[joint]
         grp_offset = cmds.group(n="fk_offset_" + jd[3], em=True)
+        layer1_objects.append(grp_offset)
         grp_sdk = cmds.group(n="fk_sdk_" + jd[3], em=True)
         grp_flip = cmds.group(n="fk_flip_" + jd[3], em=True)
         # ctrl = cmds.circle(n="fk_" + jd[3], r=10, nr=(0, 1, 0))
@@ -78,6 +80,9 @@ def create_neck_rig(dict, twist=True):
     cmds.select(d=True)
     cmds.parent("fk_offset_Neck_M", "fk_constraint_chest")
     cmds.parent("fk_master_Head_M", "fkx_Neck_M")
+
+    # add objects to layer
+    cmds.editDisplayLayerMembers("body_primary", layer1_objects, nr=True)
 
 
 
