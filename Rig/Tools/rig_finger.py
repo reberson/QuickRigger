@@ -17,59 +17,68 @@ def create_finger_rig(dict):
 
         # Create FK rig
         for joint in finger_list:
-            jd = dict[joint]
-            grp_offset = cmds.group(n="fk_offset_" + jd[3], em=True)
-            grp_sdk = cmds.group(n="fk_sdk_" + jd[3], em=True)
-            grp_sdk_sec = cmds.group(n="fk_sdk_secondary_" + jd[3], em=True)
-            grp_flip = cmds.group(n="fk_flip_" + jd[3], em=True)
-            if "Meta" in joint:
-                ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_FingerMeta_R.yaml")), "fk_" + jd[3])
+            if cmds.objExists(joint):
+                jd = dict[joint]
+                grp_offset = cmds.group(n="fk_offset_" + jd[3], em=True)
+                grp_sdk = cmds.group(n="fk_sdk_" + jd[3], em=True)
+                grp_sdk_sec = cmds.group(n="fk_sdk_secondary_" + jd[3], em=True)
+                grp_flip = cmds.group(n="fk_flip_" + jd[3], em=True)
+                if "Meta" in joint:
+                    ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_FingerMeta_R.yaml")), "fk_" + jd[3])
+                else:
+                    ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Finger_R.yaml")), "fk_" + jd[3])
+                cmds.setAttr(ctrl + ".overrideEnabled", 1)
+                if "_R" in side:
+                    cmds.setAttr(ctrl + ".overrideColor", 13)
+                else:
+                    cmds.setAttr(ctrl + ".overrideColor", 6)
+                cmds.setAttr(ctrl + ".v", lock=True, k=False, cb=False)
+                cmds.select(d=True)
+                jnt = cmds.joint(n="fkx_" + jd[3])
+                cmds.setAttr(jnt + ".drawStyle", 2)
+                cmds.select(d=True)
+                cmds.parent(jnt, ctrl)
+                cmds.parent(ctrl, grp_flip)
+                cmds.parent(grp_flip, grp_sdk_sec)
+                cmds.parent(grp_sdk_sec, grp_sdk)
+                cmds.parent(grp_sdk, grp_offset)
+                cmds.xform(grp_offset, ws=True, t=jd[0], ro=jd[1], roo=jd[2])
             else:
-                ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "fk_Finger_R.yaml")), "fk_" + jd[3])
-            cmds.setAttr(ctrl + ".overrideEnabled", 1)
-            if "_R" in side:
-                cmds.setAttr(ctrl + ".overrideColor", 13)
-            else:
-                cmds.setAttr(ctrl + ".overrideColor", 6)
-            cmds.setAttr(ctrl + ".v", lock=True, k=False, cb=False)
-            cmds.select(d=True)
-            jnt = cmds.joint(n="fkx_" + jd[3])
-            cmds.setAttr(jnt + ".drawStyle", 2)
-            cmds.select(d=True)
-            cmds.parent(jnt, ctrl)
-            cmds.parent(ctrl, grp_flip)
-            cmds.parent(grp_flip, grp_sdk_sec)
-            cmds.parent(grp_sdk_sec, grp_sdk)
-            cmds.parent(grp_sdk, grp_offset)
-            cmds.xform(grp_offset, ws=True, t=jd[0], ro=jd[1], roo=jd[2])
+                print("Warning: skipping " + joint)
 
         # Parent FK linearly
         for joint in finger_list:
-            jd = dict[joint]
-            if "Meta_" not in joint or "ThumbFinger1_" not in joint:
-                cmds.parent("fk_offset_" + jd[3], "fkx_" + jd[4])
+            if cmds.objExists(joint):
+                jd = dict[joint]
+                if "Meta_" not in joint or "ThumbFinger1_" not in joint:
+                    cmds.parent("fk_offset_" + jd[3], "fkx_" + jd[4])
 
         cmds.select(d=True)
 
         # Metacarpal version
-        cmds.parent("fk_offset_ThumbFinger1{0}".format(side), finger_grp)
-        cmds.parent("fk_offset_IndexMeta{0}".format(side), finger_grp)
-        cmds.parent("fk_offset_MiddleMeta{0}".format(side), finger_grp)
-        cmds.parent("fk_offset_RingMeta{0}".format(side), finger_grp)
-        cmds.parent("fk_offset_PinkyMeta{0}".format(side), finger_grp)
+        finger_firsts_list = ["fk_offset_ThumbFinger1{0}".format(side), "fk_offset_IndexMeta{0}".format(side), "fk_offset_MiddleMeta{0}".format(side), "fk_offset_RingMeta{0}".format(side), "fk_offset_PinkyMeta{0}".format(side)]
+        # cmds.parent("fk_offset_ThumbFinger1{0}".format(side), finger_grp)
+        # cmds.parent("fk_offset_IndexMeta{0}".format(side), finger_grp)
+        # cmds.parent("fk_offset_MiddleMeta{0}".format(side), finger_grp)
+        # cmds.parent("fk_offset_RingMeta{0}".format(side), finger_grp)
+        # cmds.parent("fk_offset_PinkyMeta{0}".format(side), finger_grp)
+        for finger_joint in finger_firsts_list:
+            if cmds.objExists(finger_joint):
+                cmds.parent(finger_joint, finger_grp)
 
         # Connect both fk ik rigs to def joints through pont/orient constraint workflow
         for jnt in finger_list:
-            point_constraint = cmds.pointConstraint("fkx_" + jnt, jnt)
-            cmds.parent(point_constraint, "constraints")
-            orient_constraint = cmds.orientConstraint("fkx_" + jnt, jnt)
-            cmds.parent(orient_constraint, "constraints")
-            # scale_constraint = cmds.scaleConstraint("fkx_" + jnt, jnt)
-            # cmds.parent(scale_constraint, "constraints")
-            # Connect hand scaler attribute to joint scale
-            cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScalex', jnt + ".sx")
-            cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScaley', jnt + ".sy")
-            cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScalez', jnt + ".sz")
+            if cmds.objExists(jnt):
+                point_constraint = cmds.pointConstraint("fkx_" + jnt, jnt)
+                cmds.parent(point_constraint, "constraints")
+                orient_constraint = cmds.orientConstraint("fkx_" + jnt, jnt)
+                cmds.parent(orient_constraint, "constraints")
+                # scale_constraint = cmds.scaleConstraint("fkx_" + jnt, jnt)
+                # cmds.parent(scale_constraint, "constraints")
+                # Connect hand scaler attribute to joint scale
+                cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScalex', jnt + ".sx")
+                cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScaley', jnt + ".sy")
+                cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScalez', jnt + ".sz")
 
         # Constraint finger offset groups to wrist joints
         cmds.pointConstraint("Wrist{0}".format(side), finger_grp)

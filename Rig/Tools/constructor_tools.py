@@ -5,10 +5,13 @@ from System.utils import create_twist_joint, mirror_joint
 
 # TODO: Make possible to build body rig AFTER face rig being built. (low priority)
 # TODO: Create a finalization pass where we can clean unused joints
+
+
 def create_rig_structure():
     rig_grp = cmds.group(em=True, n="rig")
     motion_grp = cmds.group(em=True, n="motion_system")
     def_grp = cmds.group(em=True, n="deformation_joints")
+    construction_grp = cmds.group(em=True, n="construction_joints")
     main_grp = cmds.group(em=True, n="main_system")
     main_ctrl = cmds.circle(n="Main", r=50, nr=(0, 1, 0))
     cmds.setAttr(main_ctrl[0] + ".overrideEnabled", 1)
@@ -39,6 +42,7 @@ def create_rig_structure():
     cmds.parent(fkik_grp, motion_grp)
     cmds.parent(root_grp, motion_grp)
     cmds.parent(stretch_grp, motion_grp)
+    cmds.parent(construction_grp, rig_grp)
 
     cmds.pointConstraint(main_ctrl, glob_main_grp)
     cmds.orientConstraint(main_ctrl, glob_main_grp)
@@ -83,18 +87,18 @@ def create_deform_rig():
         cmds.makeIdentity(joint, a=True, r=True)
 
     # Create Twist joints
-    sides = ["_R", "_L"]
-    for side in sides:
-        twist_shoulder = create_twist_joint("Shoulder{0}".format(side), "Elbow{0}".format(side), "Shoulder_Twist{0}".format(side))
-        cmds.parent(twist_shoulder[1], "constraints")
-        twist_elbow = create_twist_joint("Elbow{0}".format(side), "Wrist{0}".format(side), "Elbow_Twist{0}".format(side))
-        cmds.parent(twist_elbow[1], "constraints")
-        twist_hip = create_twist_joint("Hip{0}".format(side), "Knee{0}".format(side), "Hip_Twist{0}".format(side))
-        cmds.parent(twist_hip[1], "constraints")
-        twist_knee = create_twist_joint("Knee{0}".format(side), "Ankle{0}".format(side), "Knee_Twist{0}".format(side))
-        cmds.parent(twist_knee[1], "constraints")
-    twist_neck = create_twist_joint("Neck_M", "Head_M", "Neck_Twist")
-    cmds.parent(twist_neck[1], "constraints")
+    # sides = ["_R", "_L"]
+    # for side in sides:
+    #     twist_shoulder = create_twist_joint("Shoulder{0}".format(side), "Elbow{0}".format(side), "Shoulder_Twist{0}".format(side))
+    #     cmds.parent(twist_shoulder[1], "constraints")
+    #     twist_elbow = create_twist_joint("Elbow{0}".format(side), "Wrist{0}".format(side), "Elbow_Twist{0}".format(side))
+    #     cmds.parent(twist_elbow[1], "constraints")
+    #     twist_hip = create_twist_joint("Hip{0}".format(side), "Knee{0}".format(side), "Hip_Twist{0}".format(side))
+    #     cmds.parent(twist_hip[1], "constraints")
+    #     twist_knee = create_twist_joint("Knee{0}".format(side), "Ankle{0}".format(side), "Knee_Twist{0}".format(side))
+    #     cmds.parent(twist_knee[1], "constraints")
+    # twist_neck = create_twist_joint("Neck_M", "Head_M", "Neck_Twist")
+    # cmds.parent(twist_neck[1], "constraints")
 
 
 def create_rig_structure_face():

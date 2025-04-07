@@ -3,14 +3,15 @@ from System.utils import calculatePVPosition as calc_pv
 from System.utils import connect_point_constraint, connect_orient_constraint, mirror_object
 from definitions import CONTROLS_DIR
 from System.file_handle import file_read_yaml, import_curve
-from System.utils import create_stretch
+from System.utils import create_stretch, create_twist_joint
 # TODO: Refactor to Class objects
 
 
-def create_arm_rig(dict):
+def create_arm_rig(dict, twist=True):
     # List all necessary joints
     arm_joints = ["Shoulder_R", "Elbow_R", "Wrist_R", "Shoulder_L", "Elbow_L", "Wrist_L"]
     arm_switchers = ["ikfk_arm_R", "ikfk_arm_L"]
+
 
     # Create FK rig
     for joint in arm_joints:
@@ -208,9 +209,29 @@ def create_arm_rig(dict):
             cmds.parent(orient_constraint, "constraints")
         cmds.orientConstraint(ctrl_arm, "ikx_Wrist{0}".format(side), mo=True)
 
-        # Create Stretch
-        create_stretch("Elbow{0}".format(side), "Shoulder{0}".format(side), "ikfk_arm{0}".format(side), "fk_offset_Elbow{0}".format(side), "ikx_Elbow{0}".format(side), "Shoulder_Twist{0}".format(side))
-        create_stretch("Wrist{0}".format(side), "Elbow{0}".format(side), "ikfk_arm{0}".format(side), "fk_offset_Wrist{0}".format(side), "ikx_Wrist{0}".format(side), "Elbow_Twist{0}".format(side))
+        # Add Twist Joints and Stretch
+        if twist:
+            twist_shoulder = create_twist_joint("Shoulder{0}".format(side), "Elbow{0}".format(side), "Shoulder_Twist{0}".format(side))
+            cmds.parent(twist_shoulder[1], "constraints")
+            twist_elbow = create_twist_joint("Elbow{0}".format(side), "Wrist{0}".format(side), "Elbow_Twist{0}".format(side))
+            cmds.parent(twist_elbow[1], "constraints")
+            twist_shoulder = "Shoulder_Twist{0}".format(side)
+            twist_elbow = "Elbow_Twist{0}".format(side)
+            # Create Stretch
+            create_stretch("Elbow{0}".format(side), "Shoulder{0}".format(side), "ikfk_arm{0}".format(side),
+                           "fk_offset_Elbow{0}".format(side), "ikx_Elbow{0}".format(side), twist_shoulder)
+            create_stretch("Wrist{0}".format(side), "Elbow{0}".format(side), "ikfk_arm{0}".format(side),
+                           "fk_offset_Wrist{0}".format(side), "ikx_Wrist{0}".format(side), twist_elbow)
+        else:
+            # Create Stretch
+            create_stretch("Elbow{0}".format(side), "Shoulder{0}".format(side), "ikfk_arm{0}".format(side),
+                           "fk_offset_Elbow{0}".format(side), "ikx_Elbow{0}".format(side))
+            create_stretch("Wrist{0}".format(side), "Elbow{0}".format(side), "ikfk_arm{0}".format(side),
+                           "fk_offset_Wrist{0}".format(side), "ikx_Wrist{0}".format(side))
+
+        # # Create Stretch
+        # create_stretch("Elbow{0}".format(side), "Shoulder{0}".format(side), "ikfk_arm{0}".format(side), "fk_offset_Elbow{0}".format(side), "ikx_Elbow{0}".format(side), twist_shoulder)
+        # create_stretch("Wrist{0}".format(side), "Elbow{0}".format(side), "ikfk_arm{0}".format(side), "fk_offset_Wrist{0}".format(side), "ikx_Wrist{0}".format(side), twist_elbow)
 
         # Create blend node to control hand scaling
         blend_node = cmds.shadingNode("blendColors", n="hand_scale_bc{0}".format(side), au=True)

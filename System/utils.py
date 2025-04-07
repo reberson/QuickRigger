@@ -122,11 +122,9 @@ def connect_parent_constraint(tgt, first_source, second_source, attribute):
     return parent_constraint
 
 
-
-
-
-
 # Todo: Find a way to make sure the Left twist joints are on the oposite orientation. Might not brake as is, but it's good to set
+
+
 def create_twist_joint(parent_jnt, child_jnt, name):
     start = cmds.xform(parent_jnt, q=True, ws=True, t=True)
     start_rot = cmds.xform(parent_jnt, q=True, ws=True, ro=True)
@@ -150,7 +148,7 @@ def create_twist_joint(parent_jnt, child_jnt, name):
     cmds.makeIdentity(twist_jnt, a=True, r=True, jo=False)
 
     cmds.xform(twist_jnt, t=(0, length_v / 2, 0), os=True)
-    cmds.xform(twist_jnt, roo=start_roo)
+    # cmds.xform(twist_jnt, roo=start_roo)
     cmds.makeIdentity(twist_jnt, a=True, r=True, jo=False)
 
     twist_cont = cmds.parentConstraint(parent_jnt, child_jnt, twist_jnt, w=0.5, sr=["x", "z"], st=["x", "y", "z"])
@@ -412,6 +410,4 @@ def joint_list(parent, middle_joint=None, last_joint=None, first_half=None, seco
     last_jnt = len(jnt_list) - 1
 
     return jnt_list
-
-
 

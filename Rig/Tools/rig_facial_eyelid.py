@@ -174,10 +174,12 @@ def create_lattice_eyelids():
         cmds.parent(proj_sphere[0], grp_proj_sys)
         cmds.select(d=True)
         cmds.select(proj_sphere[2][1])
-        if side == "_R":
-            lattice_load("template_lattice_eye_r.yaml")
-        else:
-            lattice_load("template_lattice_eye_l.yaml")
+
+        # Disabled Lattice load template because it was making eyes offset the origin
+        # if side == "_R":
+        #     lattice_load("template_lattice_eye_r.yaml")
+        # else:
+        #     lattice_load("template_lattice_eye_l.yaml")
         # Declare list of existing primary controls for each eyelid
         rib_point_list = ["eyelidUpper{0}".format(side), "eyelidLower{0}".format(side),
                           "eyelidInnerCorner{0}".format(side), "eyelidOuterCorner{0}".format(side)]

@@ -161,7 +161,8 @@ def attach_nasolabial():
     cmds.select(d=True)
     jnt_list = cmds.listRelatives("Nasolabial")
     for jnt in jnt_list:
-        const_par = cmds.parentConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
+        # Experimenting with constraining only translate, not rotation.
+        const_par = cmds.parentConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True, sr=["x", "y", "z"])
         cmds.setAttr(const_par[0] + ".interpType", 2)
         cmds.parent(const_par, const_grp)
     cmds.select(d=True)

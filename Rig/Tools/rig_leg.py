@@ -5,13 +5,14 @@ from System.file_handle import import_ctrl
 from System.utils import connect_point_constraint, connect_orient_constraint, mirror_object
 from definitions import CONTROLS_DIR
 from System.file_handle import file_read_yaml, import_curve
-from System.utils import create_stretch
+from System.utils import create_stretch, create_twist_joint
 
 # TODO: Refactor to Class objects
 # TODO: Hide all atributes that are not directly controllable
 # TODO: Move the roll and heel joints to a reserved space instead of deleting, so that it can be reverted back if the user wants
 
-def create_leg_rig(dict):
+
+def create_leg_rig(dict, twist=True):
     # List all necessary joints
     sides = ["_R", "_L"]
     leg_joints = ["Hip_R", "Knee_R", "Ankle_R", "Heel_R", "Toes_R", "Toes_End_R", "FootSideIn_R", "FootSideOut_R",
@@ -366,15 +367,37 @@ def create_leg_rig(dict):
         cmds.orientConstraint(ctrl_leg, "ikx_Ankle{0}".format(side), mo=True)
 
         # After the foot rig is built, delete the heel and side ref joints from deform hierarchy
-        cmds.delete("Heel{0}".format(side))
-        cmds.delete("FootSideOut{0}".format(side))
-        cmds.delete("FootSideIn{0}".format(side))
+        # cmds.delete("Heel{0}".format(side))
+        # cmds.delete("FootSideOut{0}".format(side))
+        # cmds.delete("FootSideIn{0}".format(side))
 
-        # Create Stretch
-        create_stretch("Knee{0}".format(side), "Hip{0}".format(side), "ikfk_leg{0}".format(side),
-                       "fk_offset_Knee{0}".format(side), "ikx_Knee{0}".format(side), "Hip_Twist{0}".format(side))
-        create_stretch("Ankle{0}".format(side), "Knee{0}".format(side), "ikfk_leg{0}".format(side),
-                       "fk_offset_Ankle{0}".format(side), "ikx_Ankle{0}".format(side), "Knee_Twist{0}".format(side))
+        # Add Twist Joints
+        if twist:
+            twist_hip = create_twist_joint("Hip{0}".format(side), "Knee{0}".format(side),
+                                           "Hip_Twist{0}".format(side))
+            cmds.parent(twist_hip[1], "constraints")
+            twist_knee = create_twist_joint("Knee{0}".format(side), "Ankle{0}".format(side),
+                                            "Knee_Twist{0}".format(side))
+            cmds.parent(twist_knee[1], "constraints")
+            twist_hip = "Hip_Twist{0}".format(side)
+            twist_knee = "Knee_Twist{0}".format(side)
+            # Create Stretch
+            create_stretch("Knee{0}".format(side), "Hip{0}".format(side), "ikfk_leg{0}".format(side),
+                           "fk_offset_Knee{0}".format(side), "ikx_Knee{0}".format(side), twist_hip)
+            create_stretch("Ankle{0}".format(side), "Knee{0}".format(side), "ikfk_leg{0}".format(side),
+                           "fk_offset_Ankle{0}".format(side), "ikx_Ankle{0}".format(side), twist_knee)
+        else:
+            # Create Stretch
+            create_stretch("Knee{0}".format(side), "Hip{0}".format(side), "ikfk_leg{0}".format(side),
+                           "fk_offset_Knee{0}".format(side), "ikx_Knee{0}".format(side))
+            create_stretch("Ankle{0}".format(side), "Knee{0}".format(side), "ikfk_leg{0}".format(side),
+                           "fk_offset_Ankle{0}".format(side), "ikx_Ankle{0}".format(side))
+
+        # # Create Stretch
+        # create_stretch("Knee{0}".format(side), "Hip{0}".format(side), "ikfk_leg{0}".format(side),
+        #                "fk_offset_Knee{0}".format(side), "ikx_Knee{0}".format(side), twist_hip)
+        # create_stretch("Ankle{0}".format(side), "Knee{0}".format(side), "ikfk_leg{0}".format(side),
+        #                "fk_offset_Ankle{0}".format(side), "ikx_Ankle{0}".format(side), twist_knee)
 
         # Create blend node to control foot scaling
         blend_node = cmds.shadingNode("blendColors", n="foot_scale_bc{0}".format(side), au=True)

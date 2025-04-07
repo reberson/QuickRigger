@@ -131,7 +131,8 @@ def attach_brow():
     cmds.select(d=True)
     jnt_list = joint_list("Brows", "Brow_M", first_half="_r", second_half="_l")
     for jnt in jnt_list:
-        const_par = cmds.parentConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
+        # const_par = cmds.parentConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
+        const_par = cmds.parentConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True, sr=["y"])
         cmds.setAttr(const_par[0] + ".interpType", 2)
         cmds.parent(const_par, const_grp)
     cmds.select(d=True)
@@ -184,7 +185,7 @@ def create_lattice_brow():
 def attach_brow_lattice():
     reset_controls()
     # declare ctrls to be attached to lattice
-    rib_jnts = ["brow_outer_R", "brow_M", "brow_outer_L", "brow_inner_R", "brow_inner_L"]
+    rib_jnts = ["brow_outer_R", "brow_M", "brow_outer_L", "brow_inner_R", "brow_inner_L", "brow_mid_R", "brow_mid_L"]
     const_proj_grp = cmds.group(em=True, n="brow_projection_constraint")
     cmds.parent(const_proj_grp, "face_system")
     for jnt in rib_jnts:
@@ -200,7 +201,7 @@ def detach_brow_lattice():
     cmds.delete("brow_projection_constraint")
     cmds.select(d=True)
     # reset joints that were affect by lattice constraints
-    rib_jnts = ["brow_outer_R", "brow_M", "brow_outer_L", "brow_inner_R", "brow_inner_L"]
+    rib_jnts = ["brow_outer_R", "brow_M", "brow_outer_L", "brow_inner_R", "brow_inner_L", "brow_mid_R", "brow_mid_L"]
     for jnt in rib_jnts:
         cmds.xform("ribbon_cjoint_" + jnt, t=(0, 0, 0), ro=(0, 0, 0))
     cmds.select(d=True)

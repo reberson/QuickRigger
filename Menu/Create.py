@@ -5,6 +5,7 @@ from Rig.Tools import layout_tools
 from Rig.Tools import constructor_tools
 from Rig.Tools import rig_root, rig_torso, rig_arm, rig_leg, rig_finger, rig_sdk_finger, rig_neck
 from Rig.Tools import rig_facial_brow, rig_facial_eyelid, rig_facial_nasolabial, rig_facial_mouth, rig_facial_cheek, rig_facial_nose, rig_facial_jaw, rig_facial_tongue, rig_facial_eye
+from Rig.Tools import rig_generic_chain
 from System.file_handle import file_dialog_yaml as fd
 from System.file_handle import export_curve, import_curve
 from System.skin_handler import save_selected_skin_yaml, load_selected_skin_yaml
@@ -55,6 +56,11 @@ def menu():
                   c=lambda *args: build_rig(),
                   ann='Generates the complete rig based on reference joints')
 
+    # Rig body - build -- Simplified
+    cmds.menuItem(p='body', l='Build rig simple', stp='python',
+                  c=lambda *args: build_rig_simple(),
+                  ann='Generates the complete rig based on reference joints (Simplified)')
+
     # Rig body - build -- Step by step actions
     cmds.menuItem('steps', p='body', l='Step by step', subMenu=True, tearOff=True)
 
@@ -75,16 +81,27 @@ def menu():
                   ann='Creates the rig controls for the torso')
 
     cmds.menuItem(p='steps', l='Create neck rig', stp='python',
-                  c=lambda *args: rig_neck.create_neck_rig(layout_tools.joint_dictionary_creator()),
+                  c=lambda *args: rig_neck.create_neck_rig(layout_tools.joint_dictionary_creator(), twist=True),
                   ann='Creates the rig controls for the neck')
 
+    cmds.menuItem(p='steps', l='Create neck rig - No Twist', stp='python',
+                  c=lambda *args: rig_neck.create_neck_rig(layout_tools.joint_dictionary_creator(), twist=False),
+                  ann='Creates the rig controls for the neck without twist')
+
     cmds.menuItem(p='steps', l='Create arm rig', stp='python',
-                  c=lambda *args: rig_arm.create_arm_rig(layout_tools.joint_dictionary_creator()),
+                  c=lambda *args: rig_arm.create_arm_rig(layout_tools.joint_dictionary_creator(), twist=True),
                   ann='Creates the rig controls for the arms')
+    cmds.menuItem(p='steps', l='Create arm rig - No Twist', stp='python',
+                  c=lambda *args: rig_arm.create_arm_rig(layout_tools.joint_dictionary_creator(), twist=False),
+                  ann='Creates the rig controls for the arms without twist')
 
     cmds.menuItem(p='steps', l='Create leg rig', stp='python',
-                  c=lambda *args: rig_leg.create_leg_rig(layout_tools.joint_dictionary_creator()),
+                  c=lambda *args: rig_leg.create_leg_rig(layout_tools.joint_dictionary_creator(), twist=True),
                   ann='Creates the rig controls for the legs')
+
+    cmds.menuItem(p='steps', l='Create leg rig - No Twist', stp='python',
+                  c=lambda *args: rig_leg.create_leg_rig(layout_tools.joint_dictionary_creator(), twist=False),
+                  ann='Creates the rig controls for the legs without twist')
 
     cmds.menuItem(p='steps', l='Create fingers rig', stp='python',
                   c=lambda *args: rig_finger.create_finger_rig(layout_tools.joint_dictionary_creator()),
@@ -160,6 +177,18 @@ def menu():
                   c=lambda *args: detach_face_lattice(),
                   ann='Detach face controls to Lattice')
 
+    # Rig misc
+    cmds.menuItem('misc', p='builder', l='Misc', subMenu=True, tearOff=True)
+
+    # Rig misc - Create selected chain
+    cmds.menuItem(p='misc', l='Build selected chain', stp='python',
+                  c=lambda *args: rig_generic_chain.create_chain_selected(),
+                  ann='create a chain rig based on seleted joint')
+    # Rig misc - Create all chains
+    cmds.menuItem(p='misc', l='Build all chains', stp='python',
+                  c=lambda *args: rig_generic_chain.create_chain_all(),
+                  ann='create a chain rig based on seleted joint')
+
     # Tools Menu
     cmds.menuItem('tools', p=menu_name, l='Tools', subMenu=True, tearOff=True)
 
@@ -193,17 +222,33 @@ def menu():
                   c=lambda *args: load_selected_skin_yaml(),
                   ann='Loads selected Skin Weights from yaml and apply to selected mesh')
 
+    cmds.menuItem(p='tools', l='Add chain attr', stp='python',
+                  c=lambda *args: rig_generic_chain.set_chain_start_attr(cmds.ls(sl=True)[0]),
+                  ann='Add chain attr on selected joint')
+
 
 def build_rig():
     constructor_tools.create_rig_structure()
     constructor_tools.create_deform_rig()
     rig_root.create_root_rig(layout_tools.joint_dictionary_creator())
     rig_torso.create_torso_rig(layout_tools.joint_dictionary_creator())
-    rig_neck.create_neck_rig(layout_tools.joint_dictionary_creator())
-    rig_arm.create_arm_rig(layout_tools.joint_dictionary_creator())
-    rig_leg.create_leg_rig(layout_tools.joint_dictionary_creator())
+    rig_neck.create_neck_rig(layout_tools.joint_dictionary_creator(), twist=True)
+    rig_arm.create_arm_rig(layout_tools.joint_dictionary_creator(), twist=True)
+    rig_leg.create_leg_rig(layout_tools.joint_dictionary_creator(), twist=True)
     rig_finger.create_finger_rig(layout_tools.joint_dictionary_creator())
     rig_sdk_finger.create_finger_sdk()
+    constructor_tools.set_scale_compensate(0)
+
+
+def build_rig_simple():
+    constructor_tools.create_rig_structure()
+    constructor_tools.create_deform_rig()
+    rig_root.create_root_rig(layout_tools.joint_dictionary_creator())
+    rig_torso.create_torso_rig(layout_tools.joint_dictionary_creator())
+    rig_neck.create_neck_rig(layout_tools.joint_dictionary_creator(), twist=False)
+    rig_arm.create_arm_rig(layout_tools.joint_dictionary_creator(), twist=False)
+    rig_leg.create_leg_rig(layout_tools.joint_dictionary_creator(), twist=False)
+    rig_finger.create_finger_rig(layout_tools.joint_dictionary_creator())
     constructor_tools.set_scale_compensate(0)
 
 

@@ -1,10 +1,10 @@
 import maya.cmds as cmds
-from System.utils import connect_point_constraint, connect_orient_constraint, mirror_object
+from System.utils import connect_point_constraint, connect_orient_constraint, mirror_object, create_twist_joint
 from definitions import CONTROLS_DIR
 from System.file_handle import file_read_yaml, import_curve
 
 
-def create_neck_rig(dict):
+def create_neck_rig(dict, twist=True):
     # List all necessary joints
     neck_joints = ["Neck_M", "Head_M"]
 
@@ -66,6 +66,10 @@ def create_neck_rig(dict):
             cmds.orientConstraint("Neck_M", grp_fl_neck, mo=True, n="follow_neck_" + jd[3])
             scl_const = cmds.scaleConstraint(jnt, joint, mo=True)
             cmds.parent(scl_const, "constraints")
+
+    if twist:
+        twist_neck = create_twist_joint("Neck_M", "Head_M", "Neck_Twist")
+        cmds.parent(twist_neck[1], "constraints")
 
     cmds.select(d=True)
     cmds.parent("fk_offset_Neck_M", "fk_constraint_chest")

@@ -2,7 +2,7 @@ import maya.cmds as cmds
 from System.file_handle import file_dialog_yaml, file_read_yaml
 
 
-def save_skin(source_object):
+def save_skin(source_object): # works only for single mesh skin
     skin_data = {}
     geometry = cmds.listRelatives(source_object)[0]
     skin_cluster = cmds.listConnections(geometry, t="skinCluster")

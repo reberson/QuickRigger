@@ -191,10 +191,11 @@ def create_mouth(dict):
         cmds.matchTransform(grp_parent, "offset_" + jnt)
         cmds.parent(grp_parent, grp_ctrl)
         cmds.parent("offset_" + jnt, grp_parent)
-        cmds.pointConstraint("Mouth", grp_parent, mo=True, w=0.25)
-        cmds.pointConstraint("Jaw_End_M", grp_parent, mo=True, w=0.75)
-        cmds.orientConstraint("Mouth", grp_parent, mo=True, w=0.25)
-        cmds.orientConstraint("Jaw_M", grp_parent, mo=True, w=0.75)
+        # cmds.pointConstraint("Mouth", grp_parent, mo=True, w=0.25)
+        # cmds.pointConstraint("Jaw_End_M", grp_parent, mo=True, w=0.75)
+        # cmds.orientConstraint("Mouth", grp_parent, mo=True, w=0.25)
+        # cmds.orientConstraint("Jaw_M", grp_parent, mo=True, w=0.75)
+        cmds.parentConstraint("Jaw_End_M", grp_parent, mo=True)
 
 
 def attach_mouth():
