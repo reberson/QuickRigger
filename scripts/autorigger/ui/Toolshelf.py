@@ -51,8 +51,8 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         new_tab = self.create_tabs()
 
         # Draw UI
-        self.create_build_tab(new_tab)
-        self.create_tools_tab(new_tab)
+        self.create_build_tab(new_tab, face=False)
+        self.create_tools_tab(new_tab, face=False)
 
     def create_tabs(self):
 
@@ -141,9 +141,9 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
             hbox.addWidget(button_load)
             hbox.addWidget(button_run)
 
-        return button_load, button_save, line_edit, button_run
+        return button_load, button_save, line_edit, button_run, title
 
-    def create_build_tab(self, tabs):
+    def create_build_tab(self, tabs, face=False):
 
 
         tab_layout = QtWidgets.QVBoxLayout()
@@ -156,12 +156,11 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         config_file[0].clicked.connect(
             functools.partial(self.load_file_path_yaml_action, config_file[2], "Load Build Configuration File"))
 
-        # 02 ----- Build Rig Button
-        hbox_2 = QtWidgets.QHBoxLayout()
-        tab_layout.addLayout(hbox_2)
-        button_build_rig = QtWidgets.QPushButton('Build Rig')
-
-        hbox_2.addWidget(button_build_rig)
+        # # 02 ----- Build Rig Button - Will move to bottom
+        # hbox_2 = QtWidgets.QHBoxLayout()
+        # tab_layout.addLayout(hbox_2)
+        # button_build_rig = QtWidgets.QPushButton('Build Rig')
+        # hbox_2.addWidget(button_build_rig)
 
         # Scroll area contents start here
 
@@ -254,18 +253,23 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         scrollable_layout.addWidget(line_2)
 
         # 07 -------- Face base itens
+        face_widgets_list = []
+        face_filepaths_list = []
         # -- Title
         lb_title_face = QtWidgets.QLabel("Face")
         lb_title_face.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         lb_title_face.setFixedHeight(15)
         scrollable_layout.addWidget(lb_title_face)
-
+        face_widgets_list.append(lb_title_face)
         # Ribbons Skin
         load_ribbons_skins = self.file_path_assigner(scrollable_layout, 'Ribbons Skin Weights', mode="Load")
+        face_filepaths_list.append(load_ribbons_skins)
         # Lattice shapes
         load_lattices_shapes = self.file_path_assigner(scrollable_layout, 'Lattice Shapes', mode="Load")
+        face_filepaths_list.append(load_lattices_shapes)
         # Lattice Skin
         load_lattices_skins = self.file_path_assigner(scrollable_layout, 'Lattice Skin Weights', mode="Load")
+        face_filepaths_list.append(load_lattices_skins)
 
         # -- Scroll
         scrollable_widget_face = QtWidgets.QWidget()
@@ -277,6 +281,7 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         scroll_face.setWidgetResizable(True)
         scroll_face.setWidget(scrollable_widget_face)
         scrollable_layout.addWidget(scroll_face)
+        face_widgets_list.append(scroll_face)
         face_module_list = []
         # adding each module
         face_module_item_01 = self.checklist_item(scrollable_layout_face, "Face structure", rig.constructor_tools.create_rig_structure_face, checkstate=False)
@@ -328,11 +333,29 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         button_build_face_selected = QtWidgets.QPushButton('Run Selected Face Modules')
         button_build_face_selected.clicked.connect(functools.partial(self.run_module_list, face_module_list))
         scrollable_layout.addWidget(button_build_face_selected)
+        face_widgets_list.append(button_build_face_selected)
 
         # Separator
         line_3 = QtWidgets.QFrame()
         line_3.setFrameShape(QtWidgets.QFrame.HLine)
         scrollable_layout.addWidget(line_3)
+        face_widgets_list.append(line_3)
+
+        # Control visibility of the entire Face Module:
+        if face:
+            for face_widget in face_widgets_list:
+                face_widget.setVisible(True)
+            for face_filepath in face_filepaths_list:
+                for item in face_filepath:
+                    item.setVisible(True)
+        else:
+            for face_widget in face_widgets_list:
+                face_widget.setVisible(False)
+            for face_filepath in face_filepaths_list:
+                for item in face_filepath:
+                    item.setVisible(False)
+
+
 
         # 08 ----- Misc Module List
         # -- Title
@@ -368,15 +391,24 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         button_build_misc_selected.clicked.connect(functools.partial(self.run_module_list, misc_module_list))
         scrollable_layout.addWidget(button_build_misc_selected)
 
+        # Button to build entire rig - Moved to bottom
+        # 02 ----- Build Rig Button
+        hbox_2 = QtWidgets.QHBoxLayout()
+        tab_layout.addLayout(hbox_2)
+        button_build_rig = QtWidgets.QPushButton('Build Rig')
+        hbox_2.addWidget(button_build_rig)
         # Connect action of the Build complete button
         button_build_rig.clicked.connect(
             functools.partial(self.build_complete_rig, list_body=body_module_list, list_face=face_module_list, list_misc=misc_module_list, exe_me=load_mesh, exe_pl=load_placement, exe_sw=load_skin_weigths, exe_swrib=load_ribbons_skins, exe_shlat=load_lattices_shapes, exe_swlat=load_lattices_skins))
 
-    def create_tools_tab(self, tabs):
+    def create_tools_tab(self, tabs, face=False):
         tab_layout = QtWidgets.QVBoxLayout()
         tab = QtWidgets.QWidget()
         tab.setLayout(tab_layout)
         tabs.addTab(tab, "Tools")
+
+        # list of all face related widgets
+        face_widgets_list = []
 
         # Scroll area contents start here
         # Create a scrollable widget
@@ -422,6 +454,7 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         button_template_body_load.clicked.connect(functools.partial(self.load_joint_placement_template, 'template_humanoid.yaml'))
         grid_layout_placement.addWidget(button_template_body_load)
         button_template_face_load = QtWidgets.QPushButton('Load Face Template')
+        face_widgets_list.append(button_template_face_load)
         button_template_face_load.clicked.connect(functools.partial(self.load_joint_placement_template, 'template_face.yaml'))
         grid_layout_placement.addWidget(button_template_face_load)
         button_placement_load = QtWidgets.QPushButton('Load Placement')
@@ -456,15 +489,18 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         grid_layout_placement.addWidget(button_skinweights_save_sel)
 
         # Ribbon SubTitle
-        title_ribbon_ctrls = QtWidgets.QLabel("Ribbon Controls")
+        title_ribbon_ctrls = QtWidgets.QLabel("Face Ribbon Controls")
+        face_widgets_list.append(title_ribbon_ctrls)
         title_ribbon_ctrls.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         grid_layout_placement.addWidget(title_ribbon_ctrls, 10, 0, 1, 2)
 
         # Buttons
         button_face_rib_attach = QtWidgets.QPushButton('Attach Face Ribbons')
+        face_widgets_list.append(button_face_rib_attach)
         button_face_rib_attach.clicked.connect(self.attach_face_ribbons)
         grid_layout_placement.addWidget(button_face_rib_attach)
         button_face_rib_detach = QtWidgets.QPushButton('Detach Face Ribbons')
+        face_widgets_list.append(button_face_rib_detach)
         button_face_rib_detach.clicked.connect(self.detach_face_ribbons)
         grid_layout_placement.addWidget(button_face_rib_detach)
         # button_rib_skin_load_sel = QtWidgets.QPushButton('Load Selected Ribbon Skin')
@@ -475,7 +511,7 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         # grid_layout_placement.addWidget(button_rib_skin_save_sel)
 
         # Lattice SubTitle
-        title_lattice_ctrls = QtWidgets.QLabel("Lattice Controls")
+        title_lattice_ctrls = QtWidgets.QLabel("Face Lattice Controls")
         title_lattice_ctrls.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         grid_layout_placement.addWidget(title_lattice_ctrls, 13, 0, 1, 2)
 
@@ -495,6 +531,8 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         button_lat_save = QtWidgets.QPushButton('Save Lattice')
         button_lat_save.clicked.connect(rig.layout_tools.lattice_save)
         grid_layout_placement.addWidget(button_lat_save)
+
+        face_widgets_list.extend([title_lattice_ctrls, button_face_lat_create, button_face_lat_attach, button_face_lat_detach, button_lat_load, button_lat_save])
 
         # Generic Chain Subtitle
         title_generic_chain = QtWidgets.QLabel("Generic Chain Controls")
@@ -525,17 +563,25 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         button_scale_comp_disable.clicked.connect(self.scale_compensate_disable)
         grid_layout_placement.addWidget(button_scale_comp_disable)
 
-        button_build_rig_body = QtWidgets.QPushButton('Build Basic Body Rig')
-        button_build_rig_body.clicked.connect(self.build_rig_body)
-        grid_layout_placement.addWidget(button_build_rig_body)
+        # button_build_rig_body = QtWidgets.QPushButton('Build Basic Body Rig')
+        # button_build_rig_body.clicked.connect(self.build_rig_body)
+        # grid_layout_placement.addWidget(button_build_rig_body)
+        #
+        # button_build_rig_body_simple = QtWidgets.QPushButton('Build Basic Simple Body Rig')
+        # button_build_rig_body_simple.clicked.connect(self.build_rig_body_simple)
+        # grid_layout_placement.addWidget(button_build_rig_body_simple)
+        #
+        # button_build_rig_face = QtWidgets.QPushButton('Build Face Rig')
+        # button_build_rig_face.clicked.connect(self.build_rig_face)
+        # grid_layout_placement.addWidget(button_build_rig_face)
 
-        button_build_rig_body_simple = QtWidgets.QPushButton('Build Basic Simple Body Rig')
-        button_build_rig_body_simple.clicked.connect(self.build_rig_body_simple)
-        grid_layout_placement.addWidget(button_build_rig_body_simple)
-
-        button_build_rig_face = QtWidgets.QPushButton('Build Face Rig')
-        button_build_rig_face.clicked.connect(self.build_rig_face)
-        grid_layout_placement.addWidget(button_build_rig_face)
+        # Control visibility of the entire Face Module:
+        if face:
+            for face_widget in face_widgets_list:
+                face_widget.setVisible(True)
+        else:
+            for face_widget in face_widgets_list:
+                face_widget.setVisible(False)
 
 
     # Default action
