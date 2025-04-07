@@ -149,14 +149,14 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
 
     def create_build_tab(self, tabs, face=False):
 
-        dict_rig_config = {'Paths': [], 'Checklist': []}
+        dict_rig_config = {'Paths': [], 'Checklist_Body': [], 'Checklist_Face': [], 'Checklist_Misc': []}
         tab_layout = QtWidgets.QVBoxLayout()
         tab = QtWidgets.QWidget()
         tab.setLayout(tab_layout)
         tabs.addTab(tab, "Build")
 
         # 01 ----- Save Load Config file
-        config_file = self.file_path_assigner(tab_layout, 'Build Configuration File', mode="SaveLoadRun")
+        config_file = self.file_path_assigner(tab_layout, 'Build Configuration File', mode="SaveLoad")
 
         # The rest of its logic is at the bottom
 
@@ -191,11 +191,15 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         load_placement[0].clicked.connect(functools.partial(self.load_file_path_yaml_action, load_placement[2], "Load Placement File"))
         load_placement[3].clicked.connect(
             functools.partial(self.import_file_yaml_action, load_placement[2]))
+        dict_rig_config['Paths'].append(load_placement[2])
 
         # 05 ----- Load Skin Weights
         load_skin_weigths = self.file_path_assigner(scrollable_layout, 'Skin Weights', mode="Load")
         load_skin_weigths[0].clicked.connect(
             functools.partial(self.load_file_path_yaml_action, load_skin_weigths[2], "Load Skin Weights File"))
+        # TODO: Place here code to load the skin weights
+        dict_rig_config['Paths'].append(load_skin_weigths[2])
+
 
         # Separator
         line_1 = QtWidgets.QFrame()
@@ -269,12 +273,15 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         # Ribbons Skin
         load_ribbons_skins = self.file_path_assigner(scrollable_layout, 'Ribbons Skin Weights', mode="Load")
         face_filepaths_list.append(load_ribbons_skins)
+        dict_rig_config['Paths'].append(load_ribbons_skins[2])
         # Lattice shapes
         load_lattices_shapes = self.file_path_assigner(scrollable_layout, 'Lattice Shapes', mode="Load")
         face_filepaths_list.append(load_lattices_shapes)
+        dict_rig_config['Paths'].append(load_lattices_shapes[2])
         # Lattice Skin
         load_lattices_skins = self.file_path_assigner(scrollable_layout, 'Lattice Skin Weights', mode="Load")
         face_filepaths_list.append(load_lattices_skins)
+        dict_rig_config['Paths'].append(load_lattices_skins[2])
 
         # -- Scroll
         scrollable_widget_face = QtWidgets.QWidget()
@@ -407,26 +414,81 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
             functools.partial(self.build_complete_rig, list_body=body_module_list, list_face=face_module_list, list_misc=misc_module_list, exe_me=load_mesh, exe_pl=load_placement, exe_sw=load_skin_weigths, exe_swrib=load_ribbons_skins, exe_shlat=load_lattices_shapes, exe_swlat=load_lattices_skins))
 
         # Save/Load Build config logic
+        # config_file[0].clicked.connect(
+        #     functools.partial(self.load_file_path_yaml_action, config_file[2], "Load Build Configuration File"))
+        # transfer checklist items to dictionary for saving
+        for body_item in body_module_list:
+            dict_rig_config['Checklist_Body'].append(body_item)
+        for face_item in face_module_list:
+            dict_rig_config['Checklist_Face'].append(face_item)
+        for misc_item in misc_module_list:
+            dict_rig_config['Checklist_Misc'].append(misc_item)
+
         config_file[0].clicked.connect(
-            functools.partial(self.load_file_path_yaml_action, config_file[2], "Load Build Configuration File"))
+            functools.partial(self.run_rig_config, config_file[2], dict_rig_config))
         config_file[1].clicked.connect(
             functools.partial(self.save_rig_config, dict_rig_config))
-        config_file[3].clicked.connect(
-            functools.partial(self.run_rig_config, config_file[2], dict_rig_config))
+        # config_file[3].clicked.connect(
+        #     functools.partial(self.run_rig_config, config_file[2], dict_rig_config))
 
     def run_rig_config(self, line_edit, dict_config):
+
+        self.load_file_path_yaml_action(line_edit, "Load Build Configuration File")
+
         loaded_dict = file_handle.file_read_yaml(line_edit.text())
 
-        # set mesh path line:
+        # 0 - set mesh path line:
         dict_config['Paths'][0].setText(loaded_dict['Paths'][0])
-        self.import_file_maya_action(dict_config['Paths'][0])
+        # self.import_file_maya_action(dict_config['Paths'][0])
+
+        # 1 - set placement path line:
+        dict_config['Paths'][1].setText(loaded_dict['Paths'][1])
+        # self.import_file_yaml_action(dict_config['Paths'][1])
+
+        # 2 - set skin weights path line:
+        dict_config['Paths'][2].setText(loaded_dict['Paths'][2])
+        # TODO: place here code for loading skin weights (WIP)
+
+        # 3 - Face Ribbons Skins
+        dict_config['Paths'][3].setText(loaded_dict['Paths'][3])
+        # TODO: place here code for loading FACE RIBBONS skin weights (WIP)
+
+        # 4 - Face Lattice Shapes
+        dict_config['Paths'][4].setText(loaded_dict['Paths'][4])
+        # TODO: place here code for loading FACE LATTICE SHAPES (WIP)
+
+        # 5 - Face Lattice Skins
+        dict_config['Paths'][5].setText(loaded_dict['Paths'][5])
+        # TODO: place here code for loading FACE LATTICE skin weights (WIP)
+
+        # Checklist - Body
+        for index, body_item in enumerate(dict_config['Checklist_Body']):
+            body_item[0].setChecked(loaded_dict['Checklist_Body'][index])
+
+        # Checklist - Face
+        for index, face_item in enumerate(dict_config['Checklist_Face']):
+            face_item[0].setChecked(loaded_dict['Checklist_Face'][index])
+
+        # Checklist - Misc
+        for index, misc_item in enumerate(dict_config['Checklist_Misc']):
+            misc_item[0].setChecked(loaded_dict['Checklist_Misc'][index])
+
 
     def save_rig_config(self, dict_config):
         """ Transfer the values from the config dictionary to a new dictionary and save it"""
-        saved_data = {'Paths': [], 'Checklist': []}
-
+        saved_data = {'Paths': [], 'Checklist_Body': [], 'Checklist_Face': [], 'Checklist_Misc': []}
         for path_line in dict_config['Paths']:
             saved_data['Paths'].append(path_line.text())
+
+        for body_item in dict_config['Checklist_Body']:
+            saved_data['Checklist_Body'].append(body_item[0].isChecked())
+
+        for face_item in dict_config['Checklist_Face']:
+            saved_data['Checklist_Face'].append(face_item[0].isChecked())
+
+        for misc_item in dict_config['Checklist_Misc']:
+            saved_data['Checklist_Misc'].append(misc_item[0].isChecked())
+
         file_handle.file_dialog_yaml('Save Configuration File', 'w', saved_data)
 
     def create_tools_tab(self, tabs, face=False):
