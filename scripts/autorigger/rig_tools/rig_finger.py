@@ -2,8 +2,6 @@ import maya.cmds as cmds
 from scripts.autorigger.resources.definitions import CONTROLS_DIR
 from scripts.autorigger.shared.file_handle import file_read_yaml, import_curve
 
-# TODO: Refactor to Class objects
-
 
 def create_finger_rig(dict):
     sides = ["_R", "_L"]
@@ -102,8 +100,8 @@ def create_finger_rig(dict):
                 cmds.parent(point_constraint, "constraints")
                 orient_constraint = cmds.orientConstraint("fkx_" + jnt, jnt)
                 cmds.parent(orient_constraint, "constraints")
-                # scale_constraint = cmds.scaleConstraint("fkx_" + jnt, jnt)
-                # cmds.parent(scale_constraint, "constraints")
+                scale_constraint = cmds.scaleConstraint("fkx_" + jnt, jnt)
+                cmds.parent(scale_constraint, "constraints")
 
                 # Connect hand scaler attribute to joint scale
                 # cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScalex', jnt + ".sx")

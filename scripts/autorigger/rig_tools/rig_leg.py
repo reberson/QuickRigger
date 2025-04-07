@@ -486,8 +486,10 @@ def create_leg_rig(dict, twist=True):
         # Make Ankles not inherit transform
         cmds.setAttr("Ankle{0}.inheritsTransform".format(side), 0)
         # create scale constraint
-        scale_const = cmds.scaleConstraint(scl_ctrl, "Ankle{0}".format(side))
-        cmds.parent(scale_const, "constraints")
+        scale_const_ankle = cmds.scaleConstraint(scl_ctrl, "Ankle{0}".format(side))
+        cmds.parent(scale_const_ankle, "constraints")
+        scale_const_toes = cmds.scaleConstraint(scl_ctrl, "Toes{0}".format(side))
+        cmds.parent(scale_const_toes, "constraints")
 
         # Make Scale ctrls follow Ankle position
         flw_point_constraint = connect_point_constraint(grp_follow, "fkx_Ankle{0}".format(side),
