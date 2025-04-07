@@ -8,7 +8,7 @@ from scripts.autorigger.rig_tools import layout_tools
 import functools
 from pathlib import Path
 import scripts.autorigger.rig_tools as rig
-from scripts.autorigger.shared import file_handle, skin_handler
+from scripts.autorigger.shared import file_handle, skin_handler, control_handler
 from scripts.autorigger.rig_tools import layout_tools
 from scripts.autorigger.rig_tools import constructor_tools
 from scripts.autorigger.rig_tools import rig_root, rig_leg, rig_finger, rig_sdk_finger
@@ -592,6 +592,14 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         button_scale_comp_disable = QtWidgets.QPushButton('Disable Scale Compensate')
         button_scale_comp_disable.clicked.connect(self.scale_compensate_disable)
         grid_layout_placement.addWidget(button_scale_comp_disable)
+
+        button_mirror_control_selected_RL = QtWidgets.QPushButton('Mirror Selected Controls R>L')
+        button_mirror_control_selected_RL.clicked.connect(functools.partial(control_handler.mirror_control_selected, 'RightToLeft'))
+        grid_layout_placement.addWidget(button_mirror_control_selected_RL)
+        button_mirror_control_selected_LR = QtWidgets.QPushButton('Mirror Selected Controls L>R')
+        button_mirror_control_selected_LR.clicked.connect(
+            functools.partial(control_handler.mirror_control_selected, 'LeftToRight'))
+        grid_layout_placement.addWidget(button_mirror_control_selected_LR)
 
         # Control visibility of the entire Face Module:
         if face:
