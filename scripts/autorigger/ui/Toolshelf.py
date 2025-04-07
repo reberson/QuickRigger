@@ -50,8 +50,8 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         new_tab = self.create_tabs()
 
         # Draw UI
-        self.create_build_tab(new_tab, face=True)
-        self.create_tools_tab(new_tab, face=True)
+        self.create_build_tab(new_tab, face=False)
+        self.create_tools_tab(new_tab, face=False)
 
     def create_tabs(self):
 
