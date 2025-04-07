@@ -11,8 +11,8 @@ def create_tongue(dict):
     for jnt in jnt_list_all:
         if "tongue" in jnt.lower():
             jnt_list.append(jnt)
-            if "_end" in jnt.lower():
-                jnt_list.remove(jnt)
+            # if "_end" in jnt.lower():
+            #     jnt_list.remove(jnt)
     jnt_list.sort()
 
     # create base fk controls
@@ -39,7 +39,8 @@ def create_tongue(dict):
         cmds.setAttr(xjnt + ".radius", 0.5)
         cmds.select(d=True)
         cmds.setAttr(xjnt + ".drawStyle", 2)
-
+        if "_end" in jnt.lower():
+            cmds.setAttr(ctrl[0] + ".overrideVisibility", 0)
         cmds.parent(xjnt, ctrl[0])
         cmds.parent(ctrl[0], grp_flip)
         cmds.parent(grp_flip, grp_sdk)

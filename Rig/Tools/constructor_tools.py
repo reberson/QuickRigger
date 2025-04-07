@@ -105,7 +105,7 @@ def create_rig_structure_face():
         grp_rig = cmds.group(em=True, n="rig")
 
     grp_sys = cmds.group(em=True, n="face_system")
-    grp_follow_root = cmds.group(em=True, n="face_constrain_root")
+    grp_origin = cmds.group(em=True, n="face_origin")
     grp_follow_head = cmds.group(em=True, n="face_constrain_head")
 
     if cmds.objExists("deformation_joints"):
@@ -115,29 +115,27 @@ def create_rig_structure_face():
         cmds.parent(def_grp, grp_rig)
     grp_mediators = cmds.group(em=True, n="face_mediators")
     grp_const = cmds.group(em=True, n="face_constraints")
-    cmds.parent(grp_follow_root, grp_sys)
+    cmds.parent(grp_origin, grp_sys)
     cmds.parent(grp_follow_head, grp_sys)
     cmds.parent(grp_mediators, grp_sys)
     cmds.parent(grp_const, grp_sys)
     cmds.parent(grp_sys, grp_rig)
 
-    # Checks if there is an existing body rig
-    if cmds.objExists("Head_M"):
-        cmds.pointConstraint("Head_M", grp_follow_head)
-        cmds.orientConstraint("Head_M", grp_follow_head)
-    else:
-        cmds.parent("Facial", def_grp)
+    cmds.pointConstraint("Facial", grp_follow_head)
+    cmds.orientConstraint("Facial", grp_follow_head)
 
+    if not cmds.objExists("Head_M"):
+        cmds.parent("Facial", def_grp)
+    else:
+        cmds.scaleConstraint("fkx_Head_M", grp_follow_head)
     # Create Projection system groups
     grp_proj_sys = cmds.group(em=True, n="face_projection_system")
     grp_proj_fol = cmds.group(em=True, n="face_projection_follicles")
     grp_proj_rib = cmds.group(em=True, n="face_ribbons")
-    cmds.parent(grp_proj_rib, grp_proj_sys)
-    cmds.parent(grp_proj_fol, grp_sys)
+    cmds.parent(grp_proj_rib, grp_origin)
+    cmds.parent(grp_proj_fol, grp_origin)
     cmds.matchTransform(grp_proj_sys, grp_follow_head)
     cmds.parent(grp_proj_sys, grp_follow_head)
-
-
 
 
 def create_deform_rig_face():
@@ -174,3 +172,9 @@ def create_deform_rig_face():
     all_jnts = cmds.listRelatives("Facial", ad=True, type="joint")
     for joint in all_jnts:
         cmds.makeIdentity(joint, a=True, r=True)
+
+
+def set_scale_compensate(value=0):
+    jnt_list = cmds.listRelatives("deformation_joints", type="joint", ad=True)
+    for jnt in jnt_list:
+        cmds.setAttr(jnt + ".segmentScaleCompensate", value)

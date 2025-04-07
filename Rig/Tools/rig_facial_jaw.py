@@ -5,7 +5,7 @@ def create_jaw(dict):
     grp_ctrl = cmds.group(em=True, n="jaw_control_group")
     cmds.matchTransform(grp_ctrl, "Jaw_M")
     cmds.parent(grp_ctrl, "face_constrain_head")
-    jnt_list = ["Jaw_M", "Chin_M"]
+    jnt_list = ["Jaw_M", "Chin_M", "Jaw_End_M"]
 
     # create base controls
     for jnt in jnt_list:
@@ -35,7 +35,8 @@ def create_jaw(dict):
         cmds.setAttr(xjnt + ".radius", 0.5)
         cmds.select(d=True)
         cmds.setAttr(xjnt + ".drawStyle", 2)
-
+        if "_end" in jnt.lower():
+            cmds.setAttr(ctrl[0] + ".overrideVisibility", 0)
         cmds.parent(xjnt, ctrl[0])
         cmds.parent(ctrl[0], grp_flip)
         cmds.parent(grp_flip, grp_sdk)

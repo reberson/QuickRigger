@@ -2,8 +2,8 @@ import maya.cmds as cmds
 from System.utils import create_ribbon_closed, create_lattice_sphere
 import math
 
-# TODO: Make eyelid group follow eye movement (with falloff)
-# TODO : Fix Eye corner (inner and outer) ctrl orientations
+
+
 
 
 def create_eyelid(dict):
@@ -192,6 +192,14 @@ def create_eyelid(dict):
             cmds.parent(cmds.pointConstraint("x_" + jnt, jnt), "face_constraints")
             cmds.parent(cmds.orientConstraint("x_" + jnt, jnt), "face_constraints")
 
+        # check if Eye joint exists, then parent constraint the middle eyelids to follow it
+        if cmds.objExists("Eye_End{0}".format(side)):
+            cmds.pointConstraint("Eye_End{0}".format(side), "offset_eyelidUpper{0}".format(side), mo=True)
+            cmds.pointConstraint(grp_ctrl, "offset_eyelidUpper{0}".format(side), mo=True)
+            cmds.pointConstraint("Eye_End{0}".format(side), "offset_eyelidLower{0}".format(side), mo=True)
+            cmds.pointConstraint(grp_ctrl, "offset_eyelidLower{0}".format(side), mo=True)
+
+
 
 def attach_eyelids():
     # make sure brow ctrls are all zeroed out
@@ -200,6 +208,8 @@ def attach_eyelids():
     for side in sides:
         ctrl_list.append("eyelidUpper{0}".format(side))
         ctrl_list.append("eyelidLower{0}".format(side))
+        ctrl_list.append("eyelidInnerCorner{0}".format(side))
+        ctrl_list.append("eyelidOuterCorner{0}".format(side))
 
     for ctrl in ctrl_list:
         cmds.xform("ctrl_" + ctrl, t=(0, 0, 0), ro=(0, 0, 0))
@@ -207,7 +217,7 @@ def attach_eyelids():
     const_grp = cmds.group(em=True, n="eyelids_ribbon_constraint")
     cmds.parent(const_grp, "face_system")
 
-    rib_jnts = ["eyelidUpper_R", "eyelidUpper_L", "eyelidLower_R", "eyelidLower_L"]
+    rib_jnts = ["eyelidUpper_R", "eyelidUpper_L", "eyelidLower_R", "eyelidLower_L", "eyelidInnerCorner_R", "eyelidInnerCorner_L", "eyelidOuterCorner_R", "eyelidOuterCorner_L"]
     for jnt in rib_jnts:
         cmds.parent("ribbon_cjoint_" + jnt, "follicle_sphere_" + jnt)
         # cmds.xform(jnt, t=(0, 0, 0), ro=(90, 0, 90))
@@ -232,6 +242,8 @@ def detach_eyelids():
     for side in sides:
         ctrl_list.append("eyelidUpper{0}".format(side))
         ctrl_list.append("eyelidLower{0}".format(side))
+        ctrl_list.append("eyelidInnerCorner{0}".format(side))
+        ctrl_list.append("eyelidOuterCorner{0}".format(side))
 
     for ctrl in ctrl_list:
         cmds.xform("ctrl_" + ctrl, t=(0, 0, 0), ro=(0, 0, 0))
@@ -240,7 +252,7 @@ def detach_eyelids():
     cmds.delete("eyelids_ribbon_constraint")
     cmds.select(d=True)
 
-    rib_jnts = ["eyelidUpper_R", "eyelidUpper_L", "eyelidLower_R", "eyelidLower_L"]
+    rib_jnts = ["eyelidUpper_R", "eyelidUpper_L", "eyelidLower_R", "eyelidLower_L", "eyelidInnerCorner_R", "eyelidInnerCorner_L", "eyelidOuterCorner_R", "eyelidOuterCorner_L"]
     for jnt in rib_jnts:
         cmds.parent("ribbon_cjoint_" + jnt, "ctrl_" + jnt)
         cmds.xform("ribbon_cjoint_" + jnt, t=(0, 0, 0))

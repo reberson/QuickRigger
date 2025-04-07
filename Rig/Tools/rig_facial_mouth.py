@@ -234,8 +234,10 @@ def create_mouth(dict):
         if "_l" in jnt.lower():
             cmds.xform(grp_parent, r=True, ro=(0, 180, 0))
         cmds.parent("offset_" + jnt, grp_parent)
-        const_head = cmds.parentConstraint("Mouth", grp_parent, mo=True)
-        const_jaw = cmds.parentConstraint("Jaw_M", grp_parent, mo=True)
+        cmds.pointConstraint("Mouth", grp_parent, mo=True)
+        cmds.pointConstraint("Jaw_M", grp_parent, mo=True)
+        cmds.orientConstraint("Mouth", grp_parent, mo=True)
+        cmds.orientConstraint("Jaw_M", grp_parent, mo=True)
 
     # Constrain mouth LowerLip to follow the jaw
     jnts_lower_ctrl = ["mouthLower_M"]
@@ -244,7 +246,8 @@ def create_mouth(dict):
         cmds.matchTransform(grp_parent, "offset_" + jnt)
         cmds.parent(grp_parent, grp_ctrl)
         cmds.parent("offset_" + jnt, grp_parent)
-        const_jaw = cmds.parentConstraint("Jaw_M", grp_parent, mo=True)
+        cmds.pointConstraint("Jaw_M", grp_parent, mo=True)
+        cmds.orientConstraint("Jaw_M", grp_parent, mo=True)
 
 
 

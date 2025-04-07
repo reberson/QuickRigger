@@ -196,8 +196,10 @@ def create_nasolabial(dict):
         if "_l" in jnt.lower():
             cmds.xform(grp_parent, r=True, ro=(0, 180, 0))
         cmds.parent("offset_" + jnt, grp_parent)
-        const_head = cmds.parentConstraint("Nasolabial", grp_parent, mo=True)
-        const_jaw = cmds.parentConstraint("Jaw_M", grp_parent, mo=True)
+        cmds.pointConstraint("Nasolabial", grp_parent, mo=True)
+        cmds.pointConstraint("Jaw_M", grp_parent, mo=True)
+        cmds.orientConstraint("Nasolabial", grp_parent, mo=True)
+        cmds.orientConstraint("Jaw_M", grp_parent, mo=True)
 
 
 def attach_nasolabial():
@@ -207,6 +209,7 @@ def attach_nasolabial():
     for side in sides:
         ctrl_list.append("NasolabialUpper{0}".format(side))
         ctrl_list.append("NasolabialLower{0}".format(side))
+        ctrl_list.append("NasolabialMid{0}".format(side))
 
     for ctrl in ctrl_list:
         cmds.xform("ctrl_" + ctrl, t=(0, 0, 0), ro=(0, 0, 0))
@@ -214,7 +217,7 @@ def attach_nasolabial():
     const_grp = cmds.group(em=True, n="nasolabial_ribbon_constraint")
     cmds.parent(const_grp, "face_system")
 
-    rib_jnts = ["NasolabialUpper_R", "NasolabialUpper_L", "NasolabialLower_R", "NasolabialLower_L"]
+    rib_jnts = ["NasolabialUpper_R", "NasolabialUpper_L", "NasolabialLower_R", "NasolabialLower_L", "NasolabialMid_R", "NasolabialMid_L"]
     for jnt in rib_jnts:
         cmds.parent("ribbon_cjoint_" + jnt, "follicle_surface_" + jnt)
         # cmds.xform(jnt, t=(0, 0, 0), ro=(90, 0, 90))
@@ -239,6 +242,7 @@ def detach_nasolabial():
     for side in sides:
         ctrl_list.append("NasolabialUpper{0}".format(side))
         ctrl_list.append("NasolabialLower{0}".format(side))
+        ctrl_list.append("NasolabialMid{0}".format(side))
 
     for ctrl in ctrl_list:
         cmds.xform("ctrl_" + ctrl, t=(0, 0, 0), ro=(0, 0, 0))
@@ -247,7 +251,7 @@ def detach_nasolabial():
     cmds.delete("nasolabial_ribbon_constraint")
     cmds.select(d=True)
 
-    rib_jnts = ["NasolabialUpper_R", "NasolabialUpper_L", "NasolabialLower_R", "NasolabialLower_L"]
+    rib_jnts = ["NasolabialUpper_R", "NasolabialUpper_L", "NasolabialLower_R", "NasolabialLower_L", "NasolabialMid_R", "NasolabialMid_L"]
     for jnt in rib_jnts:
         cmds.parent("ribbon_cjoint_" + jnt, "ctrl_" + jnt)
         cmds.xform("ribbon_cjoint_" + jnt, t=(0, 0, 0))

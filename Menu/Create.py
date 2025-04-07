@@ -4,7 +4,7 @@ import Rig
 from Rig.Tools import layout_tools
 from Rig.Tools import constructor_tools
 from Rig.Tools import rig_root, rig_torso, rig_arm, rig_leg, rig_finger, rig_sdk_finger, rig_neck
-from Rig.Tools import rig_facial_brow, rig_facial_eyelid, rig_facial_nasolabial, rig_facial_mouth, rig_facial_cheek, rig_facial_nose, rig_facial_jaw, rig_facial_tongue
+from Rig.Tools import rig_facial_brow, rig_facial_eyelid, rig_facial_nasolabial, rig_facial_mouth, rig_facial_cheek, rig_facial_nose, rig_facial_jaw, rig_facial_tongue, rig_facial_eye
 from System.file_handle import file_dialog_yaml as fd
 from System.file_handle import export_curve, import_curve
 import System.utils
@@ -137,6 +137,9 @@ def menu():
     cmds.menuItem(p='facesteps', l='tongue rig', stp='python',
                   c=lambda *args: rig_facial_tongue.create_tongue(layout_tools.joint_dictionary_creator()),
                   ann='Creates the rig controls for the tongue')
+    cmds.menuItem(p='facesteps', l='eye rig', stp='python',
+                  c=lambda *args: rig_facial_eye.create_eye(layout_tools.joint_dictionary_creator()),
+                  ann='Creates the rig controls for the eye')
 
 
     # Rig face - Tools
@@ -161,6 +164,12 @@ def menu():
     cmds.menuItem(p='tools', l='Import curve', stp='python',
                   c=lambda *args: import_curve(fd("Load curve", mode="r")),
                   ann='Load curve object into YAML')
+    cmds.menuItem(p='tools', l='Enable scale compensate', stp='python',
+                  c=lambda *args: constructor_tools.set_scale_compensate(1),
+                  ann='Enables scale compensate for all joints')
+    cmds.menuItem(p='tools', l='Disable scale compensate', stp='python',
+                  c=lambda *args: constructor_tools.set_scale_compensate(0),
+                  ann='Disables scale compensate for all joints')
 
 
 def build_rig():
@@ -173,6 +182,7 @@ def build_rig():
     rig_leg.create_leg_rig(layout_tools.joint_dictionary_creator())
     rig_finger.create_finger_rig(layout_tools.joint_dictionary_creator())
     rig_sdk_finger.create_finger_sdk()
+    constructor_tools.set_scale_compensate(0)
 
 
 def build_rig_face():
@@ -186,7 +196,8 @@ def build_rig_face():
     rig_facial_cheek.create_cheek(layout_tools.joint_dictionary_creator())
     rig_facial_jaw.create_jaw(layout_tools.joint_dictionary_creator())
     rig_facial_tongue.create_tongue(layout_tools.joint_dictionary_creator())
-
+    rig_facial_eye.create_eye(layout_tools.joint_dictionary_creator())
+    constructor_tools.set_scale_compensate(0)
 
 def attach_face():
     rig_facial_brow.attach_brow()
