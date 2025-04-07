@@ -122,3 +122,5 @@ def import_curve(curve_dict):
     cmds.select(d=True)
     cmds.setAttr(ctrl_grp + ".v", lock=True, k=False, cb=False)
     return ctrl_grp
+
+

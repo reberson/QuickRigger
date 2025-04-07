@@ -1,5 +1,6 @@
 import maya.cmds as cmds
-
+from definitions import CONTROLS_DIR
+from System.file_handle import file_read_yaml, import_curve
 
 def create_jaw(dict):
     grp_ctrl = cmds.group(em=True, n="jaw_control_group")
@@ -18,27 +19,31 @@ def create_jaw(dict):
             ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.25, nr=(0, 1, 0))
             cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
             cmds.setAttr(ctrl[0] + ".overrideColor", 13)
+            ctrl = ctrl[0]
         elif "_l" in jnt.lower():
             ctrl = cmds.circle(n="ctrl_" + jnt, cy=-1, r=0.25, nr=(0, 1, 0))
             cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
             cmds.setAttr(ctrl[0] + ".overrideColor", 6)
+            ctrl = ctrl[0]
         elif "jaw_m" in jnt.lower():
-            ctrl = cmds.circle(n="ctrl_" + jnt, cy=15, r=0.25, nr=(0, 1, 0))
-            cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
-            cmds.setAttr(ctrl[0] + ".overrideColor", 17)
+            # ctrl = cmds.circle(n="ctrl_" + jnt, cy=15, r=0.25, nr=(0, 1, 0))
+            ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "cntrl_jaw.yaml")), "ctrl_" + jd[3])
+            cmds.setAttr(ctrl + ".overrideEnabled", 1)
+            cmds.setAttr(ctrl + ".overrideColor", 17)
         else:
             ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.25, nr=(0, 1, 0))
             cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
             cmds.setAttr(ctrl[0] + ".overrideColor", 17)
+            ctrl = ctrl[0]
         cmds.select(d=True)
         xjnt = cmds.joint(n="x_" + jnt)
         cmds.setAttr(xjnt + ".radius", 0.5)
         cmds.select(d=True)
         cmds.setAttr(xjnt + ".drawStyle", 2)
         if "_end" in jnt.lower():
-            cmds.setAttr(ctrl[0] + ".overrideVisibility", 0)
-        cmds.parent(xjnt, ctrl[0])
-        cmds.parent(ctrl[0], grp_flip)
+            cmds.setAttr(ctrl + ".overrideVisibility", 0)
+        cmds.parent(xjnt, ctrl)
+        cmds.parent(ctrl, grp_flip)
         cmds.parent(grp_flip, grp_sdk)
         cmds.parent(grp_sdk, grp_offset)
         cmds.parent(grp_offset, grp_ctrl)

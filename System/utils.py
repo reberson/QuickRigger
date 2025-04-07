@@ -412,3 +412,6 @@ def joint_list(parent, middle_joint=None, last_joint=None, first_half=None, seco
     last_jnt = len(jnt_list) - 1
 
     return jnt_list
+
+
+
