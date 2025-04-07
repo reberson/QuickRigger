@@ -1,0 +1,563 @@
+hierarchy:
+  joint_reference: !!python/tuple
+  - - Root
+  - Root: !!python/tuple
+    - - Spine1_M
+      - Hip_R
+    - Hip_R: !!python/tuple
+      - - Knee_R
+      - Knee_R: !!python/tuple
+        - - Ankle_R
+        - Ankle_R: !!python/tuple
+          - - Heel_R
+            - Toes_R
+            - FootSideOut_R
+            - FootSideIn_R
+          - Toes_R: !!python/tuple
+            - - Toes_End_R
+            - {}
+      Spine1_M: !!python/tuple
+      - - Spine2_M
+      - Spine2_M: !!python/tuple
+        - - Chest_M
+        - Chest_M: !!python/tuple
+          - - Neck_M
+            - Scapula_R
+          - Neck_M: !!python/tuple
+            - - Head_M
+            - Head_M: !!python/tuple
+              - - Head_End_M
+                - Jaw_M
+                - Eye_R
+              - Eye_R: !!python/tuple
+                - - Eye_End_R
+                - {}
+                Jaw_M: !!python/tuple
+                - - Jaw_End_M
+                - {}
+            Scapula_R: !!python/tuple
+            - - Shoulder_R
+            - Shoulder_R: !!python/tuple
+              - - Elbow_R
+              - Elbow_R: !!python/tuple
+                - - Wrist_R
+                - Wrist_R: !!python/tuple
+                  - - ThumbFinger1_R
+                    - IndexMeta_R
+                    - MiddleMeta_R
+                    - RingMeta_R
+                    - PinkyMeta_R
+                  - IndexMeta_R: !!python/tuple
+                    - - IndexFinger1_R
+                    - IndexFinger1_R: !!python/tuple
+                      - - IndexFinger2_R
+                      - IndexFinger2_R: !!python/tuple
+                        - - IndexFinger3_R
+                        - IndexFinger3_R: !!python/tuple
+                          - - IndexFinger4_R
+                          - {}
+                    MiddleMeta_R: !!python/tuple
+                    - - MiddleFinger1_R
+                    - MiddleFinger1_R: !!python/tuple
+                      - - MiddleFinger2_R
+                      - MiddleFinger2_R: !!python/tuple
+                        - - MiddleFinger3_R
+                        - MiddleFinger3_R: !!python/tuple
+                          - - MiddleFinger4_R
+                          - {}
+                    PinkyMeta_R: !!python/tuple
+                    - - PinkyFinger1_R
+                    - PinkyFinger1_R: !!python/tuple
+                      - - PinkyFinger2_R
+                      - PinkyFinger2_R: !!python/tuple
+                        - - PinkyFinger3_R
+                        - PinkyFinger3_R: !!python/tuple
+                          - - PinkyFinger4_R
+                          - {}
+                    RingMeta_R: !!python/tuple
+                    - - RingFinger1_R
+                    - RingFinger1_R: !!python/tuple
+                      - - RingFinger2_R
+                      - RingFinger2_R: !!python/tuple
+                        - - RingFinger3_R
+                        - RingFinger3_R: !!python/tuple
+                          - - RingFinger4_R
+                          - {}
+                    ThumbFinger1_R: !!python/tuple
+                    - - ThumbFinger2_R
+                    - ThumbFinger2_R: !!python/tuple
+                      - - ThumbFinger3_R
+                      - ThumbFinger3_R: !!python/tuple
+                        - - ThumbFinger4_R
+                        - {}
+joints:
+  Ankle_R: !!python/tuple
+  - - -17.05783557891847
+    - 9.313881986004247
+    - -11.523517131805413
+  - - -8.982259959140922
+    - 0.0
+    - 176.50228378682087
+  - xyz
+  - Ankle_R
+  - Knee_R
+  Chest_M: !!python/tuple
+  - - 0.0
+    - 130.2995273746929
+    - 1.3351835363409919
+  - - 0.0
+    - 0.0
+    - 0.0
+  - xyz
+  - Chest_M
+  - Spine2_M
+  Elbow_R: !!python/tuple
+  - - -30.477815628051736
+    - 130.9762077331544
+    - -11.289665222167951
+  - - -6.21970861373249
+    - 12.000827951286261
+    - 133.9111740500734
+  - zyx
+  - Elbow_R
+  - Shoulder_R
+  Eye_End_R: !!python/tuple
+  - - -4.373104572296142
+    - 174.50399780273426
+    - 8.564855575561523
+  - - 89.99917398993132
+    - 4.54718629950834
+    - -180.0
+  - xyz
+  - Eye_End_R
+  - Eye_R
+  Eye_R: !!python/tuple
+  - - -4.121370077133179
+    - 174.50404357910156
+    - 5.399595022201538
+  - - 89.99917398993132
+    - 4.54718629950834
+    - -180.0
+  - xyz
+  - Eye_R
+  - Head_M
+  FootSideIn_R: !!python/tuple
+  - - -11.729875637637534
+    - 0.08774704338925865
+    - -3.663270654646869
+  - - -8.982259959140922
+    - 0.0
+    - 176.50228378682087
+  - xyz
+  - FootSideIn_R
+  - Ankle_R
+  FootSideOut_R: !!python/tuple
+  - - -24.404598640073242
+    - 0.08774704338926398
+    - -3.663270654646861
+  - - -8.982259959140922
+    - 0.0
+    - 176.50228378682087
+  - xyz
+  - FootSideOut_R
+  - Ankle_R
+  Head_End_M: !!python/tuple
+  - - 0.0
+    - 188.3849334716797
+    - 1.189099907875061
+  - - 0.0
+    - 0.0
+    - 0.0
+  - xyz
+  - Head_End_M
+  - Head_M
+  Head_M: !!python/tuple
+  - - 0.0
+    - 168.76710510253906
+    - -3.5029001235961914
+  - - 0.0
+    - 0.0
+    - 0.0
+  - xyz
+  - Head_M
+  - Neck_M
+  Heel_R: !!python/tuple
+  - - -17.621761041023593
+    - 0.08774704338924799
+    - -19.156485781025495
+  - - -8.982259959140922
+    - 0.0
+    - 176.50228378682087
+  - xyz
+  - Heel_R
+  - Ankle_R
+  Hip_R: !!python/tuple
+  - - -10.494382083415985
+    - 101.26143892242716
+    - -2.374577522277832
+  - - -2.8817432769022187
+    - 0.0
+    - 175.4303899034259
+  - xyz
+  - Hip_R
+  - Root
+  IndexFinger1_R: !!python/tuple
+  - - -56.122241973876655
+    - 103.18541336059567
+    - -1.595625013113027
+  - - 72.24614648139249
+    - 75.76593285892822
+    - -133.88373186644225
+  - xyz
+  - IndexFinger1_R
+  - IndexMeta_R
+  IndexFinger2_R: !!python/tuple
+  - - -57.2542476654052
+    - 100.82320404052727
+    - -0.9646774753928777
+  - - 50.39155975259768
+    - 81.14219268129693
+    - -147.1363608859103
+  - xyz
+  - IndexFinger2_R
+  - IndexFinger1_R
+  IndexFinger3_R: !!python/tuple
+  - - -58.15601730346672
+    - 97.90823745727532
+    - -0.6001275107264386
+  - - 50.06376867455215
+    - 82.33754386249367
+    - -141.92968948031873
+  - xyz
+  - IndexFinger3_R
+  - IndexFinger2_R
+  IndexFinger4_R: !!python/tuple
+  - - -58.73670959472654
+    - 95.11408233642567
+    - -0.30682000517842906
+  - - 50.06376867455215
+    - 82.33754386249367
+    - -141.92968948031873
+  - xyz
+  - IndexFinger4_R
+  - IndexFinger3_R
+  IndexMeta_R: !!python/tuple
+  - - -52.157215958279515
+    - 109.48125352571492
+    - -2.6887160999179534
+  - - 33.15574406658107
+    - 74.58736244423451
+    - -179.99999999999994
+  - xyz
+  - IndexMeta_R
+  - Wrist_R
+  Jaw_End_M: !!python/tuple
+  - - -4.188873225515497e-31
+    - 162.4823455810547
+    - 9.252784729003896
+  - - 43.945788961309475
+    - 3.531125038440127e-31
+    - 180.0
+  - xyz
+  - Jaw_End_M
+  - Jaw_M
+  Jaw_M: !!python/tuple
+  - - 0.0
+    - 172.68450927734375
+    - -0.5806925147771835
+  - - 43.945788961309475
+    - 3.531125038440127e-31
+    - 180.0
+  - xyz
+  - Jaw_M
+  - Head_M
+  Knee_R: !!python/tuple
+  - - -14.504604816436771
+    - 51.08616065979
+    - -4.908373087644576
+  - - -8.982259959140922
+    - 0.0
+    - 176.50228378682087
+  - xyz
+  - Knee_R
+  - Hip_R
+  MiddleFinger1_R: !!python/tuple
+  - - -56.743587493896406
+    - 103.17714691162116
+    - -3.787812709808368
+  - - -4.234836675703854
+    - 83.95500633001079
+    - 148.2259207527567
+  - xyz
+  - MiddleFinger1_R
+  - MiddleMeta_R
+  MiddleFinger2_R: !!python/tuple
+  - - -58.2694644927979
+    - 100.25378036499032
+    - -3.81345760822295
+  - - 7.984923455395759
+    - 80.95224301996302
+    - 169.2220403214925
+  - xyz
+  - MiddleFinger2_R
+  - MiddleFinger1_R
+  MiddleFinger3_R: !!python/tuple
+  - - -59.18911933898924
+    - 97.53126907348646
+    - -3.75066769123076
+  - - -13.119948507045857
+    - 85.39181357210455
+    - 152.71479775747537
+  - xyz
+  - MiddleFinger3_R
+  - MiddleFinger2_R
+  MiddleFinger4_R: !!python/tuple
+  - - -60.01769638061521
+    - 94.25825500488297
+    - -3.812249898910497
+  - - -20.035249873071383
+    - 81.78953783852216
+    - 145.6852222022741
+  - xyz
+  - MiddleFinger4_R
+  - MiddleFinger3_R
+  MiddleMeta_R: !!python/tuple
+  - - -53.35192393923236
+    - 108.88137322638299
+    - -4.267636322205219
+  - - 30.98517220749173
+    - 81.94771830913118
+    - -179.99999999999974
+  - xyz
+  - MiddleMeta_R
+  - Wrist_R
+  Neck_M: !!python/tuple
+  - - 0.0
+    - 152.04420471191406
+    - -6.066348609247054
+  - - 0.0
+    - 0.0
+    - 0.0
+  - xyz
+  - Neck_M
+  - Chest_M
+  PinkyFinger1_R: !!python/tuple
+  - - -56.258575439452976
+    - 103.68163681030275
+    - -8.695782184600858
+  - - -89.99999999999989
+    - 80.87432953648086
+    - 71.28709641983289
+  - xyz
+  - PinkyFinger1_R
+  - PinkyMeta_R
+  PinkyFinger2_R: !!python/tuple
+  - - -57.21957206726062
+    - 101.71054077148442
+    - -9.122489929199222
+  - - -90.00000000000288
+    - 78.83089570339547
+    - 75.43489711412016
+  - xyz
+  - PinkyFinger2_R
+  - PinkyFinger1_R
+  PinkyFinger3_R: !!python/tuple
+  - - -57.954826354980284
+    - 99.544807434082
+    - -9.590022563934333
+  - - -90.00000000000543
+    - 85.29406601064224
+    - 84.67951490646806
+  - xyz
+  - PinkyFinger3_R
+  - PinkyFinger2_R
+  PinkyFinger4_R: !!python/tuple
+  - - -58.629756927490035
+    - 97.00308227539054
+    - -9.979469299316396
+  - - -90.00000000000543
+    - 85.29406601064224
+    - 84.67951490646806
+  - xyz
+  - PinkyFinger4_R
+  - PinkyFinger3_R
+  PinkyMeta_R: !!python/tuple
+  - - -53.098818576922824
+    - 109.451949130395
+    - -7.620208885668566
+  - - -81.42222251871553
+    - 80.60882810409913
+    - 69.98792874519494
+  - xyz
+  - PinkyMeta_R
+  - Wrist_R
+  RingFinger1_R: !!python/tuple
+  - - -56.6525650024412
+    - 103.24953460693358
+    - -6.318157672882134
+  - - -27.984096013127534
+    - 80.19933988897631
+    - 125.09324348033722
+  - xyz
+  - RingFinger1_R
+  - RingMeta_R
+  RingFinger2_R: !!python/tuple
+  - - -57.905605316161946
+    - 100.8187179565429
+    - -6.537289857864414
+  - - -34.600421629832226
+    - 78.9477896909311
+    - 127.15685133599257
+  - xyz
+  - RingFinger2_R
+  - RingFinger1_R
+  RingFinger3_R: !!python/tuple
+  - - -58.86591339111312
+    - 97.98851013183595
+    - -6.864579916000412
+  - - -32.49003841123767
+    - 78.34567125238458
+    - 135.1259117251808
+  - xyz
+  - RingFinger3_R
+  - RingFinger2_R
+  RingFinger4_R: !!python/tuple
+  - - -59.56355667114235
+    - 94.94790649414068
+    - -7.205094814300548
+  - - -52.14233425238935
+    - 79.5352883806761
+    - 115.07922828372831
+  - xyz
+  - RingFinger4_R
+  - RingFinger3_R
+  RingMeta_R: !!python/tuple
+  - - -53.509383983866556
+    - 109.0431274597051
+    - -5.864102382288201
+  - - -39.03242055923088
+    - 83.73497785239866
+    - 112.65433988169927
+  - xyz
+  - RingMeta_R
+  - Wrist_R
+  Root: !!python/tuple
+  - - 0.0
+    - 111.15381622314453
+    - -0.6142736938457105
+  - - 0.0
+    - 0.0
+    - 0.0
+  - xyz
+  - Root
+  - joint_reference
+  Scapula_R: !!python/tuple
+  - - -4.443030426097639
+    - 146.8046963997561
+    - -3.2050678710432905
+  - - 0.0
+    - 0.0
+    - 0.0
+  - zxy
+  - Scapula_R
+  - Chest_M
+  Shoulder_R: !!python/tuple
+  - - -15.57399034500122
+    - 146.6241912841797
+    - -8.201454997062683
+  - - 6.8054282788960485
+    - -5.942733542247247
+    - 139.05618973755742
+  - zyx
+  - Shoulder_R
+  - Scapula_R
+  Spine1_M: !!python/tuple
+  - - 0.0
+    - 111.25381622314453
+    - -0.6142736938457105
+  - - 0.0
+    - 0.0
+    - 0.0
+  - xyz
+  - Spine1_M
+  - Root
+  Spine2_M: !!python/tuple
+  - - 0.0
+    - 121.6146240234375
+    - 1.3351835363409919
+  - - 0.0
+    - 0.0
+    - 0.0
+  - xyz
+  - Spine2_M
+  - Spine1_M
+  ThumbFinger1_R: !!python/tuple
+  - - -50.35913467407198
+    - 109.20296859741207
+    - -2.859187424182945
+  - - 47.777800992293706
+    - 9.397489062691948
+    - 167.85810608745373
+  - xyz
+  - ThumbFinger1_R
+  - Wrist_R
+  ThumbFinger2_R: !!python/tuple
+  - - -51.40603637695293
+    - 106.65571594238286
+    - 0.08762991428375733
+  - - 27.77019269082138
+    - -2.234206259322128
+    - 176.62226428534242
+  - xyz
+  - ThumbFinger2_R
+  - ThumbFinger1_R
+  ThumbFinger3_R: !!python/tuple
+  - - -51.52299118041975
+    - 103.61367797851557
+    - 1.6891200542448974
+  - - 21.788896544439332
+    - -2.8477951596276148
+    - 172.9446182584166
+  - xyz
+  - ThumbFinger3_R
+  - ThumbFinger2_R
+  ThumbFinger4_R: !!python/tuple
+  - - -51.81543731689435
+    - 100.79221343994126
+    - 2.821409940719497
+  - - 21.77915755088585
+    - -2.306375672927579
+    - 173.16121353370667
+  - xyz
+  - ThumbFinger4_R
+  - ThumbFinger3_R
+  Toes_End_R: !!python/tuple
+  - - -17.607704603119274
+    - 0.770694066763078
+    - 7.24199311106549
+  - - 68.91665001022699
+    - 0.0
+    - 175.99499028370445
+  - xyz
+  - Toes_End_R
+  - Toes_R
+  Toes_R: !!python/tuple
+  - - -17.38970111575573
+    - 3.8843767917642023
+    - -0.8540623616663989
+  - - 68.91665001022699
+    - 0.0
+    - 175.99499028370445
+  - xyz
+  - Toes_R
+  - Ankle_R
+  Wrist_R: !!python/tuple
+  - - -50.09256553649902
+    - 111.60319137573256
+    - -5.170227766036997
+  - - -6.21970861373249
+    - 12.000827951286261
+    - 133.9111740500734
+  - zyx
+  - Wrist_R
+  - Elbow_R

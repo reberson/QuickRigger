@@ -1,0 +1,223 @@
+import maya.cmds as cmds
+from Rig.Tools.reference_tools import joint_dictionary_creator
+from System.utils import calculatePVPosition as calc_pv
+from System.utils import connect_point_constraint, connect_orient_constraint
+from definitions import CONTROLS_DIR
+from System.import_files import import_ctrl
+
+# TODO: Refactor to Class objects
+
+def create_leg_rig(dict):
+    # List all necessary joints
+    sides = ["_R", "_L"]
+    leg_joints = ["Hip_R", "Knee_R", "Ankle_R", "Heel_R", "Toes_R", "Toes_End_R", "FootSideIn_R", "FootSideOut_R",
+                  "Hip_L", "Knee_L", "Ankle_L", "Heel_L", "Toes_L", "Toes_End_L", "FootSideIn_L", "FootSideOut_L"]
+    leg_joints_fk = ["Hip_R", "Knee_R", "Ankle_R", "Toes_R", "Toes_End_R", "Hip_L", "Knee_L", "Ankle_L", "Toes_L", "Toes_End_L"]
+    foot_joints_ik = ["Heel_R", "Toes_R", "Toes_End_R", "FootSideIn_R", "FootSideOut_R","Heel_L", "Toes_L", "Toes_End_L", "FootSideIn_L", "FootSideOut_L"]
+
+    # Create FK rig
+    for joint in leg_joints_fk:
+        jd = dict[joint]
+        grp_offset = cmds.group(n="fk_offset_" + jd[3], em=True)
+        grp_sdk = cmds.group(n="fk_sdk_" + jd[3], em=True)
+        grp_flip = cmds.group(n="fk_flip_" + jd[3], em=True)
+        ctrl = cmds.circle(n="fk_" + jd[3], r=10, nr=(0, 1, 0))
+        cmds.select(d=True)
+        jnt = cmds.joint(n="fkx_" + jd[3])
+        cmds.setAttr(jnt + ".drawStyle", 2)
+        cmds.select(d=True)
+        cmds.parent(jnt, ctrl[0])
+        cmds.parent(ctrl[0], grp_flip)
+        cmds.parent(grp_flip, grp_sdk)
+        cmds.parent(grp_sdk, grp_offset)
+        cmds.xform(grp_offset, ws=True, t=jd[0], ro=jd[1], roo=jd[2])
+
+    # Parent FK linearly
+    for joint in leg_joints_fk:
+        jd = dict[joint]
+        if "Hip_" not in joint:
+            cmds.parent("fk_offset_" + jd[3], "fkx_" + jd[4])
+
+    cmds.select(d=True)
+    cmds.parent("fk_offset_Hip_R", "fk_constraint_root")
+    cmds.parent("fk_offset_Hip_L", "fk_constraint_root")
+
+    # Create IK rig
+    for side in sides:
+        jnt_hip = cmds.joint(n="ikx_Hip{0}".format(side))
+        cmds.setAttr(jnt_hip + ".drawStyle", 2)
+        jnt_knee = cmds.joint(n="ikx_Knee{0}".format(side))
+        cmds.setAttr(jnt_knee + ".drawStyle", 2)
+        jnt_ankle = cmds.joint(n="ikx_Ankle{0}".format(side))
+        cmds.setAttr(jnt_ankle + ".drawStyle", 2)
+        jnt_toes = cmds.joint(n="ikx_Toes{0}".format(side))
+        cmds.setAttr(jnt_toes + ".drawStyle", 2)
+        jnt_toesend = cmds.joint(n="ikx_Toes_End{0}".format(side))
+        cmds.setAttr(jnt_toesend + ".drawStyle", 2)
+        cmds.matchTransform(jnt_hip, "Hip{0}".format(side))
+        cmds.matchTransform(jnt_knee, "Knee{0}".format(side))
+        cmds.matchTransform(jnt_ankle, "Ankle{0}".format(side))
+        cmds.matchTransform(jnt_toes, "Toes{0}".format(side))
+        cmds.matchTransform(jnt_toesend, "Toes_End{0}".format(side))
+        cmds.select(d=True)
+        cmds.makeIdentity(jnt_hip, a=True, r=True)
+        cmds.makeIdentity(jnt_knee, a=True, r=True)
+        cmds.makeIdentity(jnt_ankle, a=True, r=True)
+        cmds.makeIdentity(jnt_toes, a=True, r=True)
+        cmds.makeIdentity(jnt_toesend, a=True, r=True)
+        ctrl_leg = import_ctrl(CONTROLS_DIR + 'square.ma', "ik_Leg{0}".format(side))
+        grp_offset_leg = cmds.group(n="ik_offset_Leg{0}".format(side), em=True)
+        grp_offset_hip = cmds.group(n="ik_offset_Hip{0}".format(side), em=True)
+        cmds.matchTransform(grp_offset_hip, "Hip{0}".format(side))
+        cmds.matchTransform(ctrl_leg, "Ankle{0}".format(side), pos=True)
+        cmds.matchTransform(grp_offset_leg, "Ankle{0}".format(side), pos=True)
+        cmds.parent(jnt_hip, grp_offset_hip)
+        cmds.parent(ctrl_leg, grp_offset_leg)
+        cmds.parent(grp_offset_hip, "ik_constraint_root")
+        cmds.parent(grp_offset_leg, "ik_constraint_main")
+
+        # Create Foot IK Controls
+        grp_roll_out = cmds.group(n="ik_offset_FootSideOut{0}".format(side), em=True)
+        sdk_roll_out = cmds.group(n="ik_sdk_FootSideOut{0}".format(side), em=True)
+        cmds.parent(sdk_roll_out, grp_roll_out)
+        cmds.matchTransform(grp_roll_out, "FootSideOut{0}".format(side))
+
+        grp_roll_in = cmds.group(n="ik_offset_FootSideIn{0}".format(side), em=True)
+        sdk_roll_in = cmds.group(n="ik_sdk_FootSideIn{0}".format(side), em=True)
+        cmds.parent(sdk_roll_in, grp_roll_in)
+        cmds.matchTransform(grp_roll_in, "FootSideIn{0}".format(side))
+
+        grp_heel = cmds.group(n="ik_offset_Heel{0}".format(side), em=True)
+        sdk_heel = cmds.group(n="ik_sdk_Heel{0}".format(side), em=True)
+        ctrl_heel = cmds.circle(n="ik_Heel{0}".format(side), r=5, nr=(1, 0, 0))
+        cmds.parent(ctrl_heel[0], sdk_heel)
+        cmds.parent(sdk_heel, grp_heel)
+        cmds.matchTransform(grp_heel, "Heel{0}".format(side))
+
+        grp_toe = cmds.group(n="ik_offset_Toe{0}".format(side), em=True)
+        sdk_toe = cmds.group(n="ik_sdk_Toe{0}".format(side), em=True)
+        ctrl_toe = cmds.circle(n="ik_Toe{0}".format(side), r=5, nr=(1, 0, 0))
+        cmds.parent(ctrl_toe[0], sdk_toe)
+        cmds.parent(sdk_toe, grp_toe)
+        cmds.matchTransform(grp_toe, "Toes_End{0}".format(side))
+
+        grp_ball = cmds.group(n="ik_offset_FootBall{0}".format(side), em=True)
+        sdk_ball = cmds.group(n="ik_sdk_FootBall{0}".format(side), em=True)
+        ctrl_ball = cmds.circle(n="ik_FootBall{0}".format(side), r=5, nr=(1, 0, 0))
+        cmds.parent(ctrl_ball[0], sdk_ball)
+        cmds.parent(sdk_ball, grp_ball)
+        cmds.matchTransform(grp_ball, "Toes{0}".format(side))
+        ikh_ball = cmds.ikHandle(sol="ikSCsolver", sj="ikx_Ankle{0}".format(side), ee="ikx_Toes{0}".format(side), n="ikh_FootBall{0}".format(side), p=1, w=1)
+        cmds.parent(ikh_ball[0], ctrl_ball[0])
+
+        grp_flap = cmds.group(n="ik_offset_FootFlap{0}".format(side), em=True)
+        sdk_flap = cmds.group(n="ik_sdk_FootFlap{0}".format(side), em=True)
+        ctrl_flap = cmds.circle(n="ik_FootFlap{0}".format(side), r=5, nr=(0, 1, 0))
+        cmds.parent(ctrl_flap[0], sdk_flap)
+        cmds.parent(sdk_flap, grp_flap)
+        cmds.matchTransform(grp_flap, "Toes{0}".format(side))
+        ikh_flap = cmds.ikHandle(sol="ikSCsolver", sj="ikx_Toes{0}".format(side), ee="ikx_Toes_End{0}".format(side), n="ikh_FootFlap{0}".format(side), p=0, w=1)
+        cmds.parent(ikh_flap[0], ctrl_flap[0])
+
+        # Reparent Foot controls
+        cmds.parent(grp_flap, ctrl_toe[0])
+        cmds.parent(grp_ball, ctrl_toe[0])
+        cmds.parent(grp_toe, ctrl_heel[0])
+        cmds.parent(grp_heel, sdk_roll_in)
+        cmds.parent(grp_roll_in, sdk_roll_out)
+        cmds.parent(grp_roll_out, ctrl_leg)
+
+        # Foot Sideroll sdk
+        cmds.addAttr(ctrl_leg, ln="sideroll", at="float", keyable=True, min=-10, max=10)
+        cmds.setDrivenKeyframe("ik_sdk_FootSideOut{0}".format(side), at="rotateZ", cd="ik_Leg{0}.sideroll".format(side), dv=-10, v=60)
+        cmds.setDrivenKeyframe("ik_sdk_FootSideOut{0}".format(side), at="rotateZ", cd="ik_Leg{0}.sideroll".format(side), dv=0, v=0)
+        cmds.setDrivenKeyframe("ik_sdk_FootSideIn{0}".format(side), at="rotateZ", cd="ik_Leg{0}.sideroll".format(side), dv=0, v=0)
+        cmds.setDrivenKeyframe("ik_sdk_FootSideIn{0}".format(side), at="rotateZ", cd="ik_Leg{0}.sideroll".format(side), dv=10, v=-60)
+
+        # Foot Frontroll sdk
+        cmds.addAttr(ctrl_leg, ln="frontroll", at="float", keyable=True, min=-10, max=10)
+        cmds.setDrivenKeyframe("ik_sdk_Heel{0}".format(side), at="rotateX", cd="ik_Leg{0}.frontroll".format(side), dv=-10, v=60)
+        cmds.setDrivenKeyframe("ik_sdk_Heel{0}".format(side), at="rotateX", cd="ik_Leg{0}.frontroll".format(side), dv=0, v=0)
+
+        cmds.setDrivenKeyframe("ik_sdk_FootBall{0}".format(side), at="rotateX", cd="ik_Leg{0}.frontroll".format(side), dv=0, v=0)
+        cmds.setDrivenKeyframe("ik_sdk_FootBall{0}".format(side), at="rotateX", cd="ik_Leg{0}.frontroll".format(side), dv=5, v=-30)
+        cmds.setDrivenKeyframe("ik_sdk_FootBall{0}".format(side), at="rotateX", cd="ik_Leg{0}.frontroll".format(side), dv=10, v=0)
+
+        cmds.setDrivenKeyframe("ik_sdk_Toe{0}".format(side), at="rotateX", cd="ik_Leg{0}.frontroll".format(side), dv=10, v=-60)
+        cmds.setDrivenKeyframe("ik_sdk_Toe{0}".format(side), at="rotateX", cd="ik_Leg{0}.frontroll".format(side), dv=5, v=0)
+
+        # Visual controls for foot sdks
+        grp_footdrivers = cmds.group(n="ik_offset_FootDrivers{0}".format(side), em=True)
+        grp_frontroll = cmds.group(n="ik_offset_sdk_FootRoll{0}".format(side), em=True)
+        ctrl_frontroll = cmds.circle(n="ik_sdk_FootRoll{0}".format(side), r=2, nr=(1, 0, 0))
+        grp_sideroll = cmds.group(n="ik_offset_sdk_FootSideRoll{0}".format(side), em=True)
+        ctrl_sideroll = cmds.circle(n="ik_sdk_FootSideRoll{0}".format(side), r=2, nr=(1, 0, 0))
+
+        cmds.parent(ctrl_sideroll[0], grp_sideroll)
+        cmds.parent(ctrl_frontroll[0], grp_frontroll)
+        cmds.parent(grp_frontroll, grp_footdrivers)
+        cmds.parent(grp_sideroll, grp_footdrivers)
+        cmds.parent(grp_footdrivers, "drivers_system")
+        cmds.matchTransform(grp_footdrivers, "ik_Leg{0}".format(side), pos=True)
+
+        cmds.matchTransform(grp_frontroll, "FootSideOut{0}".format(side), pos=True)
+        if side == "_R":
+            cmds.xform(grp_frontroll, r=True, t=(-10, 0, 0))
+        else:
+            cmds.xform(grp_frontroll, r=True, t=(10, 0, 0))
+
+        cmds.setDrivenKeyframe("ik_Leg{0}".format(side), at="frontroll", cd="ik_sdk_FootRoll{0}.tz".format(side), dv=-10,v=-10)
+        cmds.setDrivenKeyframe("ik_Leg{0}".format(side), at="frontroll", cd="ik_sdk_FootRoll{0}.tz".format(side), dv=0,v=0)
+        cmds.setDrivenKeyframe("ik_Leg{0}".format(side), at="frontroll", cd="ik_sdk_FootRoll{0}.tz".format(side), dv=10, v=10)
+        cmds.matchTransform(grp_sideroll, "Toes_End{0}".format(side), pos=True)
+        cmds.xform(grp_sideroll, r=True, t=(0, 0, 10))
+
+        if side == "_L":
+            cmds.xform(grp_sideroll, r=True, ro=(0, 180, 0))
+
+        cmds.setDrivenKeyframe("ik_Leg{0}".format(side), at="sideroll", cd="ik_sdk_FootSideRoll{0}.tx".format(side), dv=-10,v=-10)
+        cmds.setDrivenKeyframe("ik_Leg{0}".format(side), at="sideroll", cd="ik_sdk_FootSideRoll{0}.tx".format(side), dv=0, v=0)
+        cmds.setDrivenKeyframe("ik_Leg{0}".format(side), at="sideroll", cd="ik_sdk_FootSideRoll{0}.tx".format(side), dv=10, v=10)
+        cmds.orientConstraint("ik_Leg{0}".format(side), grp_footdrivers, mo=True)
+        cmds.pointConstraint("ik_Leg{0}".format(side), grp_footdrivers, mo=True)
+
+
+        # TODO: Remove control for FK Toes_End
+        # TODO: Remove heel and foot side joints from deform hierarchy
+        # TODO: Hide all atributes that are not directly controllable
+
+        # Create IK handle
+        ikh = cmds.ikHandle(sol="ikRPsolver", sj="ikx_Hip{0}".format(side), ee="ikx_Ankle{0}".format(side), n="ikh_Leg{0}".format(side), p=2, w=1)
+        cmds.parent(ikh[0], ctrl_ball[0])
+        # Create PV
+        pv_leg = cmds.circle(n="pv_Leg{0}".format(side), r=5, nr=(0, 0, 1))
+        grp_pv_leg = cmds.group(n="pv_offset_Leg{0}".format(side), em=True)
+        cmds.parent(pv_leg[0], grp_pv_leg)
+        pv_pos = calc_pv(["Hip{0}".format(side), "Knee{0}".format(side), "Ankle{0}".format(side)], 20)
+        cmds.xform(grp_pv_leg, t=pv_pos, ws=True)
+        cmds.parent(grp_pv_leg, "ik_constraint_main")
+        # assign constraint pole vector
+        cmds.poleVectorConstraint(pv_leg, ikh[0])
+        # Create ik/fk switch
+        switch_leg = cmds.circle(n="ikfk_leg{0}".format(side), nr=(0, 1, 0), c=(0, 0, 0), r=2)
+        grp_switch_leg = cmds.group(n="offset_switch_leg{0}".format(side), em=True)
+        cmds.matchTransform(grp_switch_leg, "Hip{0}".format(side), pos=True)
+        if side == "_R":
+            cmds.xform(grp_switch_leg, t=(-30, 0, 0), r=True)
+        else:
+            cmds.xform(grp_switch_leg, t=(30, 0, 0), r=True)
+        cmds.matchTransform(switch_leg, grp_switch_leg)
+        cmds.addAttr(switch_leg, longName="ikSwitch", attributeType="double", min=0, max=1, dv=0)
+        cmds.setAttr(str(switch_leg[0]) + ".ikSwitch", e=True, channelBox=True)
+        switch_leg_attr = switch_leg[0] + ".ikSwitch"
+        cmds.parent(switch_leg[0], grp_switch_leg)
+        cmds.parent(grp_switch_leg, "follow_ikfk_root")
+        # Connect both fk ik rigs to def joints through pont/orient constraint workflow
+        leg_list = ["Hip{0}".format(side), "Knee{0}".format(side), "Ankle{0}".format(side), "Toes{0}".format(side), "Toes_End{0}".format(side)]
+        for jnt in leg_list:
+            point_constraint = connect_point_constraint(jnt, "fkx_" + jnt, "ikx_" + jnt, switch_leg_attr)
+            cmds.parent(point_constraint, "constraints")
+            orient_constraint = connect_orient_constraint(jnt, "fkx_" + jnt, "ikx_" + jnt, switch_leg_attr)
+            cmds.parent(orient_constraint, "constraints")
+        cmds.orientConstraint(ctrl_leg, "ikx_Ankle{0}".format(side), mo=True)
+
