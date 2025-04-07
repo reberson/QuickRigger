@@ -1,5 +1,6 @@
 import maya.cmds as cmds
 import re
+from scripts.autorigger.shared.file_handle import file_dialog_yaml
 
 
 def unlock_all_attributes(transform_node):
@@ -18,7 +19,7 @@ def mirror_control_selected(direction='RightToLeft'):
     # move controls to new list
     control_names = []
     # check which side to use as mirror point
-    if direction == 'RightToLeft':
+    if direction == 'LeftToRight':
         control_names = control_names_selected
 
     else:
@@ -152,3 +153,77 @@ def mirror_control_selected(direction='RightToLeft'):
             curve_shapes = cmds.listRelatives(control_name, shapes=True, fullPath=True)
 
     cmds.select(d=True)
+
+
+def get_control_shapes_and_cv_points():
+    # Initialize an empty dictionary to store controls and their shapes' CVs
+    controls_data = {}
+
+    # Get all the transform nodes in the scene
+    transforms = cmds.ls(type='transform')
+
+    for transform in transforms:
+        # Get the shapes (nurbsCurve) associated with the transform
+        shapes = cmds.listRelatives(transform, shapes=True, type='nurbsCurve', fullPath=True) or []
+
+        if shapes:
+            control_shapes_data = []
+
+            for index, shape in enumerate(shapes):
+                # Delete history before saving the shape
+                cmds.delete(shape, ch=True)
+                # Get the CV points for the shape
+                cv_points = cmds.getAttr(f'{shape}.cv[*]')
+                control_shapes_data.append({
+                    'index': index,  # Store the index
+                    'cv_points': cv_points
+                })
+
+            # Store the transform and its shape CV points in the dictionary
+            controls_data[transform] = control_shapes_data
+
+    return controls_data
+
+
+def save_control_shapes():
+    shape_dict = get_control_shapes_and_cv_points()
+    file_dialog_yaml("Save control shapes", mode="w", saved_data=shape_dict)
+
+
+def apply_control_shapes_from_data(controls_cv_data):
+    # Loop through each control and its associated shapes data
+    for control, shapes_data in controls_cv_data.items():
+
+        for shape_data in shapes_data:
+            index = shape_data['index']
+            cv_points = shape_data['cv_points']
+
+            # Get all shapes of the control (transform)
+            shapes = cmds.listRelatives(control, shapes=True, type='nurbsCurve', fullPath=True) or []
+
+            # Ensure that the index is valid
+            if index < len(shapes):
+                shape = shapes[index]
+
+                # Delete history before modifying the curve
+                cmds.delete(shape, ch=True)
+
+                # Modify the CV points of the existing curve
+                if cmds.objExists(shape) and cmds.nodeType(shape) == 'nurbsCurve':
+                    # delete shape history prior to modifying it.
+                    cmds.delete(shape, constructionHistory=True)
+                    for idx, cv_point in enumerate(cv_points):
+                        # Use cmds.setAttr to modify each CV's position
+                        cmds.setAttr(f"{shape}.cv[{idx}]", *cv_point)
+                    print(f"Updated curve for {control} at index {index}")
+                else:
+                    print(f"{shape} is not a nurbsCurve!")
+            else:
+                print(f"Shape index {index} is out of range for {control}!")
+
+
+def load_control_shapes():
+    loaded_data = file_dialog_yaml("Load control shapes", mode="r")
+    apply_control_shapes_from_data(loaded_data)
+
+

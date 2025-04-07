@@ -11,7 +11,7 @@ import scripts.autorigger.rig_tools as rig
 from scripts.autorigger.shared import file_handle, skin_handler, control_handler
 from scripts.autorigger.rig_tools import layout_tools
 from scripts.autorigger.rig_tools import constructor_tools
-from scripts.autorigger.rig_tools import rig_root, rig_leg, rig_finger, rig_sdk_finger
+from scripts.autorigger.rig_tools import rig_root, rig_leg, rig_finger, rig_sdk_finger, rig_wing
 from scripts.autorigger.rig_tools import rig_facial_brow, rig_facial_nose
 from scripts.autorigger.rig_tools import rig_facial_mouth, rig_facial_cheek, rig_generic_chain, rig_arm, rig_facial_jaw, rig_torso, rig_facial_tongue, rig_facial_nasolabial, rig_neck, rig_facial_eye, rig_facial_eyelid, rig_mesh_setup
 
@@ -50,8 +50,8 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         new_tab = self.create_tabs()
 
         # Draw UI
-        self.create_build_tab(new_tab, face=False)
-        self.create_tools_tab(new_tab, face=False)
+        self.create_build_tab(new_tab, face=True)
+        self.create_tools_tab(new_tab, face=True)
 
     def create_tabs(self):
 
@@ -189,8 +189,7 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         # 04 ----- Load Placement
         load_placement = self.file_path_assigner(scrollable_layout, 'Placement', mode="LoadRun")
         load_placement[0].clicked.connect(functools.partial(self.load_file_path_yaml_action, load_placement[2], "Load Placement File"))
-        load_placement[3].clicked.connect(
-            functools.partial(self.import_file_yaml_action, load_placement[2]))
+        load_placement[3].clicked.connect(functools.partial(self.import_joint_placement, load_placement[2]))
         dict_rig_config['Paths'].append(load_placement[2])
 
         # 05 ----- Load Skin Weights
@@ -199,6 +198,12 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
             functools.partial(self.load_file_path_yaml_action, load_skin_weigths[2], "Load Skin Weights File"))
         # TODO: Place here code to load the skin weights
         dict_rig_config['Paths'].append(load_skin_weigths[2])
+
+        # 06 ----- Load Controls
+        load_controls = self.file_path_assigner(scrollable_layout, 'Controls', mode="LoadRun")
+        load_controls[0].clicked.connect(functools.partial(self.load_file_path_yaml_action, load_controls[2], "Load Controls File"))
+        load_controls[3].clicked.connect(functools.partial(self.load_controls_shapes_file, load_controls[2]))
+        dict_rig_config['Paths'].append(load_controls[2])
 
 
         # Separator
@@ -250,6 +255,11 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         body_module_list.append(body_module_item_12)
         body_module_item_13 = self.checklist_item(scrollable_layout_body, "Fingers extended controls", rig.rig_sdk_finger.create_finger_sdk, checkstate=True)
         body_module_list.append(body_module_item_13)
+
+        body_module_item_14 = self.checklist_item(scrollable_layout_body, "Wing rig", functools.partial(self.create_wings, twist=True), checkstate=False)
+        body_module_list.append(body_module_item_14)
+        body_module_item_15 = self.checklist_item(scrollable_layout_body, "Wing rig - No Twist", functools.partial(self.create_wings, twist=False), checkstate=False)
+        body_module_list.append(body_module_item_15)
 
         # # Button to run all checked
         # button_build_body_selected = QtWidgets.QPushButton('Run Selected Body Modules')
@@ -354,20 +364,23 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         face_widgets_list.append(line_3)
 
         # Control visibility of the entire Face Module:
-        if face:
-            for face_widget in face_widgets_list:
-                face_widget.setVisible(True)
-            for face_filepath in face_filepaths_list:
-                for item in face_filepath:
-                    item.setVisible(True)
-        else:
-            for face_widget in face_widgets_list:
-                face_widget.setVisible(False)
-            for face_filepath in face_filepaths_list:
-                for item in face_filepath:
-                    item.setVisible(False)
-
-
+        # if face:
+        #     for face_widget in face_widgets_list:
+        #         face_widget.setVisible(True)
+        #     for face_filepath in face_filepaths_list:
+        #         for item in face_filepath:
+        #             item.setVisible(True)
+        # else:
+        #     for face_widget in face_widgets_list:
+        #         face_widget.setVisible(False)
+        #     for face_filepath in face_filepaths_list:
+        #         for item in face_filepath:
+        #             item.setVisible(False)
+        for face_widget in face_widgets_list:
+            face_widget.setVisible(face)
+        for face_filepath in face_filepaths_list:
+            for item in face_filepath:
+                item.setVisible(face)
 
         # 08 ----- Misc Module List
         # -- Title
@@ -411,11 +424,10 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         hbox_2.addWidget(button_build_rig)
         # Connect action of the Build complete button
         button_build_rig.clicked.connect(
-            functools.partial(self.build_complete_rig, list_body=body_module_list, list_face=face_module_list, list_misc=misc_module_list, exe_me=load_mesh, exe_pl=load_placement, exe_sw=load_skin_weigths, exe_swrib=load_ribbons_skins, exe_shlat=load_lattices_shapes, exe_swlat=load_lattices_skins))
+            functools.partial(self.build_complete_rig, list_body=body_module_list, list_face=face_module_list, list_misc=misc_module_list, exe_me=load_mesh, exe_pl=load_placement, exe_sw=load_skin_weigths, exe_ctrl=load_controls,  exe_swrib=load_ribbons_skins, exe_shlat=load_lattices_shapes, exe_swlat=load_lattices_skins))
 
         # Save/Load Build config logic
-        # config_file[0].clicked.connect(
-        #     functools.partial(self.load_file_path_yaml_action, config_file[2], "Load Build Configuration File"))
+
         # transfer checklist items to dictionary for saving
         for body_item in body_module_list:
             dict_rig_config['Checklist_Body'].append(body_item)
@@ -601,6 +613,14 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
             functools.partial(control_handler.mirror_control_selected, 'LeftToRight'))
         grid_layout_placement.addWidget(button_mirror_control_selected_LR)
 
+        button_save_controls = QtWidgets.QPushButton('Save Controls')
+        button_save_controls.clicked.connect(self.save_controls_shapes)
+        grid_layout_placement.addWidget(button_save_controls)
+        button_load_controls = QtWidgets.QPushButton('Load Controls')
+        button_load_controls.clicked.connect(self.load_controls_shapes)
+        grid_layout_placement.addWidget(button_load_controls)
+
+
         # Control visibility of the entire Face Module:
         if face:
             for face_widget in face_widgets_list:
@@ -654,19 +674,18 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
 
         # 2 - set skin weights path line:
         dict_config['Paths'][2].setText(loaded_dict['Paths'][2])
-        # TODO: place here code for loading skin weights (WIP)
 
-        # 3 - Face Ribbons Skins
+        # 3 - set control shapes path line:
         dict_config['Paths'][3].setText(loaded_dict['Paths'][3])
-        # TODO: place here code for loading FACE RIBBONS skin weights (WIP)
 
-        # 4 - Face Lattice Shapes
+        # 4 - Face Ribbons Skins
         dict_config['Paths'][4].setText(loaded_dict['Paths'][4])
-        # TODO: place here code for loading FACE LATTICE SHAPES (WIP)
 
-        # 5 - Face Lattice Skins
+        # 5 - Face Lattice Shapes
         dict_config['Paths'][5].setText(loaded_dict['Paths'][5])
-        # TODO: place here code for loading FACE LATTICE skin weights (WIP)
+
+        # 6 - Face Lattice Skins
+        dict_config['Paths'][6].setText(loaded_dict['Paths'][6])
 
         # Checklist - Body
         for index, body_item in enumerate(dict_config['Checklist_Body']):
@@ -680,7 +699,7 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         for index, misc_item in enumerate(dict_config['Checklist_Misc']):
             misc_item[0].setChecked(loaded_dict['Checklist_Misc'][index])
 
-    def build_complete_rig(self, list_body, list_face, list_misc, exe_me=None, exe_pl=None, exe_sw=None, exe_swrib=None, exe_shlat=None, exe_swlat=None, buildribbon=False, buildLattice=False):
+    def build_complete_rig(self, list_body, list_face, list_misc, exe_me=None, exe_pl=None, exe_sw=None, exe_ctrl=None, exe_swrib=None, exe_shlat=None, exe_swlat=None, buildribbon=False, buildLattice=False):
         # Load Mesh
         if exe_me[2].text() == "":
             print("Skipping Mesh load")
@@ -692,7 +711,7 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
             print("Error: Placement field is empty. Aborting build.")
             return
         else:
-            self.import_file_yaml_action(exe_pl[2])
+            self.import_joint_placement(exe_pl[2])
 
         # Run Body Modules
         self.run_module_list(list_body)
@@ -746,6 +765,14 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
             skin_path = exe_sw[2].text()
             skin_handler.load_skin_yaml_with_file(skin_path)
 
+        # Load Control Shapes
+        if exe_ctrl[2].text() == "":
+            print("Skipping Control Shapes load")
+        else:
+            ctrl_path = exe_ctrl[2].text()
+            control_handler.apply_control_shapes_from_data(file_handle.file_read_yaml(ctrl_path))
+
+
     def run_module_list(self, list_modules):
         """
         Runs all checked modules from a category list (Body, Face or Misc)
@@ -774,6 +801,12 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
     def chain_attr_add(self):
         rig.rig_generic_chain.set_chain_start_attr(cmds.ls(sl=True)[0])
 
+    def create_wings(self, twist=True):
+        if twist:
+            rig.rig_wing.create_wing_rig(rig.layout_tools.joint_dictionary_creator(), twist=True)
+        else:
+            rig.rig_wing.create_wing_rig(rig.layout_tools.joint_dictionary_creator(), twist=False)
+
     def load_joint_placement(self):
         rig.layout_tools.joint_layout_create(file_handle.file_dialog_yaml("Load joint reference", mode="r"))
 
@@ -781,14 +814,22 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         rig.layout_tools.joint_layout_create(layout_tools.load_template_file(template_file))
 
     def load_file_path_yaml_action(self, line_edit, title):
-        # layout_tools.joint_layout_create(fd("Load joint placement", mode="r"))
         dialog = cmds.fileDialog2(bbo=1, cap=title, ds=2, ff="*.yaml;;*.yml", fm=1)
         output = Path(dialog[0])
         line_edit.clear()
         line_edit.setText(dialog[0])
 
-    def import_file_yaml_action(self, line_edit):
+    def import_joint_placement(self, line_edit):
         rig.layout_tools.joint_layout_create(file_handle.file_read_yaml(line_edit.text()))
+
+    def load_controls_shapes(self):
+        control_handler.load_control_shapes()
+
+    def load_controls_shapes_file(self, line_edit):
+        control_handler.apply_control_shapes_from_data(file_handle.file_read_yaml(line_edit.text()))
+
+    def save_controls_shapes(self):
+        control_handler.save_control_shapes()
 
     def load_file_path_maya_action(self, line_edit, title):
         dialog = cmds.fileDialog2(bbo=1, cap=title, ds=2, ff="*.ma;;*.mb", fm=1)
@@ -807,6 +848,7 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
                 module_action(rig.layout_tools.joint_dictionary_creator(), twist=True)
             elif twist == False:
                 module_action(rig.layout_tools.joint_dictionary_creator(), twist=False)
+
         else:
             if twist is None:
                 module_action()

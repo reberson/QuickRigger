@@ -125,6 +125,8 @@ def create_deform_rig():
             mirror_joint(str(key))
         elif "hip_r" == str(key).lower() or "hip_l" == str(key).lower():
             mirror_joint(str(key))
+        elif "wing_scapula_r" == str(key).lower() or "wing_scapula_l" == str(key).lower():
+            mirror_joint(str(key))
 
     # Freeze Transforms
     all_jnts = cmds.ls(type="joint")

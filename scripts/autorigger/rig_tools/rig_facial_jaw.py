@@ -2,11 +2,15 @@ import maya.cmds as cmds
 from scripts.autorigger.resources.definitions import CONTROLS_DIR
 from scripts.autorigger.shared.file_handle import file_read_yaml, import_curve
 
+
 def create_jaw(dict):
     grp_ctrl = cmds.group(em=True, n="jaw_control_group")
     cmds.matchTransform(grp_ctrl, "Jaw_M")
     cmds.parent(grp_ctrl, "face_constrain_head")
     jnt_list = ["Jaw_M", "Chin_M", "Jaw_End_M"]
+
+    # Check if each joint in the list exists and remove it if it doesn't
+    jnt_list = [jnt for jnt in jnt_list if cmds.objExists(jnt)]
 
     # create base controls
     for jnt in jnt_list:
@@ -51,9 +55,11 @@ def create_jaw(dict):
         if "_L" in jnt:
             cmds.xform(grp_flip, r=True, ro=(0, 180, 0))
 
-    #parent ctrls to jaw ctrl
-    cmds.parent("offset_Chin_M", "x_Jaw_M")
-    cmds.parent("offset_Jaw_End_M", "x_Jaw_M")
+    # parent ctrls to jaw ctrl
+    if "Chin_M" in jnt_list:
+        cmds.parent("offset_Chin_M", "x_Jaw_M")
+    if "Jaw_End_M" in jnt_list:
+        cmds.parent("offset_Jaw_End_M", "x_Jaw_M")
 
     # attach def joints to ctrl jnts
     for jnt in jnt_list:
@@ -61,8 +67,7 @@ def create_jaw(dict):
         cmds.parent(cmds.orientConstraint("x_" + jnt, jnt), "face_constraints")
 
     # make jaw locator follow jaw_end
-    cmds.pointConstraint("x_Jaw_End_M", "loc_jaw")
-    cmds.orientConstraint("x_Jaw_End_M", "loc_jaw")
-
-
+    if "Jaw_End_M" in jnt_list:
+        cmds.pointConstraint("x_Jaw_End_M", "loc_jaw")
+        cmds.orientConstraint("x_Jaw_End_M", "loc_jaw")
 

@@ -5,7 +5,6 @@ from scripts.autorigger.shared.utils import disconnect_shape_drawinfo
 from scripts.autorigger.resources.definitions import CONTROLS_DIR
 from scripts.autorigger.shared.file_handle import file_read_yaml, import_curve
 from scripts.autorigger.shared.utils import create_stretch, create_twist_joint
-# TODO: Refactor to Class objects
 
 
 def create_arm_rig(dict, twist=True):
@@ -62,6 +61,7 @@ def create_arm_rig(dict, twist=True):
 
     # Shoulder additional groups
     shoulder_sides = ["Shoulder_R", "Shoulder_L"]
+
     for shoulder in shoulder_sides:
         grp_fk_shld_master = cmds.group(em=True, n="fk_master_{0}".format(shoulder))
         grp_fk_shld_chest = cmds.group(em=True, n="fk_follow_chest_{0}".format(shoulder))

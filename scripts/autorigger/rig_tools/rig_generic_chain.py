@@ -70,7 +70,7 @@ def create_chain_rig(dict, joint1st):
     # First Joint additional groups if it has a parent and wants to have global constraint
     if chain_parent:
         grp_fk_chain_master = cmds.group(em=True, n="fk_master_{0}".format(joint1st))
-        grp_fk_chain_local = cmds.group(em=True, n="fk_follow_chest_{0}".format(joint1st))
+        grp_fk_chain_local = cmds.group(em=True, n="fk_follow_local_{0}".format(joint1st))
         grp_fk_chain_global = cmds.group(em=True, n="fk_follow_global_{0}".format(joint1st))
         grp_fk_chain_flw = cmds.group(em=True, n="fk_follow_{0}".format(joint1st))
         cmds.parent(grp_fk_chain_local, grp_fk_chain_master)
@@ -93,7 +93,14 @@ def create_chain_rig(dict, joint1st):
         # Constraint global to globalsystem and follow local to parent joint
         cmds.orientConstraint(grp_gl_chain, grp_fk_chain_global, mo=True, n="follow_global_{0}".format(joint1st))
         cmds.orientConstraint(chain_parent, grp_fk_chain_local, mo=True, n="follow_local_{0}".format(joint1st))
-        cmds.parent(grp_fk_chain_master, "fkx_" + chain_parent)
+
+        # Special check if the chain parent is the actual Root joint, or any other joint that does not have a "fkx_" joint prefix
+        fkx_chain = "fkx_" + chain_parent
+        if cmds.objExists(fkx_chain):
+            cmds.parent(grp_fk_chain_master, fkx_chain)
+        else:
+            cmds.parent(grp_fk_chain_master, "fk_constraint_root")
+
 
     # Connect both fk ik rigs to def joints through pont/orient constraint workflow
     for jnt in chain_joints:
