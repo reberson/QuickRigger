@@ -1,7 +1,9 @@
 from maya import cmds, OpenMaya
 
 NAMESPACE = ""
-
+MULTIFRAME = False
+STARTFRAME = 0
+ENDFRAME = 60
 
 class IkFKWindow:
     def __init__(self):
@@ -49,8 +51,11 @@ class IkFKWindow:
         if "Leg_" in ik_tgt:
             if "_R" in ik_tgt:
                 cmds.matchTransform(self.return_lists(NAMESPACE)[0] + "IKToes_R", jnt_chain[3], scl=False)
+                cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "IKToes_R")
             else:
                 cmds.matchTransform(self.return_lists(NAMESPACE)[0] + "IKToes_L", jnt_chain[3], scl=False)
+                cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "IKToes_L")
+        cmds.setKeyframe(ik_tgt)
 
     def set_ik_to_fk(self, jnt_chain):
         for jnt in jnt_chain:
@@ -59,47 +64,152 @@ class IkFKWindow:
                                 self.return_lists(NAMESPACE)[0] + "IKX" + jnt,
                                 scl=False,
                                 rot=True, pos=False)
-
+            cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "FK" + jnt)
     # set button functions
     def ik_fk_arm_r(self, *args):
-        self.set_ik_to_fk(self.def_joints_arm_R)
-        cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKArm_R.FKIKBlend", 0)
+        global MULTIFRAME
+        global STARTFRAME
+        global ENDFRAME
+        if not MULTIFRAME:
+            self.set_ik_to_fk(self.def_joints_arm_R)
+            cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKArm_R.FKIKBlend", 0)
+            cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "FKIKArm_R.FKIKBlend")
+        else:
+            for frame in range(STARTFRAME, ENDFRAME +1):
+                cmds.currentTime(frame, edit=True)
+                self.set_ik_to_fk(self.def_joints_arm_R)
+                cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKArm_R.FKIKBlend", 0)
+                cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "FKIKArm_R.FKIKBlend")
 
     def fk_ik_arm_r(self, *args):
-        self.set_fk_to_ik(self.return_lists(NAMESPACE)[0] + "IKArm_R",
-                          self.return_lists(NAMESPACE)[0] + "AlignIKToWrist_R",
-                          self.return_lists(NAMESPACE)[0] + "PoleArm_R", self.return_lists(NAMESPACE)[1])
-        cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKArm_R.FKIKBlend", 10)
+        global MULTIFRAME
+        global STARTFRAME
+        global ENDFRAME
+        if not MULTIFRAME:
+            self.set_fk_to_ik(self.return_lists(NAMESPACE)[0] + "IKArm_R", self.return_lists(NAMESPACE)[0] + "AlignIKToWrist_R", self.return_lists(NAMESPACE)[0] + "PoleArm_R", self.return_lists(NAMESPACE)[1])
+            cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKArm_R.FKIKBlend", 10)
+            cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "FKIKArm_R.FKIKBlend")
+            cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "PoleArm_R")
+
+        else:
+            for frame in range(STARTFRAME, ENDFRAME +1):
+                cmds.currentTime(frame, edit=True)
+                self.set_fk_to_ik(self.return_lists(NAMESPACE)[0] + "IKArm_R",
+                                  self.return_lists(NAMESPACE)[0] + "AlignIKToWrist_R",
+                                  self.return_lists(NAMESPACE)[0] + "PoleArm_R", self.return_lists(NAMESPACE)[1])
+                cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKArm_R.FKIKBlend", 10)
+                cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "FKIKArm_R.FKIKBlend")
+                cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "PoleArm_R")
 
     def ik_fk_arm_l(self, *args):
-        self.set_ik_to_fk(self.def_joints_arm_L)
-        cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKArm_L.FKIKBlend", 0)
+        global MULTIFRAME
+        global STARTFRAME
+        global ENDFRAME
+        if not MULTIFRAME:
+            self.set_ik_to_fk(self.def_joints_arm_L)
+            cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKArm_L.FKIKBlend", 0)
+            cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "FKIKArm_L.FKIKBlend")
+        else:
+            for frame in range(STARTFRAME, ENDFRAME + 1):
+                cmds.currentTime(frame, edit=True)
+                self.set_ik_to_fk(self.def_joints_arm_L)
+                cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKArm_L.FKIKBlend", 0)
+                cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "FKIKArm_L.FKIKBlend")
 
     def fk_ik_arm_l(self, *args):
-        self.set_fk_to_ik(self.return_lists(NAMESPACE)[0] + "IKArm_L",
-                          self.return_lists(NAMESPACE)[0] + "AlignIKToWrist_L",
-                          self.return_lists(NAMESPACE)[0] + "PoleArm_L", self.return_lists(NAMESPACE)[2])
-        cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKArm_L.FKIKBlend", 10)
+        global MULTIFRAME
+        global STARTFRAME
+        global ENDFRAME
+        if not MULTIFRAME:
+            self.set_fk_to_ik(self.return_lists(NAMESPACE)[0] + "IKArm_L",
+                              self.return_lists(NAMESPACE)[0] + "AlignIKToWrist_L",
+                              self.return_lists(NAMESPACE)[0] + "PoleArm_L", self.return_lists(NAMESPACE)[2])
+            cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKArm_L.FKIKBlend", 10)
+            cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "FKIKArm_L.FKIKBlend")
+            cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "PoleArm_L")
+        else:
+            for frame in range(STARTFRAME, ENDFRAME + 1):
+                cmds.currentTime(frame, edit=True)
+                self.set_fk_to_ik(self.return_lists(NAMESPACE)[0] + "IKArm_L",
+                                  self.return_lists(NAMESPACE)[0] + "AlignIKToWrist_L",
+                                  self.return_lists(NAMESPACE)[0] + "PoleArm_L", self.return_lists(NAMESPACE)[2])
+                cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKArm_L.FKIKBlend", 10)
+                cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "FKIKArm_L.FKIKBlend")
+                cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "PoleArm_L")
 
     def ik_fk_leg_r(self, *args):
-        self.set_ik_to_fk(self.def_joints_leg_R)
-        cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKLeg_R.FKIKBlend", 0)
+        global MULTIFRAME
+        global STARTFRAME
+        global ENDFRAME
+        if not MULTIFRAME:
+            self.set_ik_to_fk(self.def_joints_leg_R)
+            cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKLeg_R.FKIKBlend", 0)
+            cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "FKIKLeg_R.FKIKBlend")
+        else:
+            for frame in range(STARTFRAME, ENDFRAME + 1):
+                cmds.currentTime(frame, edit=True)
+                self.set_ik_to_fk(self.def_joints_leg_R)
+                cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKLeg_R.FKIKBlend", 0)
+                cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "FKIKLeg_R.FKIKBlend")
 
     def fk_ik_leg_r(self, *args):
-        self.set_fk_to_ik(self.return_lists(NAMESPACE)[0] + "IKLeg_R",
-                          self.return_lists(NAMESPACE)[0] + "AlignIKToAnkle_R",
-                          self.return_lists(NAMESPACE)[0] + "PoleLeg_R", self.return_lists(NAMESPACE)[3])
-        cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKLeg_R.FKIKBlend", 10)
+        global MULTIFRAME
+        global STARTFRAME
+        global ENDFRAME
+        if not MULTIFRAME:
+            self.set_fk_to_ik(self.return_lists(NAMESPACE)[0] + "IKLeg_R",
+                              self.return_lists(NAMESPACE)[0] + "AlignIKToAnkle_R",
+                              self.return_lists(NAMESPACE)[0] + "PoleLeg_R", self.return_lists(NAMESPACE)[3])
+            cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKLeg_R.FKIKBlend", 10)
+            cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "FKIKLeg_R.FKIKBlend")
+            cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "PoleLeg_R")
+        else:
+            for frame in range(STARTFRAME, ENDFRAME + 1):
+                cmds.currentTime(frame, edit=True)
+                self.set_fk_to_ik(self.return_lists(NAMESPACE)[0] + "IKLeg_R",
+                                  self.return_lists(NAMESPACE)[0] + "AlignIKToAnkle_R",
+                                  self.return_lists(NAMESPACE)[0] + "PoleLeg_R", self.return_lists(NAMESPACE)[3])
+                cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKLeg_R.FKIKBlend", 10)
+                cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "FKIKLeg_R.FKIKBlend")
+                cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "PoleLeg_R")
+
 
     def ik_fk_leg_l(self, *args):
-        self.set_ik_to_fk(self.def_joints_leg_L)
-        cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKLeg_L.FKIKBlend", 0)
+        global MULTIFRAME
+        global STARTFRAME
+        global ENDFRAME
+        if not MULTIFRAME:
+            self.set_ik_to_fk(self.def_joints_leg_L)
+            cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKLeg_L.FKIKBlend", 0)
+            cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "FKIKLeg_L.FKIKBlend")
+        else:
+            for frame in range(STARTFRAME, ENDFRAME + 1):
+                cmds.currentTime(frame, edit=True)
+                self.set_ik_to_fk(self.def_joints_leg_L)
+                cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKLeg_L.FKIKBlend", 0)
+                cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "FKIKLeg_L.FKIKBlend")
+
 
     def fk_ik_leg_l(self, *args):
-        self.set_fk_to_ik(self.return_lists(NAMESPACE)[0] + "IKLeg_L",
-                          self.return_lists(NAMESPACE)[0] + "AlignIKToAnkle_L",
-                          self.return_lists(NAMESPACE)[0] + "PoleLeg_L", self.return_lists(NAMESPACE)[4])
-        cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKLeg_L.FKIKBlend", 10)
+        global MULTIFRAME
+        global STARTFRAME
+        global ENDFRAME
+        if not MULTIFRAME:
+            self.set_fk_to_ik(self.return_lists(NAMESPACE)[0] + "IKLeg_L",
+                              self.return_lists(NAMESPACE)[0] + "AlignIKToAnkle_L",
+                              self.return_lists(NAMESPACE)[0] + "PoleLeg_L", self.return_lists(NAMESPACE)[4])
+            cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKLeg_L.FKIKBlend", 10)
+            cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "FKIKLeg_L.FKIKBlend")
+            cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "PoleLeg_L")
+        else:
+            for frame in range(STARTFRAME, ENDFRAME + 1):
+                cmds.currentTime(frame, edit=True)
+                self.set_fk_to_ik(self.return_lists(NAMESPACE)[0] + "IKLeg_L",
+                                  self.return_lists(NAMESPACE)[0] + "AlignIKToAnkle_L",
+                                  self.return_lists(NAMESPACE)[0] + "PoleLeg_L", self.return_lists(NAMESPACE)[4])
+                cmds.setAttr(self.return_lists(NAMESPACE)[0] + "FKIKLeg_L.FKIKBlend", 10)
+                cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "FKIKLeg_L.FKIKBlend")
+                cmds.setKeyframe(self.return_lists(NAMESPACE)[0] + "PoleLeg_L")
 
     def create_window(self):
         window_name = "Match IK FK"
@@ -114,6 +224,28 @@ class IkFKWindow:
         def change_namespace(name_item):
             global NAMESPACE
             NAMESPACE = name_item
+
+        def set_single(self):
+            global MULTIFRAME
+            MULTIFRAME = False
+            cmds.floatField(sframe, e=True, en=False)
+            cmds.floatField(eframe, e=True, en=False)
+
+        def set_multi(self):
+            global MULTIFRAME
+            MULTIFRAME = True
+            cmds.floatField(sframe, e=True, en=True)
+            cmds.floatField(eframe, e=True, en=True)
+
+        def set_start_frame(value):
+            global STARTFRAME
+            STARTFRAME = int(value)
+            print (STARTFRAME)
+
+        def set_end_frame(value):
+            global ENDFRAME
+            ENDFRAME = int(value)
+            print(ENDFRAME)
 
         cmds.columnLayout(adj=True)
         cmds.optionMenu(label='Namespace', changeCommand=change_namespace)
@@ -138,6 +270,17 @@ class IkFKWindow:
         cmds.button(label="IK to FK", command=self.ik_fk_leg_l)
         cmds.text(label="Leg L")
         cmds.button(label="FK to IK", command=self.fk_ik_leg_l)
+        cmds.setParent('..')
+
+        cmds.columnLayout()
+        cmds.radioButtonGrp(labelArray2=['Single Frame', 'Timeline Range'], numberOfRadioButtons=2, on1=set_single, on2=set_multi, sl=1)
+        cmds.setParent('..')
+
+        layout_c = cmds.rowColumnLayout(numberOfColumns=4, columnWidth=[(1, 75), (2, 50), (3, 75), (4, 50)], rs=(10, 10))
+        cmds.text(label="Start frame:")
+        sframe = cmds.floatField(en=False, pre=1, cc=set_start_frame)
+        cmds.text(label="End frame:")
+        eframe = cmds.floatField(en=False, pre=1, cc=set_end_frame)
         cmds.setParent('..')
 
         cmds.showWindow(window_ikfk)

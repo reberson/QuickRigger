@@ -5,7 +5,7 @@ from Rig.Tools import reference_tools
 from Rig.Tools import constructor_tools
 from Rig.Tools import rig_root, rig_torso, rig_arm, rig_leg, rig_finger, rig_sdk_finger, rig_neck
 from System.file_handle import file_dialog_yaml as fd
-from System.file_handle import export_curve
+from System.file_handle import export_curve, import_curve
 
 
 def Menu():
@@ -86,6 +86,10 @@ def Menu():
     cmds.menuItem(p='tools', l='Export curve', stp='python',
                   c=lambda *args: export_curve(),
                   ann='Save curve object into YAML')
+
+    cmds.menuItem(p='tools', l='Import curve', stp='python',
+                  c=lambda *args: import_curve(),
+                  ann='Load curve object into YAML')
 
 
 def build_rig():

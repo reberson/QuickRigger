@@ -1,6 +1,19 @@
 import maya.OpenMaya as OpenMaya
 import maya.cmds as cmds
 
+
+def mirror_object(object_tr, axis):
+    if axis.lower() == "x":
+        cmds.xform(object_tr, r=True, s=(-1, 1, 1))
+    elif axis.lower() == "y":
+        cmds.xform(object_tr, r=True, s=(1, -1, 1))
+    elif axis.lower() == "z":
+        cmds.xform(object_tr, r=True, s=(1, 1, -1))
+    else:
+        cmds.error("Invalid axis", n=True)
+    cmds.makeIdentity(object_tr, a=True, s=True)
+
+
 def calculatePVPosition(jnts, distance):
     from maya import cmds, OpenMaya
     start = cmds.xform(jnts[0], q=True, ws=True, t=True)
