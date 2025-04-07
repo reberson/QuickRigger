@@ -2,6 +2,8 @@ import maya.OpenMaya as OpenMaya
 import maya.cmds as cmds
 from System.file_handle import file_read_yaml, import_curve
 from definitions import CONTROLS_DIR
+import pymel.core as pm
+
 
 def mirror_object(object_tr, axis):
     if axis.lower() == "x":
@@ -215,7 +217,7 @@ def create_stretch(stretch_jnt, scale_jnt, att_holder, grp_offset, ikx_jnt, twis
         cmds.xform(flip_grp, r=True, ro=(180, 0, 0))
 
 
-def create_ribbon(ribbon_name, transform_list):
+def create_ribbon(ribbon_name, transform_list, duplicated=None):
     point_list = []
     for index, jnt in enumerate(transform_list):
         point = cmds.xform(jnt, q=True, ws=True, t=True)
@@ -236,10 +238,17 @@ def create_ribbon(ribbon_name, transform_list):
     param_u_step_sum = 0
     ribbon_follicle_grp = cmds.group(em=True, n="follicles_" + ribbon_name)
     ribbon = cmds.listRelatives(ribbon_shape, p=True)
-
+# TODO: Create a way to verify if the follicle is already attached to something and skip
     for item in reversed(transform_list):
         follicle = cmds.createNode("follicle")
-        follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_" + item)
+        if duplicated:
+            if duplicated in item.lower():
+                follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_" + item + "_copy")
+            else:
+                follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_" + item)
+        else:
+            follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_" + item)
+
         follicle = cmds.listRelatives(follicle_transform)[0]
         cmds.connectAttr(ribbon_shape[0] + ".local", follicle + ".inputSurface")
         cmds.connectAttr(ribbon_shape[0] + ".worldMatrix", follicle + ".inputWorldMatrix")
@@ -254,34 +263,62 @@ def create_ribbon(ribbon_name, transform_list):
     return ribbon, ribbon_follicle_grp, ribbon_shape, param_u_step
 
 
-def create_ribbon_flat(start_point, end_point, origin_point, ribbon_name, transform_list):
-    start = cmds.xform(start_point, q=True, ws=True, t=True)
-    end = cmds.xform(end_point, q=True, ws=True, t=True)
-    startV = OpenMaya.MVector(start[0], start[1], start[2])
-    endV = OpenMaya.MVector(end[0], end[1], end[2])
-    startEnd = endV[0] - startV[0]
-    ribbon = cmds.nurbsPlane(n=ribbon_name, u=len(transform_list), v=1, axis=(0, 1, 0), d=3, w=startEnd, lr=0.1)
-    cmds.matchTransform(ribbon_name, origin_point, pos=True)
-    cmds.xform(ribbon, ro=(90, 0, 180))
-    cmds.makeIdentity(ribbon, a=True, r=True, t=True)
-    ribbon_shape = cmds.listRelatives(ribbon[0])
-    param_u_step = (1 / len(transform_list) / 2)
-    ribbon_follicle_grp = cmds.group(em=True, n="follicles_" + ribbon_name)
+def create_ribbon_closed(ribbon_name, transform_list, center_jnt, left_side=False):
+    point_list = []
+    for index, jnt in enumerate(transform_list):
+        point = cmds.xform(jnt, q=True, ws=True, t=True)
+        vector = OpenMaya.MVector(point[0], point[1], point[2])
+        point_list.append(point)
+    new_curve = cmds.curve(p=point_list)
+    if left_side == False:
+        cmds.reverseCurve(new_curve)
 
-    for item in transform_list:
+    # get center joint point and apply to the curve pivot
+    center_point = cmds.xform(center_jnt, q=True, t=True, ws=True)
+    cmds.xform(new_curve, piv=center_point)
+
+    cmds.closeCurve(new_curve, rpo=True, bki=True, p=0, ps=0)
+    curve_dupli = cmds.duplicate(new_curve)
+    cmds.xform(curve_dupli, cp=True)
+    cmds.xform(curve_dupli, s=(0.9, 0.9, 1))
+    cmds.select(d=True)
+    extruded_ribbon = cmds.loft(curve_dupli, new_curve, n=ribbon_name)
+
+    cmds.xform(extruded_ribbon[0], piv=center_point)
+
+    cmds.delete(new_curve)
+    cmds.delete(curve_dupli)
+
+    ribbon_shape = cmds.listRelatives(extruded_ribbon[0])
+    steps = len(transform_list) - 1
+    param_u_step = 1 / steps
+    param_u_step_sum = 0
+    ribbon_follicle_grp = cmds.group(em=True, n="follicles_" + ribbon_name)
+    ribbon = cmds.listRelatives(ribbon_shape, p=True)
+    # ribs = pm.ls(ribbon, type=pm.nt.NurbsSurface)[0]
+    # ribs = cmds.listRelatives(ribbon, type="nurbsSurface", ad=True)[0]
+    ribs = pm.listRelatives(ribbon, type=pm.nt.NurbsSurface)[0]
+
+    # TODO: try to replace by cmds. Check if the "closestPoint" is a node that can be added as "setAttr".
+
+    for item in reversed(transform_list):
+        check = pm.xform(item, t=True, q=True, ws=True)
+        point, u, v = ribs.closestPoint(check, space='world')
+        v /= len(transform_list)
         follicle = cmds.createNode("follicle")
         follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_" + item)
         follicle = cmds.listRelatives(follicle_transform)[0]
-        # ctrl = cmds.circle(n="ctrl_brow_sec" + str(i), cz=1, r=0.75, nr=(0, 0, 1))
         cmds.connectAttr(ribbon_shape[0] + ".local", follicle + ".inputSurface")
         cmds.connectAttr(ribbon_shape[0] + ".worldMatrix", follicle + ".inputWorldMatrix")
         cmds.connectAttr(follicle + ".outRotate", follicle_transform + ".rotate")
         cmds.connectAttr(follicle + ".outTranslate", follicle_transform + ".translate")
-        cmds.setAttr(follicle + ".parameterV", 0.5)
-        cmds.setAttr(follicle + ".parameterU", param_u_step)
-        param_u_step += 1 / len(transform_list)
+        cmds.setAttr(follicle + ".parameterU", 0.5)
+        cmds.setAttr(follicle + ".parameterV", v)
+        v += param_u_step
+        param_u_step_sum += param_u_step
         cmds.parent(follicle_transform, ribbon_follicle_grp)
         cmds.select(d=True)
+
 
     return ribbon, ribbon_follicle_grp, ribbon_shape, param_u_step
 
@@ -290,13 +327,27 @@ def create_lattice_plane(origin_transform, height, width, name):
     grp = cmds.group(em=True, n="group_" + name)
     proj_plane = cmds.polyPlane(n=name, ax=(0, 0, 1), h=height, w=width)
     proj_plane_shape = cmds.listRelatives(proj_plane[0])
-    cmds.delete(proj_plane, constructionHistory=True)
+    # cmds.delete(proj_plane, constructionHistory=True)
     proj_plane_lattice = cmds.lattice(proj_plane[0], dv=(5, 5, 2), oc=True, n=name + "_")
     cmds.parent(proj_plane[0], grp)
     cmds.parent(proj_plane_lattice[1], grp)
     cmds.parent(proj_plane_lattice[2], grp)
     cmds.matchTransform(grp, origin_transform, pos=True)
     return grp, proj_plane, proj_plane_lattice, proj_plane_shape
+
+
+def create_lattice_sphere(origin_transform, radius, name):
+    grp = cmds.group(em=True, n="group_" + name)
+    proj_sphere = cmds.polySphere(n=name, ax=(1, 0, 0), r=radius, sa=32, sh=32)
+
+    proj_sphere_shape = cmds.listRelatives(proj_sphere[0])
+    # cmds.delete(proj_sphere, constructionHistory=True)
+    proj_sphere_lattice = cmds.lattice(proj_sphere[0], dv=(2, 2, 2), oc=True, n=name + "_")
+    cmds.parent(proj_sphere[0], grp)
+    cmds.parent(proj_sphere_lattice[1], grp)
+    cmds.parent(proj_sphere_lattice[2], grp)
+    cmds.matchTransform(grp, origin_transform, pos=True)
+    return grp, proj_sphere, proj_sphere_lattice, proj_sphere_shape
 
 
 def joint_list(parent, middle_joint=None, last_joint=None, first_half=None, second_half=None):

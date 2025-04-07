@@ -6,13 +6,17 @@ import math
 # TODO: Make eyelid group follow eye movement (with falloff)
 
 
-def create_eyelid(dict):
-    grp_ctrl = cmds.group(em=True, n="eyelid_control_group")
+def create_nasolabial(dict):
+    grp_ctrl = cmds.group(em=True, n="nasolabial_control_group")
     cmds.matchTransform(grp_ctrl, "Facial")
     cmds.parent(grp_ctrl, "face_constrain_head")
 
+    # Create projection lattice plane for both sides
+    proj_surface = create_lattice_plane("Nasolabial", 40, 40, "proj_plane_nasolabial")
+    cmds.parent(proj_surface[0], "face_constrain_head")
+
     # separate each side list
-    jnts_all = cmds.listRelatives("Eyelids")
+    jnts_all = cmds.listRelatives("Nasolabial")
     sides = ["_R", "_L"]
     for side in sides:
         jnt_sides = []
@@ -20,24 +24,25 @@ def create_eyelid(dict):
             if side in jnt:
                 jnt_sides.append(jnt)
 
-        # reorganize list index
-        upper_half = []
-        lower_half = []
-        for jnt in jnt_sides:
-            if "upper" in jnt.lower():
-                upper_half.append(jnt)
-            elif "lower" in jnt.lower():
-                lower_half.append(jnt)
-        upper_half.sort(reverse=True)
-        lower_half.sort()
+        # # reorganize list index
+        # upper_half = []
+        # lower_half = []
+        # for jnt in jnt_sides:
+        #     if "upper" in jnt.lower():
+        #         upper_half.append(jnt)
+        #     elif "lower" in jnt.lower():
+        #         lower_half.append(jnt)
+        # upper_half.sort(reverse=True)
+        # lower_half.sort()
 
-        jnt_list = []
-        jnt_list.append("EyelidOuterCorner{0}".format(side))
-        for jnt in upper_half:
-            jnt_list.append(jnt)
-        jnt_list.append("EyelidInnerCourner{0}".format(side))
-        for jnt in lower_half:
-            jnt_list.append(jnt)
+
+        jnt_list = jnt_sides
+        # jnt_list.append("EyelidOuterCorner{0}".format(side))
+        # for jnt in upper_half:
+        #     jnt_list.append(jnt)
+        # jnt_list.append("EyelidInnerCourner{0}".format(side))
+        # for jnt in lower_half:
+        #     jnt_list.append(jnt)
 
         # jnt_list = joint_list("Eyelids", first_half="upper", second_half="lower",middle_joint="Eyelid_InnerCourner")
         first_jnt = jnt_list[0]
@@ -72,29 +77,25 @@ def create_eyelid(dict):
             if "_l" in jnt.lower():
                 cmds.xform(grp_flip, r=True, ro=(0, 180, 0))
 
-        if side =="_R":
-            ribbon = create_ribbon_closed("ribbon_eyelid{0}".format(side), jnt_list, "Eye{0}".format(side), left_side=False)
-        else:
-            ribbon = create_ribbon_closed("ribbon_eyelid{0}".format(side), jnt_list, "Eye{0}".format(side), left_side=True)
+        ribbon = create_ribbon("ribbon_Nasolabial{0}".format(side), jnt_list)
         param_u_step = ribbon[3]
         cmds.parent(ribbon[0], grp_ctrl)
         cmds.parent(ribbon[1], grp_ctrl)
 
-        proj_sphere = create_lattice_sphere("Eye{0}".format(side), 3, "proj_sphere_eye{0}".format(side))
-        cmds.parent(proj_sphere[0], "face_constrain_head")
-
-        # Figure out the center most ctrl for upper and lower
-
-        ctrl_upper_number = str(math.ceil((len(upper_half)/2)))
-        ctrl_upper_name = "ctrl_EyelidUpper" + ctrl_upper_number + "{0}".format(side)
-
-        ctrl_lower_number = str(math.ceil((len(upper_half)/2)))
-        ctrl_lower_name = "ctrl_EyelidLower" + ctrl_lower_number + "{0}".format(side)
 
 
+        # Figure out the center most ctrl for upper and lower - It's temporary hardcoded, should find the midpoint between first half, and midpoint between second half
+        # TODO: NEEDS 3 controls
+        ctrl_upper_number = "2"
+        ctrl_upper_name = "ctrl_Nasolabial" + ctrl_upper_number + "{0}".format(side)
 
-        # Create the primary controls
-        rib_point_list = ["eyelidUpper{0}".format(side), "eyelidLower{0}".format(side)]
+        ctrl_lower_number = "4"
+        ctrl_lower_name = "ctrl_Nasolabial" + ctrl_lower_number + "{0}".format(side)
+
+
+
+        # Create the primary controls - Hardcoded based on ctrl above
+        rib_point_list = ["NasolabialUpper{0}".format(side), "NasolabialLower{0}".format(side)]
         for rib_point in rib_point_list:
             grp_offset = cmds.group(em=True, n="offset_" + rib_point)
             grp_flip = cmds.group(em=True, n="flip_" + rib_point)
@@ -117,15 +118,15 @@ def create_eyelid(dict):
 
             if "Upper" in rib_point:
                 cmds.matchTransform(grp_offset, ctrl_upper_name, pos=True)
-                follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_sphere_eyelidUpper{0}".format(side))
+                follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_surface_NasolabialUpper{0}".format(side))
                 cmds.select(d=True)
-                rib_cjoint = cmds.joint(n="ribbon_cjoint_eyelidUpper{0}".format(side))
+                rib_cjoint = cmds.joint(n="ribbon_cjoint_NasolabialUpper{0}".format(side))
 
             elif "Lower" in rib_point:
                 cmds.matchTransform(grp_offset, ctrl_lower_name, pos=True)
-                follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_sphere_eyelidLower{0}".format(side))
+                follicle_transform = cmds.rename(cmds.listRelatives(follicle, p=True), "follicle_surface_NasolabialLower{0}".format(side))
                 cmds.select(d=True)
-                rib_cjoint = cmds.joint(n="ribbon_cjoint_eyelidLower{0}".format(side))
+                rib_cjoint = cmds.joint(n="ribbon_cjoint_NasolabialLower{0}".format(side))
 
             cmds.setAttr(rib_cjoint + ".drawStyle", 2)
             cmds.parent(rib_cjoint, ctrl[0])
@@ -136,8 +137,10 @@ def create_eyelid(dict):
 
             cmds.parent(follicle_transform, "face_system")
 
-            cmds.connectAttr(proj_sphere[3][0] + ".outMesh", follicle + ".inputMesh")
-            cmds.connectAttr(proj_sphere[3][0] + ".worldMatrix", follicle + ".inputWorldMatrix")
+
+
+            cmds.connectAttr(proj_surface[3][0] + ".outMesh", follicle + ".inputMesh")
+            cmds.connectAttr(proj_surface[3][0] + ".worldMatrix", follicle + ".inputWorldMatrix")
             cmds.connectAttr(follicle + ".outRotate", follicle_transform + ".rotate")
             cmds.connectAttr(follicle + ".outTranslate", follicle_transform + ".translate")
             cmds.setAttr(follicle + ".parameterV", 0.5)
@@ -145,15 +148,15 @@ def create_eyelid(dict):
 
             close_pnt_node = cmds.createNode("closestPointOnMesh", n="closestPointOn" + rib_cjoint)
             cmds.connectAttr(mediator + ".translate", close_pnt_node + ".inPosition")
-            cmds.connectAttr(proj_sphere[3][0] + ".worldMesh", close_pnt_node + ".inMesh")
-            cmds.connectAttr(proj_sphere[3][0] + ".worldMatrix", close_pnt_node + ".inputMatrix")
+            cmds.connectAttr(proj_surface[3][0] + ".worldMesh", close_pnt_node + ".inMesh")
+            cmds.connectAttr(proj_surface[3][0] + ".worldMatrix", close_pnt_node + ".inputMatrix")
             cmds.connectAttr(close_pnt_node + ".result.parameterU", follicle + ".parameterU")
             cmds.connectAttr(close_pnt_node + ".result.parameterV", follicle + ".parameterV")
 
 
-        cmds.matchTransform("offset_eyelidUpper{0}".format(side), "EyelidUpper" + ctrl_upper_number + "{0}".format(side))
-        cmds.matchTransform("offset_eyelidLower{0}".format(side), "EyelidLower" + ctrl_lower_number + "{0}".format(side))
-        cmds.skinCluster("ribbon_cjoint_eyelidUpper{0}".format(side), "ribbon_cjoint_eyelidLower{0}".format(side), ribbon[0], tsb=True)
+        cmds.matchTransform("offset_NasolabialUpper{0}".format(side), "Nasolabial" + ctrl_upper_number + "{0}".format(side))
+        cmds.matchTransform("offset_NasolabialLower{0}".format(side), "Nasolabial" + ctrl_lower_number + "{0}".format(side))
+        cmds.skinCluster("ribbon_cjoint_NasolabialUpper{0}".format(side), "ribbon_cjoint_NasolabialLower{0}".format(side), ribbon[0], tsb=True)
 
         # attach def joints to ctrl jnts
         for jnt in jnt_list:
@@ -161,29 +164,29 @@ def create_eyelid(dict):
             cmds.parent(cmds.orientConstraint("x_" + jnt, jnt), "face_constraints")
 
 
-def attach_eyelids():
+def attach_nasolabial():
     # make sure brow ctrls are all zeroed out
-    ctrl_list = cmds.listRelatives("Eyelids")
+    ctrl_list = cmds.listRelatives("Nasolabial")
     sides = ["_R", "_L"]
     for side in sides:
-        ctrl_list.append("eyelidUpper{0}".format(side))
-        ctrl_list.append("eyelidLower{0}".format(side))
+        ctrl_list.append("NasolabialUpper{0}".format(side))
+        ctrl_list.append("NasolabialLower{0}".format(side))
 
     for ctrl in ctrl_list:
         cmds.xform("ctrl_" + ctrl, t=(0, 0, 0), ro=(0, 0, 0))
 
-    const_grp = cmds.group(em=True, n="eyelids_ribbon_constraint")
+    const_grp = cmds.group(em=True, n="nasolabial_ribbon_constraint")
     cmds.parent(const_grp, "face_system")
 
-    rib_jnts = ["eyelidUpper_R", "eyelidUpper_L", "eyelidLower_R", "eyelidLower_L"]
+    rib_jnts = ["NasolabialUpper_R", "NasolabialUpper_L", "NasolabialLower_R", "NasolabialLower_L"]
     for jnt in rib_jnts:
-        cmds.parent("ribbon_cjoint_" + jnt, "follicle_sphere_" + jnt)
+        cmds.parent("ribbon_cjoint_" + jnt, "follicle_surface_" + jnt)
         # cmds.xform(jnt, t=(0, 0, 0), ro=(90, 0, 90))
         cmds.xform("ribbon_cjoint_" + jnt, t=(0, 0, 0))
         # cmds.makeIdentity("ribbon_cjoint_" + jnt, a=True, r=True)
     cmds.select(d=True)
 
-    jnt_list = cmds.listRelatives("Eyelids")
+    jnt_list = cmds.listRelatives("Nasolabial")
 
     for jnt in jnt_list:
         const_pnt = cmds.pointConstraint("follicle_" + jnt, "sdk_" + jnt, mo=True)
@@ -193,22 +196,22 @@ def attach_eyelids():
     cmds.select(d=True)
 
 
-def detach_eyelids():
+def detach_nasolabial():
     # make sure brow ctrls are all zeroed out
-    ctrl_list = cmds.listRelatives("Eyelids")
+    ctrl_list = cmds.listRelatives("Nasolabial")
     sides = ["_R", "_L"]
     for side in sides:
-        ctrl_list.append("eyelidUpper{0}".format(side))
-        ctrl_list.append("eyelidLower{0}".format(side))
+        ctrl_list.append("NasolabialUpper{0}".format(side))
+        ctrl_list.append("NasolabialLower{0}".format(side))
 
     for ctrl in ctrl_list:
         cmds.xform("ctrl_" + ctrl, t=(0, 0, 0), ro=(0, 0, 0))
 
     # make sure brow ctrls are all zeroed out
-    cmds.delete("eyelids_ribbon_constraint")
+    cmds.delete("nasolabial_ribbon_constraint")
     cmds.select(d=True)
 
-    rib_jnts = ["eyelidUpper_R", "eyelidUpper_L", "eyelidLower_R", "eyelidLower_L"]
+    rib_jnts = ["NasolabialUpper_R", "NasolabialUpper_L", "NasolabialLower_R", "NasolabialLower_L"]
     for jnt in rib_jnts:
         cmds.parent("ribbon_cjoint_" + jnt, "ctrl_" + jnt)
         cmds.xform("ribbon_cjoint_" + jnt, t=(0, 0, 0))

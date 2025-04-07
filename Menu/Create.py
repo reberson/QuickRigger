@@ -4,7 +4,7 @@ import Rig
 from Rig.Tools import layout_tools
 from Rig.Tools import constructor_tools
 from Rig.Tools import rig_root, rig_torso, rig_arm, rig_leg, rig_finger, rig_sdk_finger, rig_neck
-from Rig.Tools import rig_facial_brow, rig_facial_eyelid
+from Rig.Tools import rig_facial_brow, rig_facial_eyelid, rig_facial_nasolabial, rig_facial_mouth
 from System.file_handle import file_dialog_yaml as fd
 from System.file_handle import export_curve, import_curve
 import System.utils
@@ -119,17 +119,24 @@ def menu():
     cmds.menuItem(p='facesteps', l='eyelid rig', stp='python',
                   c=lambda *args: rig_facial_eyelid.create_eyelid(layout_tools.joint_dictionary_creator()),
                   ann='Creates the rig controls for the brow')
-
+    cmds.menuItem(p='facesteps', l='nasolabial rig', stp='python',
+                  c=lambda *args: rig_facial_nasolabial.create_nasolabial(layout_tools.joint_dictionary_creator()),
+                  ann='Creates the rig controls for the nasolabial')
+    cmds.menuItem(p='facesteps', l='mouth rig', stp='python',
+                  c=lambda *args: rig_facial_mouth.create_mouth(layout_tools.joint_dictionary_creator()),
+                  ann='Creates the rig controls for the mouth')
 
 
     # Rig face - Tools
     cmds.menuItem('facetools', p='face', l='Face Tools', subMenu=True, tearOff=True)
-    cmds.menuItem(p='facetools', l='Attach Brow', stp='python',
-                  c=lambda *args: rig_facial_brow.attach_brow(),
-                  ann='Attach brow control to ribbon')
-    cmds.menuItem(p='facetools', l='Detach Brow', stp='python',
-                  c=lambda *args: rig_facial_brow.detach_brow(),
-                  ann='Detach brow control from ribbon')
+    cmds.menuItem(p='facetools', l='Attach Face', stp='python',
+                  c=lambda *args: attach_face(),
+                  ann='Attach face controls to ribbons')
+    cmds.menuItem(p='facetools', l='Detach Face', stp='python',
+                  c=lambda *args: detach_face(),
+                  ann='Release face controls from ribbons')
+
+
 
     # Tools Menu
     cmds.menuItem('tools', p=menu_name, l='Tools', subMenu=True, tearOff=True)
@@ -161,3 +168,19 @@ def build_rig_face():
     constructor_tools.create_deform_rig_face()
     rig_facial_brow.create_brow(layout_tools.joint_dictionary_creator())
     rig_facial_eyelid.create_eyelid(layout_tools.joint_dictionary_creator())
+    rig_facial_nasolabial.create_nasolabial(layout_tools.joint_dictionary_creator())
+    rig_facial_mouth.create_mouth(layout_tools.joint_dictionary_creator())
+
+
+def attach_face():
+    rig_facial_brow.attach_brow()
+    rig_facial_eyelid.attach_eyelids()
+    rig_facial_nasolabial.attach_nasolabial()
+    rig_facial_mouth.attach_mouth()
+
+
+def detach_face():
+    rig_facial_brow.detach_brow()
+    rig_facial_eyelid.detach_eyelids()
+    rig_facial_nasolabial.detach_nasolabial()
+    rig_facial_mouth.detach_mouth()
