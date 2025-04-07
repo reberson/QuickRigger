@@ -338,6 +338,11 @@ def create_leg_rig(dict, twist=True):
         cmds.setAttr(switch_leg + ".sy", lock=True, k=False, cb=False)
         cmds.setAttr(switch_leg + ".sz", lock=True, k=False, cb=False)
 
+        cmds.addAttr(switch_leg, longName='footScale', attributeType='double3')
+        cmds.addAttr(switch_leg, longName='footScalex', attributeType='double', parent='footScale', dv=1)
+        cmds.addAttr(switch_leg, longName='footScaley', attributeType='double', parent='footScale', dv=1)
+        cmds.addAttr(switch_leg, longName='footScalez', attributeType='double', parent='footScale', dv=1)
+
         grp_switch_leg = cmds.group(n="offset_switch_leg{0}".format(side), em=True)
         cmds.matchTransform(grp_switch_leg, "Hip{0}".format(side), pos=True)
         if side == "_R":
@@ -483,16 +488,35 @@ def create_leg_rig(dict, twist=True):
         if "_L" in side:
             cmds.xform(grp_flip, r=True, ro=(180, 0, 0))
 
-        # Make Ankles not inherit transform
-        cmds.setAttr("Ankle{0}.inheritsTransform".format(side), 0)
+        # # Make Ankles not inherit transform
+        # cmds.setAttr("Ankle{0}.inheritsTransform".format(side), 0)
         # create scale constraint
-        scale_const_ankle = cmds.scaleConstraint(scl_ctrl, "Ankle{0}".format(side))
-        cmds.parent(scale_const_ankle, "constraints")
-        scale_const_toes = cmds.scaleConstraint(scl_ctrl, "Toes{0}".format(side))
-        cmds.parent(scale_const_toes, "constraints")
+        # scale_const_ankle = cmds.scaleConstraint(scl_ctrl, "Ankle{0}".format(side))
+        # cmds.parent(scale_const_ankle, "constraints")
+        # scale_const_toes = cmds.scaleConstraint(scl_ctrl, "Toes{0}".format(side))
+        # cmds.parent(scale_const_toes, "constraints")
+
+        # Make Ankle scl_ctrl control the scale attr in ik fk switch object
+        cmds.connectAttr(scl_ctrl + ".sx", switch_leg + '.footScalex')
+        cmds.connectAttr(scl_ctrl + ".sy", switch_leg + '.footScaley')
+        cmds.connectAttr(scl_ctrl + ".sz", switch_leg + '.footScalez')
 
         # Make Scale ctrls follow Ankle position
         flw_point_constraint = connect_point_constraint(grp_follow, "fkx_Ankle{0}".format(side),
                                                         "ikx_Ankle{0}".format(side), switch_leg_attr)
         flw_orient_constraint = connect_orient_constraint(grp_follow, "fkx_Ankle{0}".format(side),
                                                           "ikx_Ankle{0}".format(side), switch_leg_attr)
+
+        # output to ankle and toe joints
+        cmds.connectAttr(switch_leg + '.footScalex', "Ankle{0}".format(side) + ".sx")
+        cmds.connectAttr(switch_leg + '.footScaley', "Ankle{0}".format(side) + ".sy")
+        cmds.connectAttr(switch_leg + '.footScalez', "Ankle{0}".format(side) + ".sz")
+
+        cmds.connectAttr(switch_leg + '.footScalex', "Toes{0}".format(side) + ".sx")
+        cmds.connectAttr(switch_leg + '.footScaley', "Toes{0}".format(side) + ".sy")
+        cmds.connectAttr(switch_leg + '.footScalez', "Toes{0}".format(side) + ".sz")
+
+        cmds.connectAttr(switch_leg + '.footScalex', "Toes_End{0}".format(side) + ".sx")
+        cmds.connectAttr(switch_leg + '.footScaley', "Toes_End{0}".format(side) + ".sy")
+        cmds.connectAttr(switch_leg + '.footScalez', "Toes_End{0}".format(side) + ".sz")
+

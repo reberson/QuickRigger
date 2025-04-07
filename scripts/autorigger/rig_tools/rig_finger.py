@@ -100,18 +100,24 @@ def create_finger_rig(dict):
                 cmds.parent(point_constraint, "constraints")
                 orient_constraint = cmds.orientConstraint("fkx_" + jnt, jnt)
                 cmds.parent(orient_constraint, "constraints")
-                scale_constraint = cmds.scaleConstraint("fkx_" + jnt, jnt)
-                cmds.parent(scale_constraint, "constraints")
+                # scale_constraint = cmds.scaleConstraint("fkx_" + jnt, jnt)
+                # cmds.parent(scale_constraint, "constraints")
 
                 # Connect hand scaler attribute to joint scale
-                # cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScalex', jnt + ".sx")
-                # cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScaley', jnt + ".sy")
-                # cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScalez', jnt + ".sz")
+                cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScalex', jnt + ".sx")
+                cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScaley', jnt + ".sy")
+                cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScalez', jnt + ".sz")
 
         # Constraint finger offset groups to wrist joints
         cmds.pointConstraint("Wrist{0}".format(side), finger_grp)
         cmds.orientConstraint("Wrist{0}".format(side), finger_grp)
-        cmds.scaleConstraint("Wrist{0}".format(side), finger_grp)
+        # cmds.scaleConstraint("Wrist{0}".format(side), finger_grp)
+
+        # Constraint finger offset groups scale to ik fk scale attribute
+        cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScalex', finger_grp + ".sx")
+        cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScaley', finger_grp + ".sy")
+        cmds.connectAttr("ikfk_arm{0}".format(side) + '.handScalez', finger_grp + ".sz")
+
 
         # blend_node = (cmds.listConnections("ikfk_arm{0}".format(side) + ".ikSwitch", t="blendColors"))[0]
         # cmds.connectAttr(blend_node + ".output", finger_grp + ".scale")

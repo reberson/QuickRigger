@@ -64,8 +64,12 @@ def create_neck_rig(dict, twist=True):
             connect_orient_constraint(grp_fl, grp_fl_neck, grp_fl_global, "fk_" + jd[3] + ".global")
             cmds.orientConstraint(grp_gl_head, grp_fl_global, mo=True, n="follow_global_" + jd[3])
             cmds.orientConstraint("Neck_M", grp_fl_neck, mo=True, n="follow_neck_" + jd[3])
-            scl_const = cmds.scaleConstraint(jnt, joint, mo=True)
-            cmds.parent(scl_const, "constraints")
+            # scl_const = cmds.scaleConstraint(jnt, joint, mo=True)
+            # cmds.parent(scl_const, "constraints")
+
+            # Constrain the head to scale with ctrl
+            cmds.connectAttr(jnt + ".scale", joint + ".scale")
+            cmds.connectAttr(ctrl + ".scale", jnt + ".scale")
 
     if twist:
         twist_neck = create_twist_joint("Neck_M", "Head_M", "Neck_Twist")

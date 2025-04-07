@@ -241,6 +241,24 @@ def create_stretch(stretch_jnt, scale_jnt, att_holder, grp_offset, ikx_jnt, twis
     if "_L" in stretch_jnt:
         cmds.xform(flip_grp, r=True, ro=(180, 0, 0))
 
+    # Squash setup
+    # Grab Y position from next joint (ex. if it's hip stretch, grab the knee joint y pos)
+    stretch_posY = cmds.xform(stretch_jnt, q=True, r=True, t=True)[1]
+    # if it's a right sided, invert the pos value. This will make sure the squash goes on the correct direction.
+    if "_R" in stretch_jnt:
+        stretch_posY *= -1
+    # Create remap node
+    nd_remap = cmds.createNode('remapValue', ss=True, n=stretch_name + "_node_remap")
+    # Connect the y translate from the stretch control to" input Value of this new remap value
+    cmds.connectAttr(st_ctrl + ".ty", nd_remap + ".inputValue")
+    # paste the position value from the next (copied previously) into the "input Min"
+    cmds.setAttr(nd_remap + ".inputMin", stretch_posY)
+    # set the output min to 0.1
+    cmds.setAttr(nd_remap + ".outputMin", 0.1)
+    # set the output max to 1
+    cmds.setAttr(nd_remap + ".outputMax", 1)
+    # connect the out value to the scale Y of the current Joint (ex. if it's hip stretch, connect the hip joint)
+    cmds.connectAttr(nd_remap + ".outValue", scale_jnt + ".sy")
 
 def create_ribbon(ribbon_name, transform_list, duplicated=None, direction=(0, -1, 0), reverse=False):
     point_list = []

@@ -238,21 +238,21 @@ def create_arm_rig(dict, twist=True):
         # cmds.connectAttr("ik_Arm{0}".format(side) + ".scale", blend_node + ".color1")
         # cmds.connectAttr("fk_Wrist{0}".format(side) + ".scale", blend_node + ".color2")
         # cmds.connectAttr(switch_arm_attr, blend_node + ".blender")
-        # # Create hand scale attribute
-        # cmds.addAttr(switch_arm, longName='handScale', attributeType='double3')
-        # cmds.addAttr(switch_arm, longName='handScalex', attributeType='double', parent='handScale', dv=1)
-        # cmds.addAttr(switch_arm, longName='handScaley', attributeType='double', parent='handScale', dv=1)
-        # cmds.addAttr(switch_arm, longName='handScalez', attributeType='double', parent='handScale', dv=1)
+        # Create hand scale attribute
+        cmds.addAttr(switch_arm, longName='handScale', attributeType='double3')
+        cmds.addAttr(switch_arm, longName='handScalex', attributeType='double', parent='handScale', dv=1)
+        cmds.addAttr(switch_arm, longName='handScaley', attributeType='double', parent='handScale', dv=1)
+        cmds.addAttr(switch_arm, longName='handScalez', attributeType='double', parent='handScale', dv=1)
         #
         # # control the hand scale attribute by the fk hand or ik hand controls
         # cmds.connectAttr(blend_node + ".outputR", switch_arm + '.handScalex')
         # cmds.connectAttr(blend_node + ".outputG", switch_arm + '.handScaley')
         # cmds.connectAttr(blend_node + ".outputB", switch_arm + '.handScalez')
         #
-        # # output to wrist joint
-        # cmds.connectAttr(switch_arm + '.handScalex', "Wrist{0}".format(side) + ".sx")
-        # cmds.connectAttr(switch_arm + '.handScaley', "Wrist{0}".format(side) + ".sy")
-        # cmds.connectAttr(switch_arm + '.handScalez', "Wrist{0}".format(side) + ".sz")
+        # output to wrist joint
+        cmds.connectAttr(switch_arm + '.handScalex', "Wrist{0}".format(side) + ".sx")
+        cmds.connectAttr(switch_arm + '.handScaley', "Wrist{0}".format(side) + ".sy")
+        cmds.connectAttr(switch_arm + '.handScalez', "Wrist{0}".format(side) + ".sz")
 
         # Create Scale system for Hands
         # Follow Hands Groups
@@ -262,6 +262,11 @@ def create_arm_rig(dict, twist=True):
         grp_flip = cmds.group(n="scl_flip_Wrist{0}".format(side), em=True)
         scl_ctrl = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "cntrl_stretch_limb.yaml")),
                                "cntrl_scale_Wrist{0}".format(side))
+
+        # control the hand scale attribute by the fk hand or ik hand controls
+        cmds.connectAttr(scl_ctrl + ".sx", switch_arm + '.handScalex')
+        cmds.connectAttr(scl_ctrl + ".sy", switch_arm + '.handScaley')
+        cmds.connectAttr(scl_ctrl + ".sz", switch_arm + '.handScalez')
 
         if "_R" in side:
             cmds.setAttr(scl_ctrl + ".overrideEnabled", 1)
@@ -287,10 +292,10 @@ def create_arm_rig(dict, twist=True):
             cmds.xform(grp_flip, r=True, ro=(180, 0, 0))
 
         # Make Wrists not inherit transform
-        cmds.setAttr("Wrist{0}.inheritsTransform".format(side), 0)
+        # cmds.setAttr("Wrist{0}.inheritsTransform".format(side), 0)
         # create scale constraint
-        scale_const = cmds.scaleConstraint(scl_ctrl, "Wrist{0}".format(side))
-        cmds.parent(scale_const, "constraints")
+        # scale_const = cmds.scaleConstraint(scl_ctrl, "Wrist{0}".format(side))
+        # cmds.parent(scale_const, "constraints")
 
         # Make Scale ctrls follow hand position
         flw_point_constraint = connect_point_constraint(grp_follow, "fkx_Wrist{0}".format(side), "ikx_Wrist{0}".format(side), switch_arm_attr)
