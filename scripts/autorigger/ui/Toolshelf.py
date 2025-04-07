@@ -9,7 +9,6 @@ import functools
 from pathlib import Path
 import scripts.autorigger.rig_tools as rig
 from scripts.autorigger.shared import file_handle, skin_handler
-
 from scripts.autorigger.rig_tools import layout_tools
 from scripts.autorigger.rig_tools import constructor_tools
 from scripts.autorigger.rig_tools import rig_root, rig_leg, rig_finger, rig_sdk_finger
@@ -141,20 +140,25 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
             hbox.addWidget(button_load)
             hbox.addWidget(button_run)
 
+        elif mode == "SaveLoadRun":
+            hbox.addWidget(button_load)
+            hbox.addWidget(button_save)
+            hbox.addWidget(button_run)
+
         return button_load, button_save, line_edit, button_run, title
 
     def create_build_tab(self, tabs, face=False):
 
-
+        dict_rig_config = {'Paths': [], 'Checklist': []}
         tab_layout = QtWidgets.QVBoxLayout()
         tab = QtWidgets.QWidget()
         tab.setLayout(tab_layout)
         tabs.addTab(tab, "Build")
 
         # 01 ----- Save Load Config file
-        config_file = self.file_path_assigner(tab_layout, 'Build Configuration File', mode="SaveLoad")
-        config_file[0].clicked.connect(
-            functools.partial(self.load_file_path_yaml_action, config_file[2], "Load Build Configuration File"))
+        config_file = self.file_path_assigner(tab_layout, 'Build Configuration File', mode="SaveLoadRun")
+
+        # The rest of its logic is at the bottom
 
         # # 02 ----- Build Rig Button - Will move to bottom
         # hbox_2 = QtWidgets.QHBoxLayout()
@@ -180,6 +184,7 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
             functools.partial(self.load_file_path_maya_action, load_mesh[2], "Load Mesh File"))
         load_mesh[3].clicked.connect(
             functools.partial(self.import_file_maya_action, load_mesh[2]))
+        dict_rig_config['Paths'].append(load_mesh[2])
 
         # 04 ----- Load Placement
         load_placement = self.file_path_assigner(scrollable_layout, 'Placement', mode="LoadRun")
@@ -239,13 +244,13 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         body_module_list.append(body_module_item_11)
         body_module_item_12 = self.checklist_item(scrollable_layout_body, "Fingers rig", functools.partial(self.run_rig_module, rig.rig_finger.create_finger_rig, joint_dict=True,))
         body_module_list.append(body_module_item_12)
-        body_module_item_13 = self.checklist_item(scrollable_layout_body, "Fingers extended controls", rig.rig_sdk_finger.create_finger_sdk, checkstate=False)
+        body_module_item_13 = self.checklist_item(scrollable_layout_body, "Fingers extended controls", rig.rig_sdk_finger.create_finger_sdk, checkstate=True)
         body_module_list.append(body_module_item_13)
 
-        # Button to run all checked
-        button_build_body_selected = QtWidgets.QPushButton('Run Selected Body Modules')
-        button_build_body_selected.clicked.connect(functools.partial(self.run_module_list, body_module_list))
-        scrollable_layout.addWidget(button_build_body_selected)
+        # # Button to run all checked
+        # button_build_body_selected = QtWidgets.QPushButton('Run Selected Body Modules')
+        # button_build_body_selected.clicked.connect(functools.partial(self.run_module_list, body_module_list))
+        # scrollable_layout.addWidget(button_build_body_selected)
 
         # Separator
         line_2 = QtWidgets.QFrame()
@@ -329,11 +334,11 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         face_module_item_14 = self.checklist_item(scrollable_layout_face, "Attach face lattices", self.attach_face_lattice, checkstate=False)
         face_module_list.append(face_module_item_14)
 
-        # Button to run all checked
-        button_build_face_selected = QtWidgets.QPushButton('Run Selected Face Modules')
-        button_build_face_selected.clicked.connect(functools.partial(self.run_module_list, face_module_list))
-        scrollable_layout.addWidget(button_build_face_selected)
-        face_widgets_list.append(button_build_face_selected)
+        # # Button to run all checked
+        # button_build_face_selected = QtWidgets.QPushButton('Run Selected Face Modules')
+        # button_build_face_selected.clicked.connect(functools.partial(self.run_module_list, face_module_list))
+        # scrollable_layout.addWidget(button_build_face_selected)
+        # face_widgets_list.append(button_build_face_selected)
 
         # Separator
         line_3 = QtWidgets.QFrame()
@@ -386,10 +391,10 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         misc_window_height = item_misc_01[1] + item_misc_02[1] + item_misc_03[1]
         scroll_misc.setMinimumSize(100, misc_window_height)
 
-        # Button to run all checked
-        button_build_misc_selected = QtWidgets.QPushButton('Run Selected Misc Modules')
-        button_build_misc_selected.clicked.connect(functools.partial(self.run_module_list, misc_module_list))
-        scrollable_layout.addWidget(button_build_misc_selected)
+        # # Button to run all checked
+        # button_build_misc_selected = QtWidgets.QPushButton('Run Selected Misc Modules')
+        # button_build_misc_selected.clicked.connect(functools.partial(self.run_module_list, misc_module_list))
+        # scrollable_layout.addWidget(button_build_misc_selected)
 
         # Button to build entire rig - Moved to bottom
         # 02 ----- Build Rig Button
@@ -400,6 +405,29 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         # Connect action of the Build complete button
         button_build_rig.clicked.connect(
             functools.partial(self.build_complete_rig, list_body=body_module_list, list_face=face_module_list, list_misc=misc_module_list, exe_me=load_mesh, exe_pl=load_placement, exe_sw=load_skin_weigths, exe_swrib=load_ribbons_skins, exe_shlat=load_lattices_shapes, exe_swlat=load_lattices_skins))
+
+        # Save/Load Build config logic
+        config_file[0].clicked.connect(
+            functools.partial(self.load_file_path_yaml_action, config_file[2], "Load Build Configuration File"))
+        config_file[1].clicked.connect(
+            functools.partial(self.save_rig_config, dict_rig_config))
+        config_file[3].clicked.connect(
+            functools.partial(self.run_rig_config, config_file[2], dict_rig_config))
+
+    def run_rig_config(self, line_edit, dict_config):
+        loaded_dict = file_handle.file_read_yaml(line_edit.text())
+
+        # set mesh path line:
+        dict_config['Paths'][0].setText(loaded_dict['Paths'][0])
+        self.import_file_maya_action(dict_config['Paths'][0])
+
+    def save_rig_config(self, dict_config):
+        """ Transfer the values from the config dictionary to a new dictionary and save it"""
+        saved_data = {'Paths': [], 'Checklist': []}
+
+        for path_line in dict_config['Paths']:
+            saved_data['Paths'].append(path_line.text())
+        file_handle.file_dialog_yaml('Save Configuration File', 'w', saved_data)
 
     def create_tools_tab(self, tabs, face=False):
         tab_layout = QtWidgets.QVBoxLayout()
@@ -583,7 +611,6 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
             for face_widget in face_widgets_list:
                 face_widget.setVisible(False)
 
-
     # Default action
     def default_action(self):
         print("Action executed")
@@ -699,7 +726,6 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
 
     def import_file_maya_action(self, line_edit):
         cmds.file(line_edit.text(), i=True, mergeNamespacesOnClash=True)
-
 
     def run_rig_module(self, module_action, joint_dict=True, twist=None):
         if joint_dict:
