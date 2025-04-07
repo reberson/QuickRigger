@@ -1,0 +1,324 @@
+proj_plane_mouthShape:
+  Influences:
+  - Facial
+  - Jaw_End_M
+  Vertices:
+    proj_plane_mouthShape.vtx[0]:
+      Facial: 0.598
+      Jaw_End_M: 0.402
+    proj_plane_mouthShape.vtx[100]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[101]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[102]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[103]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[104]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[105]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[106]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[107]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[108]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[109]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[10]:
+      Facial: 0.613
+      Jaw_End_M: 0.387
+    proj_plane_mouthShape.vtx[110]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[111]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[112]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[113]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[114]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[115]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[116]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[117]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[118]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[119]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[11]:
+      Facial: 0.627
+      Jaw_End_M: 0.373
+    proj_plane_mouthShape.vtx[120]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[12]:
+      Facial: 0.591
+      Jaw_End_M: 0.409
+    proj_plane_mouthShape.vtx[13]:
+      Facial: 0.531
+      Jaw_End_M: 0.469
+    proj_plane_mouthShape.vtx[14]:
+      Facial: 0.446
+      Jaw_End_M: 0.554
+    proj_plane_mouthShape.vtx[15]:
+      Facial: 0.355
+      Jaw_End_M: 0.645
+    proj_plane_mouthShape.vtx[16]:
+      Facial: 0.298
+      Jaw_End_M: 0.702
+    proj_plane_mouthShape.vtx[17]:
+      Facial: 0.364
+      Jaw_End_M: 0.636
+    proj_plane_mouthShape.vtx[18]:
+      Facial: 0.452
+      Jaw_End_M: 0.548
+    proj_plane_mouthShape.vtx[19]:
+      Facial: 0.533
+      Jaw_End_M: 0.467
+    proj_plane_mouthShape.vtx[1]:
+      Facial: 0.564
+      Jaw_End_M: 0.436
+    proj_plane_mouthShape.vtx[20]:
+      Facial: 0.598
+      Jaw_End_M: 0.402
+    proj_plane_mouthShape.vtx[21]:
+      Facial: 0.645
+      Jaw_End_M: 0.355
+    proj_plane_mouthShape.vtx[22]:
+      Facial: 0.676
+      Jaw_End_M: 0.324
+    proj_plane_mouthShape.vtx[23]:
+      Facial: 0.638
+      Jaw_End_M: 0.362
+    proj_plane_mouthShape.vtx[24]:
+      Facial: 0.588
+      Jaw_End_M: 0.412
+    proj_plane_mouthShape.vtx[25]:
+      Facial: 0.529
+      Jaw_End_M: 0.471
+    proj_plane_mouthShape.vtx[26]:
+      Facial: 0.469
+      Jaw_End_M: 0.531
+    proj_plane_mouthShape.vtx[27]:
+      Facial: 0.432
+      Jaw_End_M: 0.568
+    proj_plane_mouthShape.vtx[28]:
+      Facial: 0.459
+      Jaw_End_M: 0.541
+    proj_plane_mouthShape.vtx[29]:
+      Facial: 0.52
+      Jaw_End_M: 0.48
+    proj_plane_mouthShape.vtx[2]:
+      Facial: 0.497
+      Jaw_End_M: 0.503
+    proj_plane_mouthShape.vtx[30]:
+      Facial: 0.587
+      Jaw_End_M: 0.413
+    proj_plane_mouthShape.vtx[31]:
+      Facial: 0.643
+      Jaw_End_M: 0.357
+    proj_plane_mouthShape.vtx[32]:
+      Facial: 0.688
+      Jaw_End_M: 0.312
+    proj_plane_mouthShape.vtx[33]:
+      Facial: 0.728
+      Jaw_End_M: 0.272
+    proj_plane_mouthShape.vtx[34]:
+      Facial: 0.693
+      Jaw_End_M: 0.307
+    proj_plane_mouthShape.vtx[35]:
+      Facial: 0.656
+      Jaw_End_M: 0.344
+    proj_plane_mouthShape.vtx[36]:
+      Facial: 0.617
+      Jaw_End_M: 0.383
+    proj_plane_mouthShape.vtx[37]:
+      Facial: 0.584
+      Jaw_End_M: 0.416
+    proj_plane_mouthShape.vtx[38]:
+      Facial: 0.567
+      Jaw_End_M: 0.433
+    proj_plane_mouthShape.vtx[39]:
+      Facial: 0.58
+      Jaw_End_M: 0.42
+    proj_plane_mouthShape.vtx[3]:
+      Facial: 0.399
+      Jaw_End_M: 0.601
+    proj_plane_mouthShape.vtx[40]:
+      Facial: 0.615
+      Jaw_End_M: 0.385
+    proj_plane_mouthShape.vtx[41]:
+      Facial: 0.659
+      Jaw_End_M: 0.341
+    proj_plane_mouthShape.vtx[42]:
+      Facial: 0.701
+      Jaw_End_M: 0.299
+    proj_plane_mouthShape.vtx[43]:
+      Facial: 0.735
+      Jaw_End_M: 0.265
+    proj_plane_mouthShape.vtx[44]:
+      Facial: 0.775
+      Jaw_End_M: 0.225
+    proj_plane_mouthShape.vtx[45]:
+      Facial: 0.751
+      Jaw_End_M: 0.249
+    proj_plane_mouthShape.vtx[46]:
+      Facial: 0.726
+      Jaw_End_M: 0.274
+    proj_plane_mouthShape.vtx[47]:
+      Facial: 0.703
+      Jaw_End_M: 0.297
+    proj_plane_mouthShape.vtx[48]:
+      Facial: 0.685
+      Jaw_End_M: 0.315
+    proj_plane_mouthShape.vtx[49]:
+      Facial: 0.678
+      Jaw_End_M: 0.322
+    proj_plane_mouthShape.vtx[4]:
+      Facial: 0.287
+      Jaw_End_M: 0.713
+    proj_plane_mouthShape.vtx[50]:
+      Facial: 0.686
+      Jaw_End_M: 0.314
+    proj_plane_mouthShape.vtx[51]:
+      Facial: 0.706
+      Jaw_End_M: 0.294
+    proj_plane_mouthShape.vtx[52]:
+      Facial: 0.737
+      Jaw_End_M: 0.263
+    proj_plane_mouthShape.vtx[53]:
+      Facial: 0.769
+      Jaw_End_M: 0.231
+    proj_plane_mouthShape.vtx[54]:
+      Facial: 0.795
+      Jaw_End_M: 0.205
+    proj_plane_mouthShape.vtx[55]:
+      Facial: 0.835
+      Jaw_End_M: 0.165
+    proj_plane_mouthShape.vtx[56]:
+      Facial: 0.812
+      Jaw_End_M: 0.188
+    proj_plane_mouthShape.vtx[57]:
+      Facial: 0.797
+      Jaw_End_M: 0.203
+    proj_plane_mouthShape.vtx[58]:
+      Facial: 0.786
+      Jaw_End_M: 0.214
+    proj_plane_mouthShape.vtx[59]:
+      Facial: 0.779
+      Jaw_End_M: 0.221
+    proj_plane_mouthShape.vtx[5]:
+      Facial: 0.242
+      Jaw_End_M: 0.758
+    proj_plane_mouthShape.vtx[60]:
+      Facial: 0.776
+      Jaw_End_M: 0.224
+    proj_plane_mouthShape.vtx[61]:
+      Facial: 0.78
+      Jaw_End_M: 0.22
+    proj_plane_mouthShape.vtx[62]:
+      Facial: 0.793
+      Jaw_End_M: 0.207
+    proj_plane_mouthShape.vtx[63]:
+      Facial: 0.815
+      Jaw_End_M: 0.185
+    proj_plane_mouthShape.vtx[64]:
+      Facial: 0.845
+      Jaw_End_M: 0.155
+    proj_plane_mouthShape.vtx[65]:
+      Facial: 0.87
+      Jaw_End_M: 0.13
+    proj_plane_mouthShape.vtx[66]:
+      Facial: 0.918
+      Jaw_End_M: 0.082
+    proj_plane_mouthShape.vtx[67]:
+      Facial: 0.897
+      Jaw_End_M: 0.103
+    proj_plane_mouthShape.vtx[68]:
+      Facial: 0.874
+      Jaw_End_M: 0.126
+    proj_plane_mouthShape.vtx[69]:
+      Facial: 0.87
+      Jaw_End_M: 0.13
+    proj_plane_mouthShape.vtx[6]:
+      Facial: 0.299
+      Jaw_End_M: 0.701
+    proj_plane_mouthShape.vtx[70]:
+      Facial: 0.87
+      Jaw_End_M: 0.13
+    proj_plane_mouthShape.vtx[71]:
+      Facial: 0.87
+      Jaw_End_M: 0.13
+    proj_plane_mouthShape.vtx[72]:
+      Facial: 0.87
+      Jaw_End_M: 0.13
+    proj_plane_mouthShape.vtx[73]:
+      Facial: 0.877
+      Jaw_End_M: 0.123
+    proj_plane_mouthShape.vtx[74]:
+      Facial: 0.892
+      Jaw_End_M: 0.108
+    proj_plane_mouthShape.vtx[75]:
+      Facial: 0.931
+      Jaw_End_M: 0.069
+    proj_plane_mouthShape.vtx[76]:
+      Facial: 0.967
+      Jaw_End_M: 0.033
+    proj_plane_mouthShape.vtx[77]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[78]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[79]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[7]:
+      Facial: 0.412
+      Jaw_End_M: 0.588
+    proj_plane_mouthShape.vtx[80]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[81]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[82]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[83]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[84]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[85]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[86]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[87]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[88]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[89]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[8]:
+      Facial: 0.503
+      Jaw_End_M: 0.497
+    proj_plane_mouthShape.vtx[90]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[91]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[92]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[93]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[94]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[95]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[96]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[97]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[98]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[99]:
+      Facial: 1.0
+    proj_plane_mouthShape.vtx[9]:
+      Facial: 0.571
+      Jaw_End_M: 0.429

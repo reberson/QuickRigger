@@ -7,6 +7,7 @@ from Rig.Tools import rig_root, rig_torso, rig_arm, rig_leg, rig_finger, rig_sdk
 from Rig.Tools import rig_facial_brow, rig_facial_eyelid, rig_facial_nasolabial, rig_facial_mouth, rig_facial_cheek, rig_facial_nose, rig_facial_jaw, rig_facial_tongue, rig_facial_eye
 from System.file_handle import file_dialog_yaml as fd
 from System.file_handle import export_curve, import_curve
+from System.skin_handler import save_selected_skin_yaml, load_selected_skin_yaml
 import System.utils
 
 
@@ -141,17 +142,23 @@ def menu():
                   c=lambda *args: rig_facial_eye.create_eye(layout_tools.joint_dictionary_creator()),
                   ann='Creates the rig controls for the eye')
 
-
     # Rig face - Tools
     cmds.menuItem('facetools', p='face', l='Face Tools', subMenu=True, tearOff=True)
-    cmds.menuItem(p='facetools', l='Attach Face', stp='python',
+    cmds.menuItem(p='facetools', l='Attach Face Ribbons', stp='python',
                   c=lambda *args: attach_face(),
                   ann='Attach face controls to ribbons')
-    cmds.menuItem(p='facetools', l='Detach Face', stp='python',
+    cmds.menuItem(p='facetools', l='Detach Face Ribbons', stp='python',
                   c=lambda *args: detach_face(),
                   ann='Release face controls from ribbons')
-
-
+    cmds.menuItem(p='facetools', l='Create Face Lattices', stp='python',
+                  c=lambda *args: create_face_lattice(),
+                  ann='Create Lattice projection systems for the face')
+    cmds.menuItem(p='facetools', l='Attach Face Lattice', stp='python',
+                  c=lambda *args: attach_face_lattice(),
+                  ann='Attach face controls to Lattice')
+    cmds.menuItem(p='facetools', l='Detach Face Lattice', stp='python',
+                  c=lambda *args: detach_face_lattice(),
+                  ann='Detach face controls to Lattice')
 
     # Tools Menu
     cmds.menuItem('tools', p=menu_name, l='Tools', subMenu=True, tearOff=True)
@@ -178,6 +185,13 @@ def menu():
                   c=lambda *args: layout_tools.lattice_load(),
                   ann='Saves selected Lattice into yaml')
 
+    cmds.menuItem(p='tools', l='Save Selected Skin', stp='python',
+                  c=lambda *args: save_selected_skin_yaml(),
+                  ann='Saves selected Skin Weights into yaml')
+
+    cmds.menuItem(p='tools', l='Load Selected Skin', stp='python',
+                  c=lambda *args: load_selected_skin_yaml(),
+                  ann='Loads selected Skin Weights from yaml and apply to selected mesh')
 
 
 def build_rig():
@@ -207,6 +221,7 @@ def build_rig_face():
     rig_facial_eye.create_eye(layout_tools.joint_dictionary_creator())
     constructor_tools.set_scale_compensate(0)
 
+
 def attach_face():
     rig_facial_brow.attach_brow()
     rig_facial_eyelid.attach_eyelids()
@@ -219,3 +234,24 @@ def detach_face():
     rig_facial_eyelid.detach_eyelids()
     rig_facial_nasolabial.detach_nasolabial()
     rig_facial_mouth.detach_mouth()
+
+
+def create_face_lattice():
+    rig_facial_mouth.create_lattice_mouth()
+    rig_facial_brow.create_lattice_brow()
+    rig_facial_eyelid.create_lattice_eyelids()
+    rig_facial_nasolabial.create_lattice_nasolabial()
+
+
+def attach_face_lattice():
+    rig_facial_mouth.attach_mouth_lattice()
+    rig_facial_brow.attach_brow_lattice()
+    rig_facial_eyelid.attach_eyelids_lattice()
+    rig_facial_nasolabial.attach_nasolabial_lattice()
+
+
+def detach_face_lattice():
+    rig_facial_mouth.detach_mouth_lattice()
+    rig_facial_brow.detach_brow_lattice()
+    rig_facial_eyelid.detach_eyelids_lattice()
+    rig_facial_nasolabial.detach_nasolabial_lattice()

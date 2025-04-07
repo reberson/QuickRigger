@@ -357,9 +357,9 @@ def create_ribbon_closed(ribbon_name, transform_list, center_jnt, left_side=Fals
     return ribbon, ribbon_follicle_grp, ribbon_shape, param_u_step
 
 
-def create_lattice_plane(origin_transform, height, width, name):
+def create_lattice_plane(origin_transform, height, width, name, res=10):
     grp = cmds.group(em=True, n="group_" + name)
-    proj_plane = cmds.polyPlane(n=name, ax=(0, 0, 1), h=height, w=width, sh=10, sw=10)
+    proj_plane = cmds.polyPlane(n=name, ax=(0, 0, 1), h=height, w=width, sh=res, sw=res)
     proj_plane_shape = cmds.listRelatives(proj_plane[0])
     # cmds.delete(proj_plane, constructionHistory=True)
     proj_plane_lattice = cmds.lattice(proj_plane[0], dv=(5, 5, 2), oc=True, n=name + "_")

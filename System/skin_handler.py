@@ -25,12 +25,23 @@ def save_skin(source_object):
     return skin_data
 
 
-def load_skin(skin_data, source_object):
-    geometry = cmds.listRelatives(source_object)[0]
+def load_skin(skin_data, geometry):
     skin_cluster = cmds.listConnections(geometry, t="skinCluster")
     for vtx in skin_data[geometry]['Vertices'].keys():
         for influence, weight in skin_data[geometry]['Vertices'][vtx].items():
             cmds.skinPercent(skin_cluster[0], vtx, tv=[influence, weight], nrm=False)
+
+
+def save_selected_skin_yaml():
+    source_object = cmds.ls(sl=True)
+    skin_data = save_skin(source_object)
+    file_dialog_yaml("Save Skin Weights", "w", skin_data)
+
+
+def load_selected_skin_yaml():
+    skin_data = file_dialog_yaml("Load Skin Weights", "r")
+    geometry = cmds.ls(sl=True)[0]
+    load_skin(skin_data, geometry)
 
 
 # TODO: remove unused influences

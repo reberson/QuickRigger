@@ -1,6 +1,6 @@
 import maya.cmds as cmds
 
-# TODO: make lower cheek follow jaw with (with falloff maybe)
+
 def create_cheek(dict):
     grp_ctrl = cmds.group(em=True, n="cheek_control_group")
     cmds.matchTransform(grp_ctrl, "Cheeks")
@@ -25,16 +25,11 @@ def create_cheek(dict):
             ctrl = cmds.circle(n="ctrl_" + jnt, cy=1, r=0.75, nr=(0, 1, 0))
             cmds.setAttr(ctrl[0] + ".overrideEnabled", 1)
             cmds.setAttr(ctrl[0] + ".overrideColor", 17)
-
-
-
-
         cmds.select(d=True)
         xjnt = cmds.joint(n="x_" + jnt)
         cmds.setAttr(xjnt + ".radius", 0.5)
         cmds.select(d=True)
         cmds.setAttr(xjnt + ".drawStyle", 2)
-
         cmds.parent(xjnt, ctrl[0])
         cmds.parent(ctrl[0], grp_flip)
         cmds.parent(grp_flip, grp_sdk)
