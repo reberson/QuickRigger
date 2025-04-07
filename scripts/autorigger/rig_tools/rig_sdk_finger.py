@@ -18,7 +18,9 @@ def create_finger_sdk():
         grp_constraint = cmds.group(em=True, n="parentconstraint_sdk_fingers{0}".format(side))
         layer1_objects.append(grp_constraint)
         # constraint scale to hand
-        cmds.scaleConstraint("Wrist{0}".format(side), grp_constraint)
+        # cmds.scaleConstraint("Wrist{0}".format(side), grp_constraint)
+        cmds.connectAttr("ikfk_arm{0}.handScale".format(side), grp_constraint + ".scale")
+
         grp_flip = cmds.group(em=True, n="flip_sdk_fingers{0}".format(side))
         grp_holder = cmds.group(em=True, n="offset_holder_sdk_fingers{0}".format(side))
         ctrl_holder = cmds.rename(import_curve(file_read_yaml(CONTROLS_DIR + "holder_sdk_fingers.yaml")), "holder_sdk_fingers{0}".format(side))

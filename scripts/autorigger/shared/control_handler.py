@@ -18,6 +18,8 @@ def mirror_control_selected(direction='RightToLeft'):
     control_names_selected = cmds.ls(sl=True)
     # move controls to new list
     control_names = []
+
+
     # check which side to use as mirror point
     if direction == 'LeftToRight':
         control_names = control_names_selected

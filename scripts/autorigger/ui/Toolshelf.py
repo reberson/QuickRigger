@@ -129,23 +129,28 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         if mode == "SaveLoad":
             hbox.addWidget(button_load)
             hbox.addWidget(button_save)
+            return button_load, button_save, line_edit, button_load, title
 
         elif mode == "Load":
             hbox.addWidget(button_load)
+            return button_load, button_load, line_edit, button_load, title
 
         elif mode == "Save":
             hbox.addWidget(button_save)
+            return button_save, button_save, line_edit, button_save, title
 
         elif mode == "LoadRun":
             hbox.addWidget(button_load)
             hbox.addWidget(button_run)
+            return button_load, button_load, line_edit, button_run, title
 
         elif mode == "SaveLoadRun":
             hbox.addWidget(button_load)
             hbox.addWidget(button_save)
             hbox.addWidget(button_run)
+            return button_load, button_save, line_edit, button_run, title
 
-        return button_load, button_save, line_edit, button_run, title
+        # return button_load, button_save, line_edit, button_run, title
 
     def create_build_tab(self, tabs, face=False):
 
@@ -381,6 +386,7 @@ class MyDockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         for face_filepath in face_filepaths_list:
             for item in face_filepath:
                 item.setVisible(face)
+
 
         # 08 ----- Misc Module List
         # -- Title
